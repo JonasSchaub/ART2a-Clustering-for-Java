@@ -1,0 +1,85 @@
+/*
+ * ART2a Clustering for Java
+ * Copyright (C) 2022  Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ *
+ * Source code is available at <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+plugins {
+    id 'application'
+}
+application {
+    
+}
+
+group 'de.unijena.cheminf.clustering.art2a'
+version '0.0.0.1'
+
+//sourceCompatibility = 1.17
+
+//Creates javadoc and sources jars
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
+   // testImplementation group: 'junit', name: 'junit', version: '4.13'
+    testImplementation(platform('org.junit:junit-bom:5.9.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+   // testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+
+    forkEvery = 1
+
+    testLogging {
+        showStandardStreams = true
+    }
+}
+//Needed to make the created jar archives executable
+/*jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+//Creates a jar archive that includes all dependencies of the project, i.e. that  MORTAR can be started by executing this jar
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'ART2a Clustering for Java Jar File',
+                'Implementation-Version': archiveVersion,
+                'Main-Class': mainClassName
+    }
+    archiveBaseName = project.name + '-fat'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+//Archives artifacts executed with build
+artifacts {
+    archives fatJar
+}
+*/
