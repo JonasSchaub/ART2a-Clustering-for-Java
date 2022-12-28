@@ -22,8 +22,7 @@ plugins {
     id 'application'
 }
 application {
-    mainClassName = 'de.unijena.cheminf.clustering.art2a.main.Main'  //de.unijena.cheminf.fragment.fingerprint.main.Main
-    // de/unijena/cheminf/fragment/fingerprint/performanceTest/Main.java
+    
 }
 
 group 'de.unijena.cheminf.clustering.art2a'
