@@ -1,14 +1,28 @@
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.Logger.Logger;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Main {
+    private static final String RESULTS_FILE_NAME = "Results";
     public static void main(String[] args) throws Exception {
         System.out.println("hallo");
         float[][] dataMatrix = new float[10][28];
+       // float[] [] dataMatrix = new float[5][4];
+
+
         //valdiazen
         dataMatrix[0][0] = 1;
         dataMatrix[0][1] = 0;
@@ -254,7 +268,7 @@ public class Main {
         dataMatrix[7][27] = 1;
 
         // Bittersweet
-        dataMatrix[8][0] = 1;
+        dataMatrix[8][0] = 0;
         dataMatrix[8][1] = 0;
         dataMatrix[8][2] = 1;
         dataMatrix[8][3] = 1;
@@ -262,7 +276,7 @@ public class Main {
         dataMatrix[8][5] = 1;
         dataMatrix[8][6] = 0;
         dataMatrix[8][7] = 0;
-        dataMatrix[8][8] = 1;
+        dataMatrix[8][8] = 0;
         dataMatrix[8][9] = 0;
         dataMatrix[8][10] = 0;
         dataMatrix[8][11] = 1;
@@ -271,7 +285,7 @@ public class Main {
         dataMatrix[8][14] = 0;
         dataMatrix[8][15] = 0;
         dataMatrix[8][16] = 0;
-        dataMatrix[8][17] = 1;
+        dataMatrix[8][17] = 0;
         dataMatrix[8][18] = 0;
         dataMatrix[8][19] = 0;
         dataMatrix[8][20] = 0;
@@ -313,20 +327,97 @@ public class Main {
         dataMatrix[9][26] = 1;
         dataMatrix[9][27] = 1;
 
+
+
         /*
-        ART2aClustering clsuter = new ART2aClustering(dataMatrix,1);
-        System.out.println(java.util.Arrays.toString(dataMatrix[4]) + "---input 4");
-        System.out.println(java.util.Arrays.toString(dataMatrix[3])+ "---input 3");
-        System.out.println(java.util.Arrays.toString(dataMatrix[0])+ "---input 0");
-        System.out.println("\n");
-        clsuter.call();
+        dataMatrix[0][0] = 1;
+        dataMatrix[0][1] = 0;
+        dataMatrix[0][2] = 0;
+        dataMatrix[0][3] = 1;
+        //
 
-         */
-        ExecutorService executor = Executors.newFixedThreadPool(9);
-           ART2aClustering task = new ART2aClustering( dataMatrix, 10);
-            Future<Void> future = executor.submit(task);
-           executor.shutdown();
+        dataMatrix[1][0] = 1;
+        dataMatrix[1][1] = 0;
+        dataMatrix[1][2] = 0;
+        dataMatrix[1][3] = 0;
+        //
+        dataMatrix[2][0] = 1;
+        dataMatrix[2][1] = 1;
+        dataMatrix[2][2] = 1;
+        dataMatrix[2][3] = 1;
 
+        //
+        dataMatrix[3][0] = 0;
+        dataMatrix[3][1] = 0;
+        dataMatrix[3][2] = 0;
+        dataMatrix[3][3] = 0;
+
+        //
+        dataMatrix[4][0] = 0;
+        dataMatrix[4][1] = 0;
+        dataMatrix[4][2] = 1;
+        dataMatrix[4][3] = 1;
+        */
+        String tmpWorkingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
+        LocalDateTime tmpDateTime = LocalDateTime.now();
+        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
+        new File(tmpWorkingPath + "/Results").mkdirs();
+        File tmpResultsLogFile = new File(tmpWorkingPath + "/Results/" + Main.RESULTS_FILE_NAME + tmpProcessingTime + ".txt");
+        FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, true);
+        PrintWriter tmpResultsPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
+        tmpResultsPrintWriter.println("--------------------------------");
+        tmpResultsPrintWriter.println("ART2a Clustering Results:");
+        tmpResultsPrintWriter.println("--------------------------------");
+            ExecutorService executor = Executors.newFixedThreadPool(9);
+            List<Art2aClusteringTask> tmpClusteringTask = new ArrayList<>();
+            Logger tmpLog = new Logger();
+            for(float i = 0.1f; i<1.0f; i += 0.1f) {
+              //  Art2aClusteringTask task = new Art2aClusteringTask(i, dataMatrix, 10, tmpLog);
+                Art2aClusteringTask task = new Art2aClusteringTask(i, "Fingerprints.txt",100,tmpLog);
+                tmpClusteringTask.add(task);
+            }
+          System.out.println(tmpClusteringTask.size());
+           // Future<Void> future = executor.submit(task); // invokeAll list mt tasks übergeben
+            List<Future<ART2aClustering>> tmpFuturesList;
+            try{
+                float tmpExceptionsCounter = 0;
+                ART2aClustering result;
+                tmpFuturesList = executor.invokeAll(tmpClusteringTask);
+              //  Logger tmpLog = new Logger();
+                    for (Future<ART2aClustering> tmpFuture : tmpFuturesList) {
+                        result = tmpFuture.get();
+                        System.out.println(result.getTreeMap() + "-----treeMap");
+                        System.out.println(tmpExceptionsCounter + "----future get");
+                        System.out.println(result.getList() + "------liste");
+                        System.out.println(result.getListeEnd() + "-----listeEND");
+                        System.out.println(result.getMAp() + "---Vigilance Map");
+                        int i = 1;
+                        int z = 0;
+                 for( String g : result.getMAp()) {
+                     tmpResultsPrintWriter.println("Vigilance Parameter: " + g);
+                     tmpResultsPrintWriter.println("Number of Eopchs: "+ i);
+                     i++;
+                     for(String d : result.getListeEnd().get(z)) {
+                         tmpResultsPrintWriter.println(d);
+                     }
+                     z++;
+                     tmpResultsPrintWriter.println("");
+                     tmpResultsPrintWriter.println("--------------------------------");
+                     tmpResultsPrintWriter.println("");
+
+                        }
+
+
+
+
+                    }
+
+                tmpResultsPrintWriter.flush();
+                tmpResultsPrintWriter.close();
+            } catch (InterruptedException anException) {
+                System.out.println("falsch");
+            }
+            executor.shutdown();
 
 
 
