@@ -22,8 +22,7 @@ plugins {
     id 'application'
 }
 application {
-    mainClassName = 'de.unijena.cheminf.clustering.art2a.main.Main'  //de.unijena.cheminf.fragment.fingerprint.main.Main
-    // de/unijena/cheminf/fragment/fingerprint/performanceTest/Main.java
+    mainClassName = 'de.unijena.cheminf.clustering.art2a.main.Main'
 }
 
 group 'de.unijena.cheminf.clustering.art2a'
@@ -58,29 +57,3 @@ tasks.withType(Test).configureEach {
         showStandardStreams = true
     }
 }
-//Needed to make the created jar archives executable
-/*jar {
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-}
-
-//Creates a jar archive that includes all dependencies of the project, i.e. that  MORTAR can be started by executing this jar
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'ART2a Clustering for Java Jar File',
-                'Implementation-Version': archiveVersion,
-                'Main-Class': mainClassName
-    }
-    archiveBaseName = project.name + '-fat'
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
-}
-
-//Archives artifacts executed with build
-artifacts {
-    archives fatJar
-}
-*/
