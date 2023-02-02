@@ -546,14 +546,11 @@ public class ART2aFloatClusteringResult {
                 this.clusteringLogger.appendIntermediateResult("---------------------------------------");
             }
             this.clusteringStatus = true;
-            System.out.println(this.clusteringStatus);
         } catch (RuntimeException anRuntimeException) {
             this.clusteringStatus = false;
-            System.out.println(this.clusteringStatus);
             throw anRuntimeException;
         } catch(Exception anException) {
             this.clusteringStatus = false;
-            System.out.println(this.clusteringStatus);
             throw new Exception("The clustering process has failed."); // TODO Exception
         }
     }
