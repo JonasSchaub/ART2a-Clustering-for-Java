@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * File utility
@@ -43,6 +45,15 @@ public final class FileUtil {
      * Name of file for writing results
      */
     private static final String RESULT_LOG_FILE_NAME = "Result_Log";
+    /**
+     * Root logger
+     */
+    private static final Logger ROOT_LOGGER = LogManager.getLogManager().getLogger("");
+
+    /**
+     * Logger of this class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(FileUtil.class.getName());
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">

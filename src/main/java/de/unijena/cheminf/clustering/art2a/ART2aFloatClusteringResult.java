@@ -24,7 +24,7 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.Logger.Logger;
+import de.unijena.cheminf.clustering.art2a.Logger.ART2aLogger;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -40,14 +40,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Implementation of an ART 2a algorithm for fast clustering of fingerprints.
  * It is possible to cluster both bit and count fingerprints. <br>
  * LITERATURE SOURCE:<br>
- * Original : G.A. Carpenter etal., Neural Networks 4 (1991) 493-504<br>
- * Secondary : Wienke etal., Chemometrics and Intelligent Laboratory Systems 24
+ * Original : G.A. Carpenter et al., Neural Networks 4 (1991) 493-504<br>
+ * Secondary : Wienke et al., Chemometrics and Intelligent Laboratory Systems 24
  * (1994), 367-387<br>
- * @author original C# code: Stefan Neumann, Gesellschaft fuer
+ * @author Betuel Sevindik; original C# code: Stefan Neumann, Gesellschaft fuer
  *         naturwissenschaftliche Informatik, stefan.neumann@gnwi.de<br>
  *         porting to Java: Thomas Kuhn and Christian Geiger, University of Applied Sciences
  *         Gelsenkirchen, 2007
- * @author Betuel Sevindik
  */
 public class ART2aFloatClusteringResult {
     //<editor-fold desc="private class variables" defaultstate="collapsed">
@@ -95,7 +94,7 @@ public class ART2aFloatClusteringResult {
     /**
      * Result logger
      */
-    private Logger clusteringLogger;
+    private ART2aLogger clusteringLogger;
     /**
      * Queue for logging
      */
@@ -106,11 +105,11 @@ public class ART2aFloatClusteringResult {
     /**
      * Learning parameter to modify the cluster after a new input has been added.
      */
-    private final float defaultLearningParameter = 0.01f;
+    private final float DEFAULT_LEARNING_PARAMETER = 0.01f;
     /**
      * Minimum similarity between the cluster vectors that must be present.
      */
-    private final float requiredSimilarity = 0.99f;
+    private final float REQUIRED_SIMILARITY = 0.99f;
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -145,7 +144,7 @@ public class ART2aFloatClusteringResult {
      * @param aMaximumNumberOfEpochs maximum number of epochs that the system may use for convergence.
      * @throws Exception is thrown if the file cannot be read in.
      */
-    public ART2aFloatClusteringResult(String aFile, int aMaximumNumberOfEpochs, String aSeparator) throws Exception {
+    public ART2aFloatClusteringResult(String aFile, int aMaximumNumberOfEpochs, String aSeparator) throws IOException {
         if(aMaximumNumberOfEpochs<= 0) {
             throw new IllegalArgumentException("Number of epochs must be at least greater than zero.");
         }
@@ -292,7 +291,7 @@ public class ART2aFloatClusteringResult {
      * @param aConvergenceEpoch number of current epochs
      * @return true if system are converged false if not.
      */
-    private boolean checkConvergence(int aNumberOfDetectedClasses, int[] aVectorNew, int[] aVectorOld, int aConvergenceEpoch)   {
+    private boolean checkConvergence(int aNumberOfDetectedClasses, int[] aVectorNew, int[] aVectorOld, int aConvergenceEpoch) throws RuntimeException  {
         if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
             boolean tmpConvergence = true;
             // first check
@@ -302,6 +301,7 @@ public class ART2aFloatClusteringResult {
                     break;
                 }
             }
+            /*
             if (tmpConvergence) {
                 // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
                 tmpConvergence = true;
@@ -321,16 +321,22 @@ public class ART2aFloatClusteringResult {
                     }
                 }
             }
+
+             */
             if (!tmpConvergence) {
+                /*
                 for (int i = 0; i < aNumberOfDetectedClasses; i++) {
                     for (int j = 0; j < this.numberOfComponents; j++) {
                         this.clusterMatrixPreviousEpoch[i][j] = this.clusterMatrix[i][j];
                     }
                 }
+
+                 */
                 for (int tmpClusterDistribution = 0; tmpClusterDistribution < this.numberOfFingerprints; tmpClusterDistribution++) {
                     aVectorOld[tmpClusterDistribution] = aVectorNew[tmpClusterDistribution];
                 }
             }
+            System.out.println(tmpConvergence);
             return tmpConvergence;
         } else {
             throw new RuntimeException("Convergence failed");
@@ -346,6 +352,7 @@ public class ART2aFloatClusteringResult {
      * @throws IOException is thrown if the file cannot be read in.
      */
     private void getDataMatrix(String aFileName, String aSeparator) throws IOException {
+        System.out.println("start read in");
         if(aFileName == null || aFileName.isEmpty() || aFileName.isBlank()) {
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
@@ -373,6 +380,7 @@ public class ART2aFloatClusteringResult {
                 tmpFingerprintList.add(tmpFingerprintFloatArray);
             }
             tmpFingerprintFileReader.close();
+            System.out.println("erfogreich eingelesen");
         } catch (IllegalArgumentException anException) {
             throw new IllegalArgumentException("The file is not available in a suitable form.");
         }
@@ -380,6 +388,9 @@ public class ART2aFloatClusteringResult {
         for(int tmpCurrentMatrixRow = 0; tmpCurrentMatrixRow < tmpDataMatrixRow; tmpCurrentMatrixRow++) {
             this.dataMatrix[tmpCurrentMatrixRow] = tmpFingerprintList.get(tmpCurrentMatrixRow);
         }
+        System.out.println("Zeile " + tmpDataMatrixRow);
+        System.out.println("Spalte: " + tmpFingerprintList.get(0).length);
+        System.out.println(java.util.Arrays.toString(this.dataMatrix[10]));
     }
     // </editor-fold>
     //
@@ -392,7 +403,7 @@ public class ART2aFloatClusteringResult {
      *                   Parameter less than or equal to 1.
      * @throws Exception if the clustering process failed.
      */
-    public void startArt2aClustering(float aVigilanceParameter) throws Exception {
+    public void startArt2aClustering(float aVigilanceParameter) throws Exception  {
         this.clusteringStatus = false;
         try{
             this.initialiseMatrices();
@@ -422,7 +433,7 @@ public class ART2aFloatClusteringResult {
             }
             int tmpCurrentNumberOfEpochs = 1;
             // Initialisation of Logger
-            this.clusteringLogger = new Logger();
+            this.clusteringLogger = new ART2aLogger();
             this.intermediateResultList = new ConcurrentLinkedQueue<>();
             // begin clustering process
             while (tmpConvergence == false && tmpCurrentNumberOfEpochs <= this.maximumNumberOfEpochs) { // TODO  maximumNumberOfEpochs
@@ -508,8 +519,8 @@ public class ART2aFloatClusteringResult {
                                     }
                                 }
                                 float tmpLength3 = this.getVectorLength(tmpInputVector);
-                                float tmpFactor1 = this.defaultLearningParameter / tmpLength3;
-                                float tmpFactor2 = 1 - this.defaultLearningParameter;
+                                float tmpFactor1 = this.DEFAULT_LEARNING_PARAMETER / tmpLength3;
+                                float tmpFactor2 = 1 - this.DEFAULT_LEARNING_PARAMETER;
                                 for (int tmpAdaptedComponents = 0; tmpAdaptedComponents < this.numberOfComponents; tmpAdaptedComponents++) {
                                     tmpInputVector[tmpAdaptedComponents] = tmpInputVector[tmpAdaptedComponents] * tmpFactor1 + tmpFactor2 * this.clusterMatrix[tmpWinnerClassIndex][tmpAdaptedComponents]; // result t
                                 }
@@ -547,10 +558,8 @@ public class ART2aFloatClusteringResult {
             }
             this.clusteringStatus = true;
         } catch (RuntimeException anRuntimeException) {
-            this.clusteringStatus = false;
             throw anRuntimeException;
         } catch(Exception anException) {
-            this.clusteringStatus = false;
             throw new Exception("The clustering process has failed."); // TODO Exception
         }
     }

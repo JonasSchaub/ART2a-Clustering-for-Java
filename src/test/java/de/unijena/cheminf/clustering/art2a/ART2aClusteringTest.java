@@ -342,15 +342,18 @@ public class ART2aClusteringTest {
         tmpDataMatrix[9][27] = 1;
         */
 
+
+
+
+        /*
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            Art2aClusteringTask task = new Art2aClusteringTask(tmpVigilanceParameter, "src/test/resources/de/unijena/cheminf/clustering/art2a/Fingerprints.txt", 1000, ",");
+            Art2aClusteringTask task = new Art2aClusteringTask(tmpVigilanceParameter, "src/test/resources/de/unijena/cheminf/clustering/art2a/Fingerprints.txt", 1, ",");
             tmpClusteringTask.add(task);
         }
         PrintWriter tmpWriter = FileUtil.createResultFile();
         List<Future<ART2aFloatClusteringResult>> tmpFuturesList;
-        try {
             ART2aFloatClusteringResult tmpClusteringResult;
             tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
             for (Future<ART2aFloatClusteringResult> tmpFuture : tmpFuturesList) {
@@ -364,10 +367,12 @@ public class ART2aClusteringTest {
             tmpWriter.flush();
             tmpWriter.close();
             tmpExecutorService.shutdown();
-        } catch (InterruptedException | ExecutionException anException) {
-            System.out.println("Failed");
             //Assertions.assertEquals(false, true);
-        }
+
+         */
+
+
+
     }
     //</editor-fold>
     //

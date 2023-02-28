@@ -25,6 +25,7 @@
 package de.unijena.cheminf.clustering.art2a.Logger;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
 
 /**
  * Logger.
@@ -32,11 +33,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * @author Betuel Sevindik
  */
-public class Logger {
+public class ART2aLogger {
     // <editor-fold defaultstate="collapsed" desc="Private class variables">
     /**
      *
      */
+    private static final int EXCEPTION = 0;
+    private static final int METHOD_CALL = 1;
+    private static final int INFO = 2;
+    private static final int[] ALL_LOG_LEVELS = new int[] {
+            EXCEPTION,
+            METHOD_CALL,
+            INFO
+    };
     private ConcurrentLinkedQueue<String> logQueue;
     // </editor-fold>
     //
@@ -44,11 +53,19 @@ public class Logger {
     /**
      * Empty constructor.
      */
-    public Logger() {
+    public ART2aLogger() {
+        this.logQueue = new ConcurrentLinkedQueue<>();
     }
     // </editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Public methods">
+    public synchronized void startLogging() {
+        this.logQueue.clear();
+        this.logQueue.add("---------------------------------------");
+        this.logQueue.add("ART Clustering:");
+        this.logQueue.add("Logger started at  " ); // TODO time
+        this.logQueue.add("---------------------------------------");
+    }
     /**
      * Add clustering info/result.
      *
@@ -63,8 +80,18 @@ public class Logger {
      *
      * @param aLogList add all information and clustering results.
      */
-    public void startResultLog(ConcurrentLinkedQueue<String> aLogList) {
+    public synchronized void startResultLog(ConcurrentLinkedQueue<String> aLogList) {
         this.logQueue = aLogList;
+    }
+    public synchronized void appendException(String aExceptionMessage) {
+      if(ALL_LOG_LEVELS[EXCEPTION] == 0) {
+          this.logQueue.add(aExceptionMessage);
+      }
+    }
+    public synchronized void finishLog() {
+        this.logQueue.add("----------------------------------------");
+        this.logQueue.add("Logger finished at " );
+        this.logQueue.add("----------------------------------------");
     }
     //
     /**
