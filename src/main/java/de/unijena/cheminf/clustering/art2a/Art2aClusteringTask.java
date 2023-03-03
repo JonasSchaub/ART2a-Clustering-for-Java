@@ -24,7 +24,9 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 
 /**
  * Callable class for clustering fingerprints.
@@ -41,6 +43,7 @@ public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult>
      * Vigilance parameter, which influences the number of clusters to be formed.
      */
     private float vigilanceParameter;
+    private static final Logger LOGGER = Logger.getLogger(Art2aClusteringTask.class.getName());
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -60,15 +63,19 @@ public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult>
     /**
      * Constructor.
      *
-     * @param aVigilance influences the number of clusters to be formed.
+     * @param aVigilanceParameter influences the number of clusters to be formed.
      * @param aFingerprintFile fingerprint file.
      * @param aMaximumEpochsNumber maximum number of epochs that the system can use.
      * @param aSeparator separator that separates the respective components of the fingerprint.
      * @throws Exception is thrown if the file cannot be read in.
      */
-    public Art2aClusteringTask(float aVigilance, String aFingerprintFile, int aMaximumEpochsNumber, String aSeparator) throws Exception {
+    public Art2aClusteringTask(float aVigilanceParameter, String aFingerprintFile, int aMaximumEpochsNumber, String aSeparator) throws IOException {
+        if(aVigilanceParameter < 0 || aVigilanceParameter > 1) {
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
+        }
         this.art2aFloatClusteringResult = new ART2aFloatClusteringResult(aFingerprintFile, aMaximumEpochsNumber, aSeparator);
-        this.vigilanceParameter = aVigilance;
+        this.vigilanceParameter = aVigilanceParameter;
+
     }
     //</editor-fold>
     //

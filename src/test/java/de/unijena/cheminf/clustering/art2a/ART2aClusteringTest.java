@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -340,12 +341,7 @@ public class ART2aClusteringTest {
         tmpDataMatrix[9][25] = 0;
         tmpDataMatrix[9][26] = 1;
         tmpDataMatrix[9][27] = 1;
-        */
 
-
-
-
-        /*
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
@@ -370,6 +366,8 @@ public class ART2aClusteringTest {
             //Assertions.assertEquals(false, true);
 
          */
+
+
 
 
 
