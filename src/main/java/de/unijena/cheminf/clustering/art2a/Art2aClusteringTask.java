@@ -25,25 +25,24 @@
 package de.unijena.cheminf.clustering.art2a;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 /**
  * Callable class for clustering fingerprints.
  *
  * @author Betuel Sevindik
  */
-public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult> {
+public class ART2aClusteringTask implements Callable<ART2aFloatClustering> {
     //<editor-fold desc="private class variables" defaultstate="collapsed>
     /**
      * Clusterer instance
      */
-    private ART2aFloatClusteringResult art2aFloatClusteringResult;
+    private ART2aFloatClustering art2aFloatClusteringResult;
     /**
      * Vigilance parameter, which influences the number of clusters to be formed.
      */
     private float vigilanceParameter;
-    private static final Logger LOGGER = Logger.getLogger(Art2aClusteringTask.class.getName());
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -51,12 +50,13 @@ public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult>
      * Constructor.
      *
      * @param aVigilance influences the number of clusters to be formed.
-     * @param aDataMatrix matrix contains fingerprints. the matrix has as many rows as there are fingerprints, and the number
-     *                     of columns corresponds to the dimensionality of the fingerprints.
+     * @param aDataMatrix matrix contains fingerprints.The matrix has as many rows as there are fingerprints,
+     *                    and the number
+     *                    of columns corresponds to the dimensionality of the fingerprints.
      * @param aMaximumEpochsNumber maximum number of epochs that the system can use.
      */
-    public Art2aClusteringTask(float aVigilance, float[][] aDataMatrix, int aMaximumEpochsNumber)  {
-        this.art2aFloatClusteringResult = new ART2aFloatClusteringResult(aDataMatrix, aMaximumEpochsNumber);
+    public ART2aClusteringTask(float aVigilance, float[][] aDataMatrix, int aMaximumEpochsNumber)  {
+        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber);
         this.vigilanceParameter = aVigilance;
     }
     //
@@ -64,18 +64,17 @@ public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult>
      * Constructor.
      *
      * @param aVigilanceParameter influences the number of clusters to be formed.
-     * @param aFingerprintFile fingerprint file.
+     * @param aFingerprintFilePathName path name of the fingerprint file.
      * @param aMaximumEpochsNumber maximum number of epochs that the system can use.
      * @param aSeparator separator that separates the respective components of the fingerprint.
      * @throws Exception is thrown if the file cannot be read in.
      */
-    public Art2aClusteringTask(float aVigilanceParameter, String aFingerprintFile, int aMaximumEpochsNumber, String aSeparator) throws IOException {
+    public ART2aClusteringTask(float aVigilanceParameter, String aFingerprintFilePathName, int aMaximumEpochsNumber, char aSeparator) throws IOException {
         if(aVigilanceParameter < 0 || aVigilanceParameter > 1) {
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
         }
-        this.art2aFloatClusteringResult = new ART2aFloatClusteringResult(aFingerprintFile, aMaximumEpochsNumber, aSeparator);
+        this.art2aFloatClusteringResult = new ART2aFloatClustering(aFingerprintFilePathName, aMaximumEpochsNumber, aSeparator);
         this.vigilanceParameter = aVigilanceParameter;
-
     }
     //</editor-fold>
     //
@@ -83,11 +82,11 @@ public class Art2aClusteringTask implements Callable<ART2aFloatClusteringResult>
     /**
      * Executes the clustering.
      *
-     * @return clustering result
+     * @return clustering result.
      * @throws Exception is thrown if the clustering process failed.
      */
     @Override
-    public ART2aFloatClusteringResult call() throws Exception {
+    public ART2aFloatClustering call() throws Exception {
         this.art2aFloatClusteringResult.startArt2aClustering(this.vigilanceParameter);
         return art2aFloatClusteringResult;
     }

@@ -29,71 +29,58 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * File utility
+ * //TODO possibly delete class
  *
  * @author Betuel Sevindik
  */
 public final class FileUtil {
     //<editor-fold desc="Private static class variables" defaultstate="collapsed">
     /**
-     * Name of file for writing results
+     * Name of file for writing clustering process.
      */
-    private static final String RESULT_LOG_FILE_NAME = "Result_Log";
-
+    private static final String PROCESS_LOG_FILE_NAME = "Process_Log";
     /**
-     * Logger of this class.
+     * Name of the file for writing clustering result.
      */
-    private static final Logger LOGGER = Logger.getLogger(FileUtil.class.getName());
-    private static final Logger ROOT_LOGGER = LogManager.getLogManager().getLogger("");
-    private static FileHandler fileHandler;
-
-    /**
-     * Log file that is currently logged in
-     */
-    private static File logFile;
-
-    /**
-     * Storage for exceptions thrown in the process of managing the log-files' folder
-     */
-    private static ArrayList<Exception> storedExceptions;
+    private static final String RESULT_FILE_NAME = "Result_Log";
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Set up result log file
+     * Set up process log file.
      *
-     * @return PrintWriter to write the clustering results into the file
+     * @return PrintWriter to write the clustering process into the file.
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createResultFile() throws IOException {
-        String tmpWorkingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
-        LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
-        new File(tmpWorkingPath + "/Results").mkdirs();
-        File tmpExceptionsLogFile = new File(tmpWorkingPath + "/Results/"
-                + FileUtil.RESULT_LOG_FILE_NAME + ".txt");
-        FileWriter tmpFileWriter = new FileWriter(tmpExceptionsLogFile, false);
+    public static PrintWriter createProcessLogFile() throws IOException {
+        String tmpWorkingPath = (new File("src/test/resources/de/unijena/cheminf/clustering/art2a").getAbsoluteFile().getAbsolutePath()) + File.separator;
+        new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Results_Clustering").mkdirs();
+        File tmpClusteringResultFile = new File(tmpWorkingPath + "/Results_Clustering/"
+                + FileUtil.PROCESS_LOG_FILE_NAME + ".txt");
+        FileWriter tmpFileWriter = new FileWriter(tmpClusteringResultFile, false);
         BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
         PrintWriter  tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
         return tmpPrintWriter;
     }
     //
     /**
+     * Set up result log file.
      *
+     * @return PrintWriter to write the clustering result into the file.
+     * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public void manageResultFiles() {
-        throw new UnsupportedOperationException();
+    public static PrintWriter createResultLogFile() throws IOException {
+        String tmpWorkingPath = (new File("src/test/resources/de/unijena/cheminf/clustering/art2a").getAbsoluteFile().getAbsolutePath()) + File.separator;
+        new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Results_Clustering").mkdirs();
+        File tmpClusteringResultFile = new File(tmpWorkingPath + "/Results_Clustering/"
+                + FileUtil. RESULT_FILE_NAME+ ".txt");
+        FileWriter tmpFileWriter = new FileWriter(tmpClusteringResultFile, false);
+        BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
+        PrintWriter  tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
+        return tmpPrintWriter;
     }
     //</editor-fold>
     //
