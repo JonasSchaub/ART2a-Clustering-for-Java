@@ -1,0 +1,36 @@
+Vigilance parameter: 0.1
+Number of epochs: 10
+Number of detected clusters: 11
+---------------------------------------
+Vigilance parameter: 0.2
+Number of epochs: 9
+Number of detected clusters: 13
+---------------------------------------
+Vigilance parameter: 0.3
+Number of epochs: 8
+Number of detected clusters: 25
+---------------------------------------
+Vigilance parameter: 0.4
+Number of epochs: 9
+Number of detected clusters: 43
+---------------------------------------
+Vigilance parameter: 0.5
+Number of epochs: 3
+Number of detected clusters: 82
+---------------------------------------
+Vigilance parameter: 0.6
+Number of epochs: 3
+Number of detected clusters: 131
+---------------------------------------
+Vigilance parameter: 0.70000005
+Number of epochs: 2
+Number of detected clusters: 177
+---------------------------------------
+Vigilance parameter: 0.8000001
+Number of epochs: 2
+Number of detected clusters: 210
+---------------------------------------
+Vigilance parameter: 0.9000001
+Number of epochs: 2
+Number of detected clusters: 221
+---------------------------------------
