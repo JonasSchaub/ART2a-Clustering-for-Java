@@ -24,15 +24,15 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.Logger.FileUtil;
+import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
+import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.Result.ART2aFloatClusteringResult;
+import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -392,15 +392,16 @@ public class ART2aFloatClusteringTaskTest {
 
 
 
-
+/*
 
        // ART2aFloatClustering d = new ART2aFloatClustering("Fingerprints4096.txt",100, ',');
        // Assertions.assertEquals(1,1);
-       // FileUtil.createLoggingFile();
+        FileUtil.createLoggingFile();
+        float [] [] deneme =   FileUtil.importDataMatrixFromFile("Count.txt", ',');
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for(float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-           ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, dataMatrix, 10);
+           ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, dataMatrix, 10, true);
            tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
         PrintWriter tmpProcessLogWriter = FileUtil.createProcessLogFile();
@@ -410,10 +411,9 @@ public class ART2aFloatClusteringTaskTest {
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         for(Future<IART2aClusteringResult> tmpFuture : tmpFuturesList) {
             tmpClusteringResult = tmpFuture.get();
+            // tmpClusteringResult.getClusterIndices(6);
             //tmpClusteringResult.getAngleBetweenClusters(0,1);
-            System.out.println(java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(6)) + "---fingerprints in cluster");
-
-            /*
+            tmpClusteringResult.getClusterRepresentatives(0);
             tmpClusteringResult.getProcessLog();
             tmpClusteringResult.getResultLog();
             for (String tmpProcessLog : tmpClusteringResult.getProcessLog()) {
@@ -423,7 +423,9 @@ public class ART2aFloatClusteringTaskTest {
                 tmpResultLogWriter.println(tmpResultLog);
             }
 
-             */
+        }
+
+
 
 
 
@@ -431,7 +433,7 @@ public class ART2aFloatClusteringTaskTest {
             //test
            // Assertions.assertEquals(true, tmpClusteringResult.getClusteringStatus());
             Assertions.assertEquals(true, true);
-        }
+
         tmpProcessLogWriter.flush();
         tmpProcessLogWriter.close();
         tmpResultLogWriter.flush();
@@ -439,21 +441,31 @@ public class ART2aFloatClusteringTaskTest {
         tmpExecutorService.shutdown();
 
 
-
-
-
-
-
-
-
-
-/*
-        ART2aFloatClustering de = new ART2aFloatClustering(dataMatrix,10, 0.1f);
-       ART2aClusteringResult resu =  de.startClustering(0.1f, false);
-       resu.getAngleBetweenClusters(3,2);
-       resu.getClusterIndices(0);
-
  */
+
+
+
+
+
+
+
+
+
+
+
+
+       ART2aFloatClustering de = new ART2aFloatClustering(dataMatrix,10, 0.1f,0.99f,0.01f);
+       IART2aClusteringResult resu =  de.startClustering(0.1f, false);
+       //resu.getAngleBetweenClusters(3,2);
+        System.out.println(java.util.Arrays.toString(resu.getClusterIndices(4))+ "---indices");
+        resu.getClusterRepresentatives(4);
+        float a = 0.34768572f;
+        float b = 0.35897768f;
+        float c = a+b;
+        System.out.println(c);
+
+
+
 
 
 

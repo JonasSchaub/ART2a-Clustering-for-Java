@@ -24,6 +24,11 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
+import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
+import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
+import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -40,11 +45,13 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
      * Clusterer instance
      */
     private ART2aFloatClustering art2aFloatClusteringResult;
+    private ART2aDoubleClustering art2aDoubleClusteringResult;
     /**
      * Vigilance parameter, which influences the number of clusters to be formed.
      */
     private float vigilanceParameter;
-    private ART2aClusteringResult result;
+
+    private boolean addLog;
     private static final Logger LOGGER = Logger.getLogger(ART2aClusteringTask.class.getName());
     //</editor-fold>
     //
@@ -58,10 +65,26 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
      *                    of columns corresponds to the dimensionality of the fingerprints.
      * @param aMaximumEpochsNumber maximum number of epochs that the system can use.
      */
-    public ART2aClusteringTask(float aVigilance, float[][] aDataMatrix, int aMaximumEpochsNumber)  {
+    public ART2aClusteringTask(float aVigilance, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean log, float aRequiredSimilarity, float aLearningParameter)  {
        // this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber);
         this.vigilanceParameter = aVigilance;
-        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilance);
+        this.addLog = log;
+        float tmpRequiredSimilarity = aRequiredSimilarity;
+        float tmpLearningParameter = aLearningParameter;
+        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilance, tmpRequiredSimilarity, tmpLearningParameter);
+    }
+    public ART2aClusteringTask(float vigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean log) {
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, log, 0.99f,0.01f);
+    }
+    public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean log, double aRequiredSimilarity, double aLearningParameter) {
+        this.vigilanceParameter = vigilanceParameter;
+        this.addLog = log;
+        double tmpRequiredSimilarity = aRequiredSimilarity;
+        double tmpLearningParameter = aLearningParameter;
+        this.art2aDoubleClusteringResult = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, this.vigilanceParameter, tmpRequiredSimilarity, tmpLearningParameter);
+    }
+    public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean log) {
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, log, 0.99,0.01);
     }
     //</editor-fold>
     //
@@ -73,14 +96,26 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
      * @throws Exception is thrown if the clustering process failed.
      */
     @Override
-    public ART2aClusteringResult call()  {
+    public IART2aClusteringResult call()  {
+/*
         try {
-            return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, false);
+            if(this.art2aFloatClusteringResult != null) {
+                System.out.println("Float");
+                return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, this.addLog);
+            } else {
+                System.out.println("Double");
+                return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, addLog);
+            }
         } catch (RuntimeException anException) {
            // throw anException;
             ART2aClusteringTask.LOGGER.log(Level.SEVERE, anException.toString(), anException);
             throw anException;
         }
+
+ */
+
+
+
 
 
 
@@ -88,7 +123,7 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
 
 
        // return art2aFloatClusteringResult;
-       // throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
     //</editor-fold>
     //

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package de.unijena.cheminf.clustering.art2a.Logger;
+package de.unijena.cheminf.clustering.art2a.Util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -72,7 +71,8 @@ public final class FileUtil {
      * @return PrintWriter to write the clustering process into the file.
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createProcessLogFile() throws IOException {
+    public static PrintWriter createResultLogFile() throws IOException {
+        /*
         LOGGER.info("start create Process log");
         FileUtil.deleteOldestFileIfNecessary("src/test/resources/de/unijena/cheminf/clustering/art2a/Process_Clustering_Log");
         LocalDateTime tmpDateTime = LocalDateTime.now();
@@ -81,7 +81,10 @@ public final class FileUtil {
         new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Results_Clustering_Log").mkdirs();
         File tmpClusteringResultFile = new File(tmpWorkingPath + "/Results_Clustering_Log/"
                 + FileUtil.PROCESS_LOG_FILE_NAME + tmpProcessingTime + ".txt");
-        FileWriter tmpFileWriter = new FileWriter(tmpClusteringResultFile, false);
+
+         */
+        FileUtil.deleteOldestFileIfNecessary("src/test/resources/de/unijena/cheminf/clustering/art2a/Result_Clustering_Log");
+        FileWriter tmpFileWriter = new FileWriter(FileUtil.createOutputFile("src/test/resources/de/unijena/cheminf/clustering/art2a", "Result_Clustering_Log"), false);
         BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
         PrintWriter tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
         return tmpPrintWriter;
@@ -93,7 +96,9 @@ public final class FileUtil {
      * @return PrintWriter to write the clustering result into the file.
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createResultLogFile() throws IOException {
+    public static PrintWriter createProcessLogFile() throws IOException {
+
+        /*
         FileUtil.deleteOldestFileIfNecessary("src/test/resources/de/unijena/cheminf/clustering/art2a/Result_Clustering_Log");
         LocalDateTime tmpDateTime = LocalDateTime.now();
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
@@ -101,34 +106,53 @@ public final class FileUtil {
         new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Process_Clustering_Log").mkdirs();
         File tmpClusteringResultFile = new File(tmpWorkingPath + "/Process_Clustering_Log/"
                 + FileUtil. RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
-        FileWriter tmpFileWriter = new FileWriter(tmpClusteringResultFile, false);
+
+         */
+
+
+      //  FileUtil.createOutputFile("src/test/resources/de/unijena/cheminf/clustering/art2a"+ "/Process_Clustering_Log","Process_Clustering_Log");
+        FileWriter tmpFileWriter = new FileWriter(FileUtil.createOutputFile("src/test/resources/de/unijena/cheminf/clustering/art2a","Process_Clustering_Log"), false);
         BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
         PrintWriter  tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
+        FileUtil.createOutputFile("src/test/resources/de/unijena/cheminf/clustering/art2a"+ "/Process_Clustering_Log","Process_Clustering_Log");
         return tmpPrintWriter;
     }
     public static float[][] importDataMatrixFromFile(String aFilePath, char aSeparator) throws IOException, NumberFormatException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
-        BufferedReader tmpFingerprintFileReader;
-        tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
+        BufferedReader tmpFingerprintFileReader = null;
+        try {
+           // BufferedReader tmpFingerprintFileReader;
+            tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
+        } catch (IOException anException) {
+            LOGGER.log(Level.SEVERE, anException.toString()+ " File is not readable!", anException);
+        }
         List<float[]> tmpFingerprintList = new ArrayList<>();
         String tmpFingerprintLine;
         int tmpDataMatrixRow = 0;
-        while ((tmpFingerprintLine = tmpFingerprintFileReader.readLine()) != null) {
-            String[] tmpFingerprint = tmpFingerprintLine.split(String.valueOf(aSeparator));
-            float[] tmpFingerprintFloatArray = new float[tmpFingerprint.length];
-            try {
-                for (int i = 0; i < tmpFingerprint.length; i++) {
-                    tmpFingerprintFloatArray[i] = Float.parseFloat(tmpFingerprint[i]);
+        try {
+            while ((tmpFingerprintLine = tmpFingerprintFileReader.readLine()) != null) {
+                String[] tmpFingerprint = tmpFingerprintLine.split(String.valueOf(aSeparator));
+                float[] tmpFingerprintFloatArray = new float[tmpFingerprint.length];
+                try {
+                    for (int i = 0; i < tmpFingerprint.length; i++) {
+                        tmpFingerprintFloatArray[i] = Float.parseFloat(tmpFingerprint[i]);
+                    }
+                } catch (NumberFormatException anException) {
+                    LOGGER.log(Level.SEVERE, anException.toString(), anException);
+                    throw anException;
                 }
-            } catch (NumberFormatException anException) {
-                throw anException;
+                tmpDataMatrixRow++;
+                tmpFingerprintList.add(tmpFingerprintFloatArray);
             }
-            tmpDataMatrixRow++;
-            tmpFingerprintList.add(tmpFingerprintFloatArray);
+        } catch (IOException anException) {
+            LOGGER.log(Level.SEVERE, anException.toString(), anException + "invalid fingerprint file. At least one line is not readable.");
         }
-        tmpFingerprintFileReader.close();
+        finally {
+            tmpFingerprintFileReader.close();
+        }
+       /// tmpFingerprintFileReader.close();
         float[][] aDataMatrix = new float[tmpDataMatrixRow][tmpFingerprintList.get(0).length];
         for (int tmpCurrentMatrixRow = 0; tmpCurrentMatrixRow < tmpDataMatrixRow; tmpCurrentMatrixRow++) {
             aDataMatrix[tmpCurrentMatrixRow] = tmpFingerprintList.get(tmpCurrentMatrixRow);
@@ -142,22 +166,41 @@ public final class FileUtil {
             Arrays.sort(files, Comparator.comparingLong(File::lastModified));
             if (files[0].delete()) {
                 System.out.println("Deleted file: " + files[0].getName());
+                LOGGER.info("Deleted file: " + files[0].getName());
             } else {
                 System.out.println("Failed to delete file: " + files[0].getName());
+                LOGGER.info("Deleted file: " + files[0].getName());
             }
         }
     }
-    public static void createLoggingFile() throws IOException {
-        LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
-        String tmpWorkingPath = (new File("src/test/resources/de/unijena/cheminf/clustering/art2a").getAbsoluteFile().getAbsolutePath()) + File.separator;
-        new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Logging_ART2a").mkdirs();
+    public static void createLoggingFile()  {
+        try {
+            FileUtil.deleteOldestFileIfNecessary("src/test/resources/de/unijena/cheminf/clustering/art2a/Logging_ART2a");
+            LocalDateTime tmpDateTime = LocalDateTime.now();
+            String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
+            String tmpWorkingPath = (new File("src/test/resources/de/unijena/cheminf/clustering/art2a").getAbsoluteFile().getAbsolutePath()) + File.separator;
+            new File("src/test/resources/de/unijena/cheminf/clustering/art2a" + "/Logging_ART2a").mkdirs();
+        /*
         File tmpClusteringResultFile = new File(tmpWorkingPath + "/Logging_ART2a/"
                 + FileUtil. RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
-        FileHandler handler = new FileHandler(tmpWorkingPath + "/Logging_ART2a/"
-                + FileUtil. RESULT_FILE_NAME + tmpProcessingTime+ ".txt", true);
-        handler.setFormatter(new SimpleFormatter());
-        ROOT_LOGGER.addHandler(handler);
+
+         */
+            FileHandler handler = new FileHandler(tmpWorkingPath + "/Logging_ART2a/"
+                    + FileUtil.RESULT_FILE_NAME + tmpProcessingTime + ".txt", true);
+            handler.setFormatter(new SimpleFormatter());
+            ROOT_LOGGER.addHandler(handler);
+        }catch (IOException anException) {
+            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException);
+        }
+    }
+    private static File createOutputFile(String aFileName, String den){
+        LocalDateTime tmpDateTime = LocalDateTime.now();
+        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
+        String tmpWorkingPath = (new File(aFileName).getAbsoluteFile().getAbsolutePath()) + File.separator;
+        new File(aFileName + "/" +den).mkdirs();
+        File tmpClusteringResultFile = new File(tmpWorkingPath + "/"+den+"/"
+                + FileUtil. RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
+        return tmpClusteringResultFile;
     }
 
     //</editor-fold>

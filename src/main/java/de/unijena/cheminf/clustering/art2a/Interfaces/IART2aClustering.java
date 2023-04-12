@@ -1,9 +1,9 @@
-package de.unijena.cheminf.clustering.art2a;
+package de.unijena.cheminf.clustering.art2a.Interfaces;
 
 public interface IART2aClustering {
     void initializeMatrices();
     int[] randomizeVectorIndices();
-    ART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddLog) throws Exception;
+    IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddLog) throws Exception;
 
     boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch);
 
