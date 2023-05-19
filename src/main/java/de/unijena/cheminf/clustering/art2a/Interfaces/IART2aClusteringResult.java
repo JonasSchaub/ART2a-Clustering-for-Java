@@ -7,8 +7,8 @@ public interface IART2aClusteringResult {
     int getNumberOfDetectedClusters();
     int getNumberOfEpochs();
     int[] getClusterIndices(int aClusterNumber);
-    float getAngleBetweenClusters(int aFirstCluster, int aSecondCluster);
-    int getClusterRepresentatives(int aClusterNumber);
+  //  T getAngleBetweenClusters(int aFirstCluster, int aSecondCluster);
+    //int getClusterRepresentatives(int aClusterNumber);
     ConcurrentLinkedQueue<String> getProcessLog();
     ConcurrentLinkedQueue<String> getResultLog();
 }

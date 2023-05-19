@@ -1,5 +1,6 @@
 package de.unijena.cheminf.clustering.art2a.Clustering;
 
+import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.Result.ART2aDoubleClusteringResult;
@@ -208,7 +209,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * @throws RuntimeException
      */
     @Override
-    public IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddResultLog) throws RuntimeException {
+    public ART2aDoubleClusteringResult startClustering(float aVigilanceParameter, boolean aAddResultLog) throws RuntimeException {
         //<editor-fold desc="initialization steps for logging the clustering results if aAddResultLog = true" defaultstate="collapsed">
         ConcurrentLinkedQueue<String> tmpClusteringProcessLog = null;
         ConcurrentLinkedQueue<String>tmpClusteringResultLog = null;

@@ -1,7 +1,30 @@
+/*
+ * GNU General Public License v3.0
+ *
+ * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package de.unijena.cheminf.clustering.art2a.Clustering;
 
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.Result.ART2aFloatClusteringResult;
 
 import java.io.IOException;
@@ -12,6 +35,9 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
+/**
+ *
+ */
 public class ART2aFloatClustering implements IART2aClustering {
     //<editor-fold desc="private class variables" defaultstate="collapsed">
     /**
@@ -22,7 +48,7 @@ public class ART2aFloatClustering implements IART2aClustering {
     /**
      * Threshold for contrast enhancement. If a vector/fingerprint component is below the threshold, it is set to zero.
      */
-    private  float thresholdForContrastEnhancement;
+    private float thresholdForContrastEnhancement;
     /**
      * Number of fingerprints to be clustered.
      */
@@ -336,7 +362,7 @@ public class ART2aFloatClustering implements IART2aClustering {
     }
 
     @Override
-    public IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddLog) throws RuntimeException {
+    public ART2aFloatClusteringResult startClustering(float aVigilanceParameter, boolean aAddLog) throws RuntimeException {
         // float aVigilanceParameter = 0.1f;
         this.clusteringStatus = false;
         ConcurrentLinkedQueue<String> tmpClusteringProcessLog = null;
@@ -372,6 +398,7 @@ public class ART2aFloatClustering implements IART2aClustering {
                 tmpClusterMatrixRowOld[tmpCurrentVectorComponentsInClusterMatrix] = tmpInitialWeightValue;
             }
         }
+        System.out.println(tmpInitialWeightValue + "-----initial Value");
         int tmpCurrentNumberOfEpochs = 0;
         if(aAddLog) {
             tmpClusteringResultLog.add("Vigilance parameter: " + aVigilanceParameter);
@@ -388,7 +415,6 @@ public class ART2aFloatClustering implements IART2aClustering {
             System.out.println(java.util.Arrays.toString(tmpSampleVectorIndicesInRandomOrder )+ "-----random order");
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfFingerprints; tmpCurrentInput++) {
                 //tmpClusteringProcessLog.add("Input: " + tmpCurrentInput);
-                System.out.println(tmpCurrentInput + "-------Input");
                 float[] tmpInputVector = new float[this.numberOfComponents];
                 boolean tmpCheckNullVector = true;
                 for(int tmpCurrentInputVectorComponents = 0; tmpCurrentInputVectorComponents < this.numberOfComponents; tmpCurrentInputVectorComponents++) {
@@ -462,6 +488,7 @@ public class ART2aFloatClustering implements IART2aClustering {
                         }
                         if(tmpRhoWinner == true || tmpRho < aVigilanceParameter) {
                             tmpNumberOfDetectedClusters++;
+                            System.out.println(tmpNumberOfDetectedClusters + "--------- anzahl cluster falls ein neues hinzugefügt wird");
                             tmpClassView[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpNumberOfDetectedClusters - 1;
                             this.clusterMatrix[tmpNumberOfDetectedClusters - 1] = tmpInputVector;
                             if(aAddLog) {
@@ -496,28 +523,13 @@ public class ART2aFloatClustering implements IART2aClustering {
 
             }
             // number of cluster members
-            /*
-            TreeMap<Integer, Integer> tmpClusterToMembersMap = new TreeMap<>();
-            tmpClusterToMembersMap = new TreeMap<>();
-            int i = 1;
-            for(int tmpClusterMembers : tmpClassView) {
-                if (tmpClusterMembers == -1) {
-                    continue;
-                }
-                if(tmpClusterToMembersMap.containsKey(tmpClusterMembers) == false) {
-                    tmpClusterToMembersMap.put(tmpClusterMembers, i);
-                } else {
-                    tmpClusterToMembersMap.put(tmpClusterMembers, tmpClusterToMembersMap.get(tmpClusterMembers) + 1);
-                }
-            }
-
-             */
             // check the convergence. If the network is converged, tmpConvergence == true otherwise false
             tmpConvergence = this.checkConvergence(tmpNumberOfDetectedClusters, tmpCurrentNumberOfEpochs);
             tmpCurrentNumberOfEpochs++;
             //  tmpClusteringProcessLog.add("Cluster members: " + tmpClusterToMembersMap);
             if(aAddLog) {
                 tmpClusteringProcessLog.add("Convergence status: " + tmpConvergence);
+                tmpClusteringProcessLog.add("ClusterIndices" + java.util.Arrays.toString(tmpClassView));
                 tmpClusteringProcessLog.add("---------------------------------------");
             }
         }
@@ -528,11 +540,16 @@ public class ART2aFloatClustering implements IART2aClustering {
             tmpClusteringResultLog.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
             tmpClusteringResultLog.add("---------------------------------------");
         }
+        System.out.println(java.util.Arrays.toString(tmpClassView) + "----class view");
+        for(int i = 0; i<10; i++) {
+            System.out.println(java.util.Arrays.toString(this.clusterMatrix[i])+ "------ cluster matrix" +i);
+        }
         // return this.clusteringStatus = true;
         if(!aAddLog) {
-            return new ART2aFloatClusteringResult(this.clusterMatrix,this.dataMatrix, tmpClassView, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters);
+            System.out.println(tmpNumberOfDetectedClusters + "---kac tane cluster var?");
+            return new ART2aFloatClusteringResult(aVigilanceParameter,this.clusterMatrix, tmpClassView, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters);
         } else {
-            return new ART2aFloatClusteringResult(this.clusterMatrix,this.dataMatrix, tmpClassView, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters,tmpClusteringProcessLog, tmpClusteringResultLog);
+            return new ART2aFloatClusteringResult(aVigilanceParameter,this.clusterMatrix,tmpClassView, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters,tmpClusteringProcessLog, tmpClusteringResultLog);
         }
 
         /*

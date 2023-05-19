@@ -24,8 +24,11 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
+import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.Result.ART2aDoubleClusteringResult;
 import de.unijena.cheminf.clustering.art2a.Result.ART2aFloatClusteringResult;
 import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 import org.junit.jupiter.api.Assertions;
@@ -58,9 +61,9 @@ public class ART2aFloatClusteringTaskTest {
     @Test
     public void startArt2aClusteringTest() throws Exception {
 
-
         float[][] dataMatrix = new float[10][28];
         //valdiazen
+
         dataMatrix[0][0] = 1;
         dataMatrix[0][1] = 0;
         dataMatrix[0][2] = 0;
@@ -121,6 +124,8 @@ public class ART2aFloatClusteringTaskTest {
         dataMatrix[1][26] = 1;
         dataMatrix[1][27] = 1;
 
+
+
         // Nona-2,6-dienal
         dataMatrix[2][0] = 0;
         dataMatrix[2][1] = 0;
@@ -150,7 +155,6 @@ public class ART2aFloatClusteringTaskTest {
         dataMatrix[2][25] = 0;
         dataMatrix[2][26] = 0;
         dataMatrix[2][27] = 0;
-
 
         // Istanbulin A
         dataMatrix[3][0] = 0;
@@ -304,7 +308,7 @@ public class ART2aFloatClusteringTaskTest {
         dataMatrix[7][27] = 1;
 
         // Bittersweet
-        dataMatrix[8][0] = 1;
+        dataMatrix[8][0] = 0;
         dataMatrix[8][1] = 0;
         dataMatrix[8][2] = 1;
         dataMatrix[8][3] = 1;
@@ -312,7 +316,7 @@ public class ART2aFloatClusteringTaskTest {
         dataMatrix[8][5] = 1;
         dataMatrix[8][6] = 0;
         dataMatrix[8][7] = 0;
-        dataMatrix[8][8] = 1;
+        dataMatrix[8][8] = 0;
         dataMatrix[8][9] = 0;
         dataMatrix[8][10] = 0;
         dataMatrix[8][11] = 1;
@@ -321,7 +325,7 @@ public class ART2aFloatClusteringTaskTest {
         dataMatrix[8][14] = 0;
         dataMatrix[8][15] = 0;
         dataMatrix[8][16] = 0;
-        dataMatrix[8][17] = 1;
+        dataMatrix[8][17] = 0;
         dataMatrix[8][18] = 0;
         dataMatrix[8][19] = 0;
         dataMatrix[8][20] = 0;
@@ -365,7 +369,9 @@ public class ART2aFloatClusteringTaskTest {
 
 
 
-/*
+
+        /*
+
         float[][] dataMatrix = new float[4][4];
 
         dataMatrix[0][0] = 1;
@@ -392,30 +398,24 @@ public class ART2aFloatClusteringTaskTest {
 
 
 
-/*
-
+        /*
        // ART2aFloatClustering d = new ART2aFloatClustering("Fingerprints4096.txt",100, ',');
        // Assertions.assertEquals(1,1);
-        FileUtil.createLoggingFile();
-        float [] [] deneme =   FileUtil.importDataMatrixFromFile("Count.txt", ',');
+        //float [] [] deneme =   FileUtil.importDataMatrixFromFile("Fingerprints.txt", ',');
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
-        for(float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-           ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, dataMatrix, 10, true);
-           tmpClusteringTask.add(tmpART2aFloatClusteringTask);
+        for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
+            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, dataMatrix, 100, true);
+            tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
         PrintWriter tmpProcessLogWriter = FileUtil.createProcessLogFile();
         PrintWriter tmpResultLogWriter = FileUtil.createResultLogFile();
-        List<Future<IART2aClusteringResult>> tmpFuturesList;
+        List<Future<ART2aAbstractResult>> tmpFuturesList;
         IART2aClusteringResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
-        for(Future<IART2aClusteringResult> tmpFuture : tmpFuturesList) {
+        for (Future<ART2aAbstractResult> tmpFuture : tmpFuturesList) {
             tmpClusteringResult = tmpFuture.get();
-            // tmpClusteringResult.getClusterIndices(6);
-            //tmpClusteringResult.getAngleBetweenClusters(0,1);
-            tmpClusteringResult.getClusterRepresentatives(0);
-            tmpClusteringResult.getProcessLog();
-            tmpClusteringResult.getResultLog();
+            // Illustration the clustering result
             for (String tmpProcessLog : tmpClusteringResult.getProcessLog()) {
                 tmpProcessLogWriter.println(tmpProcessLog);
             }
@@ -424,6 +424,15 @@ public class ART2aFloatClusteringTaskTest {
             }
 
         }
+        tmpProcessLogWriter.flush();
+        tmpProcessLogWriter.close();
+        tmpResultLogWriter.flush();
+        tmpResultLogWriter.close();
+        tmpExecutorService.shutdown();
+
+         */
+
+
 
 
 
@@ -434,41 +443,13 @@ public class ART2aFloatClusteringTaskTest {
            // Assertions.assertEquals(true, tmpClusteringResult.getClusteringStatus());
             Assertions.assertEquals(true, true);
 
-        tmpProcessLogWriter.flush();
-        tmpProcessLogWriter.close();
-        tmpResultLogWriter.flush();
-        tmpResultLogWriter.close();
-        tmpExecutorService.shutdown();
-
-
- */
-
-
-
-
-
-
-
-
-
-
 
 
        ART2aFloatClustering de = new ART2aFloatClustering(dataMatrix,10, 0.1f,0.99f,0.01f);
-       IART2aClusteringResult resu =  de.startClustering(0.1f, false);
-       //resu.getAngleBetweenClusters(3,2);
-        System.out.println(java.util.Arrays.toString(resu.getClusterIndices(4))+ "---indices");
-        resu.getClusterRepresentatives(4);
-        float a = 0.34768572f;
-        float b = 0.35897768f;
-        float c = a+b;
-        System.out.println(c);
-
-
-
-
-
-
+       ART2aFloatClusteringResult resu =  de.startClustering(0.1f, false);
+       System.out.println(resu.getNumberOfDetectedClusters() + "----detected clusters number");
+       System.out.println(java.util.Arrays.toString(resu.getClusterIndices(4)) + "-----cluster indice");
+       System.out.println(resu.getAngleBetweenClusters(0,2)+ "-------cluster Angle");
 
 
 

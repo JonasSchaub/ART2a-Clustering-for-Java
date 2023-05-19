@@ -24,6 +24,7 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
@@ -39,7 +40,7 @@ import java.util.logging.Logger;
  *
  * @author Betuel Sevindik
  */
-public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
+public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     //<editor-fold desc="private class variables" defaultstate="collapsed>
     /**
      * Clusterer instance
@@ -96,8 +97,8 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
      * @throws Exception is thrown if the clustering process failed.
      */
     @Override
-    public IART2aClusteringResult call()  {
-/*
+    public ART2aAbstractResult call()  {
+        /*
         try {
             if(this.art2aFloatClusteringResult != null) {
                 System.out.println("Float");
@@ -112,7 +113,7 @@ public class ART2aClusteringTask implements Callable<IART2aClusteringResult> {
             throw anException;
         }
 
- */
+         */
 
 
 
