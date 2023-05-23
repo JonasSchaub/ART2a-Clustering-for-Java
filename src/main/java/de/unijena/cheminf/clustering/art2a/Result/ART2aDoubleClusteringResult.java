@@ -1,21 +1,81 @@
+/*
+ * GNU General Public License v3.0
+ *
+ * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package de.unijena.cheminf.clustering.art2a.Result;
 
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Result class for the double clustering.
+ */
 public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
-
-    private  double[][] doubleClusterMatrix;
+    //<editor-fold desc="Private class variables" defaultstate="collapsed">
+    /**
+     * Queue for clustering result (process)
+     */
     private ConcurrentLinkedQueue<String> processLog;
-    private  ConcurrentLinkedQueue<String> resultLog;
-
+    /**
+     *  Queue for clustering result
+     */
+    private ConcurrentLinkedQueue<String> resultLog;
+    //</editor-fold>
+    //
+    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    /**
+     * Matrix contains all cluster vectors
+     */
+    private final double[][] doubleClusterMatrix;
+    //</editor-fold>
+    //
+    //<editor-fold desc="Constructors" defaultstate="collapsed">
+    /**
+     * Constructor.
+     *
+     * @param aVigilanceParameter
+     * @param aClusterMatrix
+     * @param aClusterView
+     * @param aNumberOfEpochs
+     * @param aNumberOfDetectedClusters
+     */
     public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, int[] aClusterView, int aNumberOfEpochs, int aNumberOfDetectedClusters) {
-        super( aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters,aClusterView);
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters,aClusterView);
         this.doubleClusterMatrix = aClusterMatrix;
-
-
     }
+
+    /**
+     * Constructor.
+     *
+     * @param aVigilanceParameter
+     * @param aClusterMatrix
+     * @param aClusterView
+     * @param aNumberOfEpochs
+     * @param aNumberOfDetectedClusters
+     * @param aProcessLog
+     * @param aResultLog
+     */
     public ART2aDoubleClusteringResult( float aVigilanceParameter, double[][] aClusterMatrix, int[] aClusterView,
                                         int aNumberOfEpochs,int aNumberOfDetectedClusters,ConcurrentLinkedQueue<String> aProcessLog,
                                         ConcurrentLinkedQueue<String> aResultLog) {
@@ -23,9 +83,10 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
         this.doubleClusterMatrix = aClusterMatrix;
         this.processLog = aProcessLog;
         this.resultLog = aResultLog;
-
     }
-
+    //</editor-fold>
+    //
+    //<editor-fold desc="Overriden public methods" defaultstate="collapsed">
     @Override
     public int getClusterRepresentatives(int aClusterNumber) {
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
@@ -66,9 +127,19 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
         System.out.println(tmpSecondArray[z]);
         return tmpSecondArray[z];
     }
-
+    //
+    /**
+     * @see ART2aAbstractResult
+     */
     @Override
-    public Double getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) {
+    public Double getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException { //
+        if(aFirstCluster < 0 || aSecondCluster < 0) {
+            throw new IllegalArgumentException("The given cluster number is negative/invalid.");
+        }
+        int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters() -1;
+        if(aFirstCluster > tmpNumberOfDetectedCluster || aSecondCluster > tmpNumberOfDetectedCluster) {
+            throw new IllegalArgumentException("The given cluster number does not exist.");
+        }
         // TODO parameter check
         double[] tmpFirstCluster = this.doubleClusterMatrix[aFirstCluster]; // TODO ensure that the clusterMatrix represent the vectors of clusters in the right order
         System.out.println(java.util.Arrays.toString(tmpFirstCluster)+ "---first clsuter vector");
@@ -85,4 +156,5 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
         System.out.println(tmpAngle);
         return tmpAngle;
     }
+    //</editor-fold>
 }

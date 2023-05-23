@@ -27,10 +27,7 @@ package de.unijena.cheminf.clustering.art2a;
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,49 +40,111 @@ import java.util.logging.Logger;
 public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     //<editor-fold desc="private class variables" defaultstate="collapsed>
     /**
-     * Clusterer instance
+     * Float clustering instance
      */
     private ART2aFloatClustering art2aFloatClusteringResult;
+    /**
+     * Double clustering instance
+     */
     private ART2aDoubleClustering art2aDoubleClusteringResult;
     /**
      * Vigilance parameter, which influences the number of clusters to be formed.
      */
     private float vigilanceParameter;
-
-    private boolean addLog;
+    /**
+     * If addClusteringResultInTextFile = true the clustering results are written in text files.
+     * If addClusteringResultInTextFile = false the clustering results are not written in text files.
+     */
+    private boolean addClusteringResultInTextFile;
+    //</editor-fold>
+    //
+    //<editor-fold desc="private final class variables" defaultstate="collapsed>
+    /**
+     * Default value of the learning parameter in float
+     */
+    private final float DEFAULT_LEARNING_PARAMETER = 0.01f;
+    /**
+     * Default value of the required similarity parameter
+     */
+    private final float REQUIRED_SIMILARITY = 0.99f;
+    //</editor-fold>
+    //
+    //<editor-fold desc="private static class variables" defaultstate="collapsed>
+    /**
+     * Logger of this class
+     */
     private static final Logger LOGGER = Logger.getLogger(ART2aClusteringTask.class.getName());
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
     /**
-     * Constructor.
+     * Float clustering task constructor.
      *
-     * @param aVigilance influences the number of clusters to be formed.
-     * @param aDataMatrix matrix contains fingerprints.The matrix has as many rows as there are fingerprints,
-     *                    and the number
-     *                    of columns corresponds to the dimensionality of the fingerprints.
-     * @param aMaximumEpochsNumber maximum number of epochs that the system can use.
+     * @param aVigilanceParameter parameter to influence the number of clusters.
+     * @param aDataMatrix matrix contains all inputs for clustering.
+     * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
+     * @param aClusteringResultInTextFile if the parameter is set to true, the clustering results are
+     *                                    written to text files, otherwise not.
+     * @param aRequiredSimilarity parameter indicating the minimum similarity between the current
+     *                            cluster vectors and the previous cluster vectors.
+     * @param aLearningParameter parameter to define the intensity of keeping the old class vector in mind
+     *                           before the system adapts it to the new sample vector.
      */
-    public ART2aClusteringTask(float aVigilance, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean log, float aRequiredSimilarity, float aLearningParameter)  {
-       // this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber);
-        this.vigilanceParameter = aVigilance;
-        this.addLog = log;
+    public ART2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile, float aRequiredSimilarity, float aLearningParameter) {
+        this.vigilanceParameter = aVigilanceParameter;
+        this.addClusteringResultInTextFile = aClusteringResultInTextFile;
         float tmpRequiredSimilarity = aRequiredSimilarity;
         float tmpLearningParameter = aLearningParameter;
-        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilance, tmpRequiredSimilarity, tmpLearningParameter);
+        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, tmpRequiredSimilarity, tmpLearningParameter);
     }
-    public ART2aClusteringTask(float vigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean log) {
-        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, log, 0.99f,0.01f);
+    //
+    /**
+     * Float clustering task constructor.
+     * For the required similarity and learning parameter default values are used.
+     *
+     * @param vigilanceParameter parameter to influence the number of clusters.
+     * @param aDataMatrix matrix contains all inputs for clustering.
+     * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
+     * @param aClusteringResultInTextFile if the parameter is set to true, the clustering results are
+     *                                     written to text files, otherwise not.
+     */
+    public ART2aClusteringTask(float vigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile) {
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99f,0.01f);
     }
-    public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean log, double aRequiredSimilarity, double aLearningParameter) {
-        this.vigilanceParameter = vigilanceParameter;
-        this.addLog = log;
+    //
+    /**
+     * Double clustering task constructor.
+     *
+     * @param aVigilanceParameter parameter to influence the number of clusters.
+     * @param aDataMatrix matrix contains all inputs for clustering.
+     * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
+     * @param aClusteringResultInTextFile if the parameter is set to true, the clustering results are
+     *                                    written to text files, otherwise not.
+     * @param aRequiredSimilarity parameter indicating the minimum similarity between the current
+     *                            cluster vectors and the previous cluster vectors.
+     * @param aLearningParameter parameter to define the intensity of keeping the old class vector in mind
+     *                           before the system adapts it to the new sample vector.
+     */
+    public ART2aClusteringTask(float aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile, double aRequiredSimilarity, double aLearningParameter) {
+        this.vigilanceParameter = aVigilanceParameter;
+        this.addClusteringResultInTextFile = aClusteringResultInTextFile;
         double tmpRequiredSimilarity = aRequiredSimilarity;
         double tmpLearningParameter = aLearningParameter;
         this.art2aDoubleClusteringResult = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, this.vigilanceParameter, tmpRequiredSimilarity, tmpLearningParameter);
     }
-    public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean log) {
-        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, log, 0.99,0.01);
+    //
+    /**
+     * Double clustering task constructor.
+     * For the required similarity and learning parameter default values are used.
+     *
+     * @param vigilanceParameter parameter to influence the number of clusters.
+     * @param aDataMatrix matrix contains all inputs for clustering.
+     * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
+     * @param aClusteringResultInTextFile if the parameter is set to true, the clustering results are
+     *                                     written to text files, otherwise not.
+     */
+    public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile) {
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99,0.01);
     }
     //</editor-fold>
     //
@@ -94,38 +153,21 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
      * Executes the clustering.
      *
      * @return clustering result.
-     * @throws Exception is thrown if the clustering process failed.
      */
     @Override
     public ART2aAbstractResult call()  {
-        /*
         try {
             if(this.art2aFloatClusteringResult != null) {
                 System.out.println("Float");
-                return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, this.addLog);
+                return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, this.addClusteringResultInTextFile);
             } else {
                 System.out.println("Double");
-                return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, addLog);
+                return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, addClusteringResultInTextFile);
             }
-        } catch (RuntimeException anException) {
-           // throw anException;
+        } catch (Exception anException) {
             ART2aClusteringTask.LOGGER.log(Level.SEVERE, anException.toString(), anException);
             throw anException;
         }
-
-         */
-
-
-
-
-
-
-
-
-
-       // return art2aFloatClusteringResult;
-        throw new UnsupportedOperationException();
     }
     //</editor-fold>
-    //
 }

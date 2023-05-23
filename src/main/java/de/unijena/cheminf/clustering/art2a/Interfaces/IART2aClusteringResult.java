@@ -1,5 +1,6 @@
 package de.unijena.cheminf.clustering.art2a.Interfaces;
 
+import java.io.Writer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public interface IART2aClusteringResult {
@@ -7,8 +8,5 @@ public interface IART2aClusteringResult {
     int getNumberOfDetectedClusters();
     int getNumberOfEpochs();
     int[] getClusterIndices(int aClusterNumber);
-  //  T getAngleBetweenClusters(int aFirstCluster, int aSecondCluster);
-    //int getClusterRepresentatives(int aClusterNumber);
-    ConcurrentLinkedQueue<String> getProcessLog();
-    ConcurrentLinkedQueue<String> getResultLog();
+    void getProcessLog(String aPathName);
 }

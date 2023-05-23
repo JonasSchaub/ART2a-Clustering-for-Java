@@ -61,7 +61,7 @@ public class ART2aFloatClusteringTaskTest {
     @Test
     public void startArt2aClusteringTest() throws Exception {
 
-        float[][] dataMatrix = new float[10][28];
+        double[][] dataMatrix = new double[10][28];
         //valdiazen
 
         dataMatrix[0][0] = 1;
@@ -396,9 +396,8 @@ public class ART2aFloatClusteringTaskTest {
         */
 
 
+/*
 
-
-        /*
        // ART2aFloatClustering d = new ART2aFloatClustering("Fingerprints4096.txt",100, ',');
        // Assertions.assertEquals(1,1);
         //float [] [] deneme =   FileUtil.importDataMatrixFromFile("Fingerprints.txt", ',');
@@ -408,29 +407,20 @@ public class ART2aFloatClusteringTaskTest {
             ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, dataMatrix, 100, true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        PrintWriter tmpProcessLogWriter = FileUtil.createProcessLogFile();
-        PrintWriter tmpResultLogWriter = FileUtil.createResultLogFile();
         List<Future<ART2aAbstractResult>> tmpFuturesList;
         IART2aClusteringResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         for (Future<ART2aAbstractResult> tmpFuture : tmpFuturesList) {
             tmpClusteringResult = tmpFuture.get();
+            tmpClusteringResult.getProcessLog("VersuchLOg");
             // Illustration the clustering result
-            for (String tmpProcessLog : tmpClusteringResult.getProcessLog()) {
-                tmpProcessLogWriter.println(tmpProcessLog);
-            }
-            for (String tmpResultLog : tmpClusteringResult.getResultLog()) {
-                tmpResultLogWriter.println(tmpResultLog);
-            }
 
-        }
-        tmpProcessLogWriter.flush();
-        tmpProcessLogWriter.close();
-        tmpResultLogWriter.flush();
-        tmpResultLogWriter.close();
-        tmpExecutorService.shutdown();
+ */
 
-         */
+
+
+
+
 
 
 
@@ -445,11 +435,17 @@ public class ART2aFloatClusteringTaskTest {
 
 
 
-       ART2aFloatClustering de = new ART2aFloatClustering(dataMatrix,10, 0.1f,0.99f,0.01f);
-       ART2aFloatClusteringResult resu =  de.startClustering(0.1f, false);
+
+       ART2aDoubleClustering de = new ART2aDoubleClustering(dataMatrix,100, 0.1f,0.99,0.01);
+       ART2aDoubleClusteringResult resu =  de.startClustering(0.4f, false);
        System.out.println(resu.getNumberOfDetectedClusters() + "----detected clusters number");
        System.out.println(java.util.Arrays.toString(resu.getClusterIndices(4)) + "-----cluster indice");
-       System.out.println(resu.getAngleBetweenClusters(0,2)+ "-------cluster Angle");
+        System.out.println(resu.getNumberOfEpochs() + "----number of epochs");
+       System.out.println(resu.getAngleBetweenClusters(5,7)+ "-------cluster Angle");
+      // resu.getProcessLog("VersuchLOg");
+
+
+
 
 
 
