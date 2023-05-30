@@ -39,3 +39,7 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# ClusteringFolder
+Clustering_Process
+Clustering_Result

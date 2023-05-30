@@ -27,10 +27,13 @@ package de.unijena.cheminf.clustering.art2a;
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 
+import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -362,20 +365,27 @@ public class ART2aFloatClusteringTaskTest {
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100, true);
+            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
+        PrintWriter writer1 = FileUtil.createClusteringProcessInFile("ClusteringFolder");
+        PrintWriter writer2 = FileUtil.createClusteringResultInFile("ClusteringFolder");
         List<Future<ART2aAbstractResult>> tmpFuturesList;
         IART2aClusteringResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
-        System.out.println("\nCLUSTERING RESULTS\n");
+        System.out.println("\nCLUSTERING RESULTS:\n");
         for (Future<ART2aAbstractResult> tmpFuture : tmpFuturesList) {
             tmpClusteringResult = tmpFuture.get();
             System.out.println("vigilance parameter: " + tmpClusteringResult.getVigilanceParameter() );
             System.out.println("number of epochs: " + tmpClusteringResult.getNumberOfEpochs());
             System.out.println("cluster indices in cluster 0: " + java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(0)));
             System.out.println("####################################");
+            tmpClusteringResult.getClusteringResultsInTextFile(writer1, writer2);
         }
+        writer1.flush();
+        writer1.close();
+        writer2.flush();
+        writer2.close();
         tmpExecutorService.shutdown();
         Assertions.assertEquals(true, true); // TODO test methods?
     }

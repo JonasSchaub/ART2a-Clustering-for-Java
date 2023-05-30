@@ -24,6 +24,8 @@
 
 package de.unijena.cheminf.clustering.art2a.Interfaces;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
@@ -70,9 +72,7 @@ public interface IART2aClusteringResult {
      * very detailed representation of the results (clustering result file), while in the other only the
      * most important results are summarized (clustering process file).
      *
-     * @param aPathName directory where the text files should be stored.
-     * @param aWriter text writer
      */
-    void getClusteringResultsInTextFile(String aPathName, Writer aWriter);
+    void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter);
     // </editor-fold>
 }

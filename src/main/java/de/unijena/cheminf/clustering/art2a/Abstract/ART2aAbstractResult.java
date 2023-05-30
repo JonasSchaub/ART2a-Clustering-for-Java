@@ -27,6 +27,7 @@ package de.unijena.cheminf.clustering.art2a.Abstract;
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
@@ -163,18 +164,12 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * {@inheritDoc}
      */
     @Override
-    public void getClusteringResultsInTextFile(String aPathName, Writer aWriter) {
-        PrintWriter tmpResultPrintWriter = FileUtil.createClusteringResultInFile(aPathName);
+    public void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter)  {
         for (String tmpClusteringResult : this.clusteringResult) {
-            System.out.println(tmpClusteringResult);
-            tmpResultPrintWriter.println(tmpClusteringResult);
+            aClusteringResultWriter.write(tmpClusteringResult+"\n");
+        } for(String tmpClusteringProcess : this.clusteringProcess) {
+            aClusteringProcessWriter.write(tmpClusteringProcess+"\n");
         }
-        tmpResultPrintWriter.flush();
-        tmpResultPrintWriter.close();
-        PrintWriter tmpProcessPrintWriter = FileUtil.createClusteringProcessInFile(aPathName);
-
-           // return tmpResultPrintWriter;
-       // tmpResultPrintWriter.flush();
     }
     //</editor-fold>
     //

@@ -362,7 +362,7 @@ public class ART2aDoubleClusteringTaskTest {
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100, true);
+            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100, false);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
         List<Future<ART2aAbstractResult>> tmpFuturesList;
