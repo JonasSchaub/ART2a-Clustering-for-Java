@@ -39,12 +39,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * Test class for float clustering.
+ * Test class for double clustering.
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public class ART2aFloatClusteringTaskTest {
+public class ART2aDoubleClusteringTaskTest {
     //<editor-fold desc="Test methods" defaultstate="collapsed">
     /**
      * Test method
@@ -52,12 +52,12 @@ public class ART2aFloatClusteringTaskTest {
      * @throws IOException is thrown if an error occurs when creating the log files.
      * @throws InterruptedException is thrown if the parallelization is disturbed.
      * @throws ExecutionException is thrown if an error occurs during the task.
-     * @throws Exception
+     * @throws Exception is thrown if the clustering is failed.
      */
     @Test
     public void startArt2aClusteringTest() throws Exception {
 
-        float[][] tmpTestDataMatrix = new float[10][28];
+        double[][] tmpTestDataMatrix = new double[10][28];
 
         //valdiazen
         tmpTestDataMatrix[0][0] = 1;
@@ -382,3 +382,4 @@ public class ART2aFloatClusteringTaskTest {
     //</editor-fold>
     //
 }
+

@@ -25,135 +25,142 @@
 package de.unijena.cheminf.clustering.art2a.Result;
 
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
+import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Result class for the double clustering.
+ *
+ * @author Betuel Sevindik
+ * @version 1.0.0.0
  */
 public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
-    //<editor-fold desc="Private class variables" defaultstate="collapsed">
-    /**
-     * Queue for clustering result (process)
-     */
-    private ConcurrentLinkedQueue<String> processLog;
-    /**
-     *  Queue for clustering result
-     */
-    private ConcurrentLinkedQueue<String> resultLog;
-    //</editor-fold>
-    //
     //<editor-fold desc="Private final class variables" defaultstate="collapsed">
     /**
-     * Matrix contains all cluster vectors
+     * Matrix contains all cluster vectors.
      */
     private final double[][] doubleClusterMatrix;
+    /**
+     * Matrix contains all input vector/fingerprints to be clustered.
+     * Each row in the matrix corresponds to an input vector.
+     */
+    private final double[][] dataMatrix;
+    //</editor-fold>
+    //<editor-fold desc="Private final static class variables" defaultstate="collapsed">
+    private static final Logger LOGGER = Logger.getLogger(ART2aDoubleClusteringResult.class.getName());
     //</editor-fold>
     //
     //<editor-fold desc="Constructors" defaultstate="collapsed">
     /**
      * Constructor.
      *
-     * @param aVigilanceParameter
-     * @param aClusterMatrix
-     * @param aClusterView
-     * @param aNumberOfEpochs
-     * @param aNumberOfDetectedClusters
+     * @param aVigilanceParameter parameter to influence the number of clusters.
+     * @param aNumberOfEpochs final epoch number.
+     * @param aNumberOfDetectedClusters final number of detected clusters.
+     * @param aClusterView array for cluster assignment of each input vector.
+     * @param aClusterMatrix double cluster vector matrix. All cluster vectors created after double ART-2a clustering are
+     *                       stored in this matrix.
+     * @param aDataMatrix double matrix with all input vectors/fingerprints.
+     *                    Each row in the matrix corresponds to an input vector.
      */
-    public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, int[] aClusterView, int aNumberOfEpochs, int aNumberOfDetectedClusters) {
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, double[][] aDataMatrix, int[] aClusterView, int aNumberOfEpochs, int aNumberOfDetectedClusters) {
         super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters,aClusterView);
         this.doubleClusterMatrix = aClusterMatrix;
+        this.dataMatrix = aDataMatrix;
     }
-
+    //
     /**
      * Constructor.
      *
-     * @param aVigilanceParameter
-     * @param aClusterMatrix
-     * @param aClusterView
-     * @param aNumberOfEpochs
-     * @param aNumberOfDetectedClusters
-     * @param aProcessLog
-     * @param aResultLog
+     * @param aVigilanceParameter parameter to influence the number of clusters.
+     * @param aNumberOfEpochs final epoch number.
+     * @param aNumberOfDetectedClusters final number of detected clusters.
+     * @param aClusteringProcessQueue clustering result (process) queue.
+     * @param aClusteringResultQueue clustering result queue.
+     * @param aClusterView array for cluster assignment of each input vector.
+     * @param aClusterMatrix cluster vector matrix. All cluster vectors created after double ART-2a clustering are
+     *                       stored in this matrix.
+     * @param aDataMatrix matrix with all input vectors/fingerprints.
+     *                    Each row in the matrix corresponds to an input vector.
+     *
      */
-    public ART2aDoubleClusteringResult( float aVigilanceParameter, double[][] aClusterMatrix, int[] aClusterView,
-                                        int aNumberOfEpochs,int aNumberOfDetectedClusters,ConcurrentLinkedQueue<String> aProcessLog,
-                                        ConcurrentLinkedQueue<String> aResultLog) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aProcessLog, aResultLog,aClusterView);
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, double[][] aDataMatrix, int[] aClusterView,
+                                        int aNumberOfEpochs,int aNumberOfDetectedClusters,ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                        ConcurrentLinkedQueue<String> aClusteringResultQueue) {
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusteringProcessQueue, aClusteringResultQueue,aClusterView);
         this.doubleClusterMatrix = aClusterMatrix;
-        this.processLog = aProcessLog;
-        this.resultLog = aResultLog;
+        this.dataMatrix = aDataMatrix;
     }
     //</editor-fold>
     //
     //<editor-fold desc="Overriden public methods" defaultstate="collapsed">
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getClusterRepresentatives(int aClusterNumber) {
+    public int getClusterRepresentatives(int aClusterNumber) throws IllegalArgumentException {
+        if(aClusterNumber > this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
+            ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist or is invalid.");
+            throw new IllegalArgumentException("The given cluster number does not exist or is invalid.");
+        }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
         double[] tmpCurrentClusterVector = this.doubleClusterMatrix[aClusterNumber];
         System.out.println(java.util.Arrays.toString(tmpCurrentClusterVector) + "---cluster vector");
-        double factor = 0;
-        double[] tmpRaw;
-        double[] tmpProduct  = new double[tmpClusterIndices.length];
-        System.out.println(tmpProduct.length + "----length");
-        int[] tmpSecondArray = new int[tmpClusterIndices.length];
-        int t = 0;
+        double tmpFactor = 0;
+        double[] tmpMatrixRow;
+        double[] tmpScalarProductArray = new double[tmpClusterIndices.length+1];
+        int tmpIterator = 0;
         for(int tmpCurrentInput : tmpClusterIndices) {
             System.out.println(tmpCurrentInput + "----current input");
-            tmpRaw = this.doubleClusterMatrix[tmpCurrentInput];
-            System.out.println(java.util.Arrays.toString(tmpRaw)+ "----tmpRaw");
-            for(int i = 0; i <tmpRaw.length; i++) {
-                factor += tmpRaw[i] * tmpCurrentClusterVector[i];
+            tmpMatrixRow = this.dataMatrix[tmpCurrentInput];
+            System.out.println(java.util.Arrays.toString(tmpMatrixRow)+ "----tmpRaw");
+            for(int i = 0; i < tmpMatrixRow.length; i++) {
+                tmpFactor += tmpMatrixRow[i] * tmpCurrentClusterVector[i];
             }
-            System.out.println(factor + "----factor");
-            System.out.println(t + "---t");
-            tmpSecondArray[t] = tmpCurrentInput;
-            tmpProduct[t] = factor;
-            t++;
+            System.out.println(tmpFactor + "----factor");
+            tmpScalarProductArray[tmpIterator] = tmpFactor;
+            tmpIterator++;
         }
-        System.out.println("beginn");
-        System.out.println(java.util.Arrays.toString(tmpProduct) + "----product");
-        double tmpFirstComponent = tmpProduct[0];
-        int z = 0;
-        for (double tmpComponentsOfScalingVector : tmpProduct) {
-            if (tmpComponentsOfScalingVector > tmpFirstComponent) {
-                z++;
-                System.out.println(z + "----z");
-                tmpFirstComponent = tmpComponentsOfScalingVector;
-                System.out.println(tmpFirstComponent + "-----reprsentent");
+        int tmpIndexOfGreatestScalarProduct = 0;
+        System.out.println(java.util.Arrays.toString(tmpScalarProductArray) + "----product");
+        for(int i = 0; i < tmpScalarProductArray.length; i++) {
+            if(tmpScalarProductArray[i] > tmpScalarProductArray[tmpIndexOfGreatestScalarProduct]) {
+                tmpIndexOfGreatestScalarProduct = i;
             }
         }
-        System.out.println(java.util.Arrays.toString(tmpSecondArray)+"----second array");
-        System.out.println(tmpSecondArray[z]);
-        return tmpSecondArray[z];
+        return tmpClusterIndices[tmpIndexOfGreatestScalarProduct];
     }
     //
     /**
-     * @see ART2aAbstractResult
+     * {@inheritDoc}
      */
     @Override
-    public Double getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException { //
+    public Double getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException {
         if(aFirstCluster < 0 || aSecondCluster < 0) {
+            ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number is negative/invalid.");
             throw new IllegalArgumentException("The given cluster number is negative/invalid.");
         }
-        int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters() -1;
-        if(aFirstCluster > tmpNumberOfDetectedCluster || aSecondCluster > tmpNumberOfDetectedCluster) {
-            throw new IllegalArgumentException("The given cluster number does not exist.");
+        double tmpAngle;
+        if(aFirstCluster == aSecondCluster) {
+            tmpAngle = 0;
+        } else {
+            int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters() - 1;
+            if (aFirstCluster > tmpNumberOfDetectedCluster || aSecondCluster > tmpNumberOfDetectedCluster) {
+                ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist.");
+                throw new IllegalArgumentException("The given cluster number does not exist.");
+            }
+            double[] tmpFirstCluster = this.doubleClusterMatrix[aFirstCluster];
+            double[] tmpSecondCluster = this.doubleClusterMatrix[aSecondCluster];
+            double tmpFactor = 180.0 / Math.PI;
+            double tmpProduct = 0;
+            for (int i = 0; i < tmpFirstCluster.length; i++) {
+                tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];
+            }
+            tmpAngle = tmpFactor * Math.acos(tmpProduct);
         }
-        // TODO parameter check
-        double[] tmpFirstCluster = this.doubleClusterMatrix[aFirstCluster]; // TODO ensure that the clusterMatrix represent the vectors of clusters in the right order
-        System.out.println(java.util.Arrays.toString(tmpFirstCluster)+ "---first clsuter vector");
-        double[] tmpSecondCluster = this.doubleClusterMatrix[aSecondCluster];
-        System.out.println(java.util.Arrays.toString(tmpSecondCluster)+ "---second clsuter vector");
-        double factor = 180.0 / Math.PI;
-        double product = 0;
-        for(int i = 0; i<tmpFirstCluster.length; i++) {
-            product += tmpFirstCluster[i] * tmpSecondCluster[i];
-        }
-        System.out.println(tmpFirstCluster.length + "----length");
-        System.out.println(product + "-----skalarprodukt");
-        double tmpAngle =  factor * Math.acos(product);
-        System.out.println(tmpAngle);
         return tmpAngle;
     }
     //</editor-fold>

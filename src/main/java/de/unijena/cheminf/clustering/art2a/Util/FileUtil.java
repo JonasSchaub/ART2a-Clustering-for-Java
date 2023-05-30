@@ -36,31 +36,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * File utility
  *
  * @author Betuel Sevindik
+ * @version 1.0.0.0
  */
 public final class FileUtil {
     //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
      * Name of file for writing clustering process.
      */
-    private static final String PROCESS_FILE_NAME = "Process_Report";
+    private static final String CLUSTERING_PROCESS_FILE_NAME = "Clustering_Process";
     /**
      * Name of the file for writing clustering result.
      */
-    private static final String RESULT_FILE_NAME = "Result_Report";
-    /**
-     * Root logger
-     */
-    private static final Logger ROOT_LOGGER = LogManager.getLogManager().getLogger("");
+    private static final String CLUSTERING_RESULT_FILE_NAME = "Clustering_Result";
     /**
      * Logger of this class
      */
@@ -76,43 +70,42 @@ public final class FileUtil {
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Set up result log file.
+     * Set up clustering result file.
      * If necessary, existing result files will also be deleted.
      *
      * @return PrintWriter to write the clustering result into the file.
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createResultLogFile(String aPathName) {
+    public static PrintWriter createClusteringResultInFile(String aPathName) {
         PrintWriter tmpPrintWriter = null;
         try {
-            FileWriter tmpFileWriter = new FileWriter(FileUtil.createReportFile(FileUtil.RESULT_FILE_NAME, aPathName), false); // Ergebnis der methode ist eij File
+            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false); // Ergebnis der methode ist eij File
             BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter); // used BufferedWriter als Puffer, um die Leistung zu steigern, da die textdatein sehr groß werden können
             tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.RESULT_FILE_NAME);
-            //return tmpPrintWriter; // reinschreiben von Informationen
+            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
         } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, "sjfshdf"); // TODO
+            FileUtil.LOGGER.log(Level.SEVERE, "The file could not be created.");
+
         }
         return tmpPrintWriter;
     }
     //
     /**
-     * Set up process log file.
+     * Set up clustering process file.
      * If necessary, existing process files will also be deleted.
      *
      * @return PrintWriter to write the clustering process into the file.
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createProcessLogFile(String aPathName) {
+    public static PrintWriter createClusteringProcessInFile(String aPathName) {
         PrintWriter tmpPrintWriter = null;
         try {
-            FileWriter tmpFileWriter = new FileWriter(FileUtil.createReportFile(FileUtil.PROCESS_FILE_NAME, aPathName), false);
+            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_PROCESS_FILE_NAME, aPathName), false);
             BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
             tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.PROCESS_FILE_NAME);
-           // return tmpPrintWriter;
+            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_PROCESS_FILE_NAME);
         } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, "Exception"); // TODO change the exception message
+            FileUtil.LOGGER.log(Level.SEVERE, "The file could not be created.");
         }
         return tmpPrintWriter;
     }
@@ -128,7 +121,7 @@ public final class FileUtil {
      * Each row of the matrix represents one fingerprint.
      * @throws IllegalArgumentException is thrown if the given file path is invalid.
      */
-    public static float[][] importDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
+    public static float[][] importDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException, IOException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
@@ -137,6 +130,12 @@ public final class FileUtil {
             tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
         } catch (IOException anException) {
             FileUtil.LOGGER.log(Level.SEVERE, anException.toString()+ " File is not readable!", anException);
+        } finally {
+            try {
+                tmpFingerprintFileReader.close();
+            } catch (IOException anException) {
+                FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "FileReader can not close.");
+            }
         }
         ArrayList<float[]> tmpFingerprintList = new ArrayList<>();
         String tmpFingerprintLine;
@@ -174,21 +173,19 @@ public final class FileUtil {
     }
     //
     /**
-     * Reporting files are deleted when their number is greater than 10.
+     * Clustering files are deleted when their number is greater than 10.
      *
-     * @param aPathName of the report files.
+     * @param aPathName of the clustering files.
      */
     private static void deleteOldestFileIfNecessary(String aPathName) {
-        File dir = new File(aPathName); // "src/test/resources/de/unijena/cheminf/clustering/art2a/Process_Clustering_Log"
-        File[] files = dir.listFiles();
-        if (files != null && files.length > 10) { // magic number
-            Arrays.sort(files, Comparator.comparingLong(File::lastModified));
-            if (files[0].delete()) {
-                System.out.println("Deleted file: " + files[0].getName());
-                FileUtil.LOGGER.info("Deleted file: " + files[0].getName());
+        File tmpDirectory = new File(aPathName); // "src/test/resources/de/unijena/cheminf/clustering/art2a/Process_Clustering_Log"
+        File[] tmpClusteringFiles = tmpDirectory.listFiles();
+        if (tmpClusteringFiles != null && tmpClusteringFiles.length > 10) { // magic number
+            Arrays.sort(tmpClusteringFiles, Comparator.comparingLong(File::lastModified));
+            if (tmpClusteringFiles[0].delete()) {
+                FileUtil.LOGGER.info("Deleted file: " + tmpClusteringFiles[0].getName());
             } else {
-                System.out.println("Failed to delete file: " + files[0].getName());
-                FileUtil.LOGGER.info("Deleted file: " + files[0].getName());
+                FileUtil.LOGGER.info("Deleted file: " + tmpClusteringFiles[0].getName());
             }
         }
     }
@@ -196,12 +193,12 @@ public final class FileUtil {
     //
     //<editor-fold defaultstate="collapsed" desc="Private static methods">
     /**
-     * Report files are generated.
+     * Clustering files are generated.
      *
-     * @param aFileFolderName for reporting typ.
+     * @param aFileFolderName for clustering files typ.
      * @return File
      */
-    private static File createReportFile(String aFileFolderName, String aPathName){
+    private static File createClusteringResultFiles(String aFileFolderName, String aPathName){
         LocalDateTime tmpDateTime = LocalDateTime.now();
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
         FileUtil.workingPath = (new File(aPathName) + File.separator);

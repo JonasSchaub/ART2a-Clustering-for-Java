@@ -36,6 +36,7 @@ import java.util.logging.Logger;
  * Callable class for clustering fingerprints.
  *
  * @author Betuel Sevindik
+ * @version 1.0.0.0
  */
 public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     //<editor-fold desc="private class variables" defaultstate="collapsed>
@@ -93,9 +94,7 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     public ART2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile, float aRequiredSimilarity, float aLearningParameter) {
         this.vigilanceParameter = aVigilanceParameter;
         this.addClusteringResultInTextFile = aClusteringResultInTextFile;
-        float tmpRequiredSimilarity = aRequiredSimilarity;
-        float tmpLearningParameter = aLearningParameter;
-        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, tmpRequiredSimilarity, tmpLearningParameter);
+        this.art2aFloatClusteringResult = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
@@ -109,7 +108,7 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
      *                                     written to text files, otherwise not.
      */
     public ART2aClusteringTask(float vigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile) {
-        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99f,0.01f);
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99f,0.01f); // TODO ask Jonas and Felix!!!!!!
     }
     //
     /**
@@ -128,9 +127,7 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     public ART2aClusteringTask(float aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile, double aRequiredSimilarity, double aLearningParameter) {
         this.vigilanceParameter = aVigilanceParameter;
         this.addClusteringResultInTextFile = aClusteringResultInTextFile;
-        double tmpRequiredSimilarity = aRequiredSimilarity;
-        double tmpLearningParameter = aLearningParameter;
-        this.art2aDoubleClusteringResult = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, this.vigilanceParameter, tmpRequiredSimilarity, tmpLearningParameter);
+        this.art2aDoubleClusteringResult = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
@@ -144,7 +141,7 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
      *                                     written to text files, otherwise not.
      */
     public ART2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aClusteringResultInTextFile) {
-        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99,0.01);
+        this(vigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aClusteringResultInTextFile, 0.99,0.01); // TODO ask Jonas and Felix!!!!!!!!
     }
     //</editor-fold>
     //
@@ -158,10 +155,8 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     public ART2aAbstractResult call()  {
         try {
             if(this.art2aFloatClusteringResult != null) {
-                System.out.println("Float");
                 return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, this.addClusteringResultInTextFile);
             } else {
-                System.out.println("Double");
                 return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, addClusteringResultInTextFile);
             }
         } catch (Exception anException) {
