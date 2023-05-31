@@ -25,7 +25,6 @@
 package de.unijena.cheminf.clustering.art2a.Result;
 
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
-import de.unijena.cheminf.clustering.art2a.Clustering.ART2aFloatClustering;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,6 +50,9 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
     private final float[][] dataMatrix;
     //</editor-fold>
     //<editor-fold desc="Private final static class variables" defaultstate="collapsed">
+    /**
+     * Logger of this class
+     */
     private static final Logger LOGGER = Logger.getLogger(ART2aFloatClusteringResult.class.getName());
     //</editor-fold>
     //
@@ -113,24 +115,19 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
         }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
         float[] tmpCurrentClusterVector = this.floatClusterMatrix[aClusterNumber];
-        System.out.println(java.util.Arrays.toString(tmpCurrentClusterVector) + "---cluster vector");
         float tmpFactor = 0;
         float[] tmpMatrixRow;
         float[] tmpScalarProductArray = new float[tmpClusterIndices.length+1];
         int tmpIterator = 0;
         for(int tmpCurrentInput : tmpClusterIndices) {
-            System.out.println(tmpCurrentInput + "----current input");
             tmpMatrixRow = this.dataMatrix[tmpCurrentInput];
-            System.out.println(java.util.Arrays.toString(tmpMatrixRow)+ "----tmpRaw");
             for(int i = 0; i < tmpMatrixRow.length; i++) {
                 tmpFactor += tmpMatrixRow[i] * tmpCurrentClusterVector[i];
             }
-            System.out.println(tmpFactor + "----factor");
             tmpScalarProductArray[tmpIterator] = tmpFactor;
             tmpIterator++;
         }
         int tmpIndexOfGreatestScalarProduct = 0;
-        System.out.println(java.util.Arrays.toString(tmpScalarProductArray) + "----product");
         for(int i = 0; i < tmpScalarProductArray.length; i++) {
             if(tmpScalarProductArray[i] > tmpScalarProductArray[tmpIndexOfGreatestScalarProduct]) {
                 tmpIndexOfGreatestScalarProduct = i;
@@ -157,17 +154,14 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
                 ART2aFloatClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist.");
                 throw new IllegalArgumentException("The given cluster number does not exist.");
             }
-            float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];// TODO ensure that the clusterMatrix represent the vectors of clusters in the right order
-            System.out.println(java.util.Arrays.toString(tmpFirstCluster) + "---first clsuter vector");
+            float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];
             float[] tmpSecondCluster = this.floatClusterMatrix[aSecondCluster];
-            System.out.println(java.util.Arrays.toString(tmpSecondCluster) + "---second clsuter vector");
-            float factor = (float) (180 / Math.PI);
-            float product = 0;
+            float tmpFactor = (float) (180 / Math.PI);
+            float tmpProduct = 0;
             for (int i = 0; i < tmpFirstCluster.length; i++) {
-                product += tmpFirstCluster[i] * tmpSecondCluster[i];
+                tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];
             }
-            tmpAngle = (float) (factor * Math.acos(product));
-            System.out.println(tmpAngle);
+            tmpAngle = (float) (tmpFactor * Math.acos(tmpProduct));
         }
         return tmpAngle;
     }

@@ -33,12 +33,14 @@ package de.unijena.cheminf.clustering.art2a.Interfaces;
 public interface IART2aClustering {
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
-     * Initialise the cluster matrix. // TODO describe the cluster matrix; what is it...?
+     * Initialise the cluster matrices.
      */
     void initializeMatrices();
     //
     /**
-     * The input vectors/fingerprints are randomized so that all input vectors can be clustered by random selection. // TODO add the argument, why the inputs have to be randomize!
+     * Since the ART-2a algorithm randomly selects any input vector, the input vectors must first be randomized.
+     * The input vectors/fingerprints are randomized so that all input vectors can be clustered by random selection.
+     *
      * Here, the Fisher-Yates method is used to randomize the inputs.
      *
      * @return an array with vector indices in a random order
@@ -61,7 +63,7 @@ public interface IART2aClustering {
      *                                             once in detail and once roughly additionally in text files.
      *                                             If the parameter == false, the information is not written
      *                                             out in text files.
-     * @return IART2aClusteringResult // TODO maybe add more information?
+     * @return IART2aClusteringResult
      * @throws RuntimeException is thrown if the system cannot converge within the specified number of epochs.
      */
     IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException; // early Exception
@@ -74,8 +76,6 @@ public interface IART2aClustering {
      * @param aConvergenceEpoch current epochs number.
      * @return boolean true is returned if the system has converged.
      * False is returned if the system has not converged to the epoch.
-     * @throws RuntimeException is thrown if the network does not converge within the
-     * specified maximum number of epochs.
      */
     boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch);
     // </editor-fold>

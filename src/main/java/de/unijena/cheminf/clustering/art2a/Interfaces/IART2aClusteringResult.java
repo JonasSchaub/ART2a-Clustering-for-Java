@@ -24,9 +24,7 @@
 
 package de.unijena.cheminf.clustering.art2a.Interfaces;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 
 /**
  * Interface for implementing clustering result classes.

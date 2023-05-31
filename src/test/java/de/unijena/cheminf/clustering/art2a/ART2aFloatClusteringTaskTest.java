@@ -25,17 +25,14 @@
 package de.unijena.cheminf.clustering.art2a;
 
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 
 import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -50,11 +47,8 @@ public class ART2aFloatClusteringTaskTest {
     //<editor-fold desc="Test methods" defaultstate="collapsed">
     /**
      * Test method
+     * TODO add test methods
      *
-     * @throws IOException is thrown if an error occurs when creating the log files.
-     * @throws InterruptedException is thrown if the parallelization is disturbed.
-     * @throws ExecutionException is thrown if an error occurs during the task.
-     * @throws Exception
      */
     @Test
     public void startArt2aClusteringTest() throws Exception {
@@ -361,17 +355,16 @@ public class ART2aFloatClusteringTaskTest {
         tmpTestDataMatrix[9][26] = 1;
         tmpTestDataMatrix[9][27] = 1;
 
-        float [] [] deneme =   FileUtil.importFloatDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Fingerprints12.txt", ',');
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, deneme, 2,true);
+            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
         PrintWriter tmpClusteringProcessWriter = FileUtil.createClusteringProcessInFile("ClusteringFolder");
         PrintWriter tmpClusteringResultWriter = FileUtil.createClusteringResultInFile("ClusteringFolder");
         List<Future<ART2aAbstractResult>> tmpFuturesList;
-        IART2aClusteringResult tmpClusteringResult;
+        ART2aAbstractResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         System.out.println("\nCLUSTERING RESULTS:\n");
         for (Future<ART2aAbstractResult> tmpFuture : tmpFuturesList) {
@@ -380,6 +373,7 @@ public class ART2aFloatClusteringTaskTest {
             System.out.println("number of epochs: " + tmpClusteringResult.getNumberOfEpochs());
             System.out.println("cluster indices in cluster 0: " + java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(0)));
             System.out.println("convergence status: " +tmpClusteringResult.getConvergenceStatus());
+            System.out.println("Angle: " + tmpClusteringResult.getAngleBetweenClusters(0,1));
             System.out.println("####################################");
             tmpClusteringResult.getClusteringResultsInTextFile(tmpClusteringProcessWriter, tmpClusteringResultWriter);
         }
@@ -388,7 +382,7 @@ public class ART2aFloatClusteringTaskTest {
         tmpClusteringResultWriter.flush();
         tmpClusteringResultWriter.close();
         tmpExecutorService.shutdown();
-        Assertions.assertEquals(true, true); // TODO test methods?
+        Assertions.assertEquals(true, true);
     }
     //</editor-fold>
     //

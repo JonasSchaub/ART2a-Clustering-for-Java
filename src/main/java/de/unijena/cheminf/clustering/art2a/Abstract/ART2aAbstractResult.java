@@ -73,7 +73,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     private final int numberOfDetectedClusters;
     /**
      * Convergence status of the clustering. The convergence status is false, if the given maximum number of epochs
-     *  is not sufficient until the system converges.
+     * is not sufficient until the system converges.
      *
      */
     private final boolean convergenceStatus;
@@ -201,7 +201,6 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
                 }
                 tmpInputIndices++;
             }
-            System.out.println(java.util.Arrays.toString(tmpIndicesInCluster)); // TODO delete line
             return tmpIndicesInCluster;
         }
     }

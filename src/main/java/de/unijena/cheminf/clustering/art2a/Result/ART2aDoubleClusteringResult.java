@@ -113,24 +113,19 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
         }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
         double[] tmpCurrentClusterVector = this.doubleClusterMatrix[aClusterNumber];
-        System.out.println(java.util.Arrays.toString(tmpCurrentClusterVector) + "---cluster vector");
         double tmpFactor = 0;
         double[] tmpMatrixRow;
         double[] tmpScalarProductArray = new double[tmpClusterIndices.length+1];
         int tmpIterator = 0;
         for(int tmpCurrentInput : tmpClusterIndices) {
-            System.out.println(tmpCurrentInput + "----current input");
             tmpMatrixRow = this.dataMatrix[tmpCurrentInput];
-            System.out.println(java.util.Arrays.toString(tmpMatrixRow)+ "----tmpRaw");
             for(int i = 0; i < tmpMatrixRow.length; i++) {
                 tmpFactor += tmpMatrixRow[i] * tmpCurrentClusterVector[i];
             }
-            System.out.println(tmpFactor + "----factor");
             tmpScalarProductArray[tmpIterator] = tmpFactor;
             tmpIterator++;
         }
         int tmpIndexOfGreatestScalarProduct = 0;
-        System.out.println(java.util.Arrays.toString(tmpScalarProductArray) + "----product");
         for(int i = 0; i < tmpScalarProductArray.length; i++) {
             if(tmpScalarProductArray[i] > tmpScalarProductArray[tmpIndexOfGreatestScalarProduct]) {
                 tmpIndexOfGreatestScalarProduct = i;

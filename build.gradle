@@ -42,11 +42,8 @@ repositories {
 
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-   // testImplementation group: 'junit', name: 'junit', version: '4.13'
     testImplementation(platform('org.junit:junit-bom:5.9.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
-    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-   // testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
 }
 tasks.withType(Test).configureEach {
     useJUnitPlatform()

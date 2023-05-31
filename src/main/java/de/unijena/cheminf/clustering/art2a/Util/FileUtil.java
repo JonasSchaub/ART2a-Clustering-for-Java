@@ -79,8 +79,8 @@ public final class FileUtil {
     public static PrintWriter createClusteringResultInFile(String aPathName) {
         PrintWriter tmpPrintWriter = null;
         try {
-            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false); // Ergebnis der methode ist eij File
-            BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter); // used BufferedWriter als Puffer, um die Leistung zu steigern, da die textdatein sehr groß werden können
+            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false);
+            BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
             tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
             FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
         } catch (IOException anException) {
@@ -120,7 +120,6 @@ public final class FileUtil {
      * @return float matrix is returned that contains the fingerprints that were read in.
      * Each row of the matrix represents one fingerprint.
      * @throws IllegalArgumentException is thrown if the given file path is invalid.
-     * @throws IOException is thrown if
      */
     public static float[][] importFloatDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
@@ -220,14 +219,14 @@ public final class FileUtil {
      * @param aPathName of the clustering files.
      */
     private static void deleteOldestFileIfNecessary(String aPathName) {
-        File tmpDirectory = new File(aPathName); // "src/test/resources/de/unijena/cheminf/clustering/art2a/Process_Clustering_Log"
+        File tmpDirectory = new File(aPathName);
         File[] tmpClusteringFiles = tmpDirectory.listFiles();
         if (tmpClusteringFiles != null && tmpClusteringFiles.length > 10) { // magic number
             Arrays.sort(tmpClusteringFiles, Comparator.comparingLong(File::lastModified));
             if (tmpClusteringFiles[0].delete()) {
-                FileUtil.LOGGER.info("Deleted file: " + tmpClusteringFiles[0].getName());
+                FileUtil.LOGGER.log(Level.INFO,"Deleted file: " + tmpClusteringFiles[0].getName());
             } else {
-                FileUtil.LOGGER.info("Deleted file: " + tmpClusteringFiles[0].getName());
+                FileUtil.LOGGER.log(Level.INFO,"Deleted file: " + tmpClusteringFiles[0].getName());
             }
         }
     }

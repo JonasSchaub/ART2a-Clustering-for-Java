@@ -221,7 +221,6 @@ public class ART2aFloatClustering implements IART2aClustering {
             for(int j = 0; j < tmpSingleFingerprint.length; j++) {
                 tmpCurrentVectorComponent = tmpSingleFingerprint[j];
                 if(tmpCurrentVectorComponent > 1) {
-                    System.out.println(tmpCurrentVectorComponent +"---scale");
                     tmpFingerprintsForScalingToMatrixRowMap.put(aDataMatrix[i],i);
                 }
                 if(tmpCurrentVectorComponent < 0) {
@@ -231,7 +230,7 @@ public class ART2aFloatClustering implements IART2aClustering {
             }
         }
         if(!tmpFingerprintsForScalingToMatrixRowMap.isEmpty()) {
-            this.scaleInput(tmpFingerprintsForScalingToMatrixRowMap, aDataMatrix); // TODO replace method?
+            this.scaleInput(tmpFingerprintsForScalingToMatrixRowMap, aDataMatrix); // TODO replace method? why?
         }
         return aDataMatrix;
     }
@@ -274,7 +273,6 @@ public class ART2aFloatClustering implements IART2aClustering {
                     tmpFirstComponent = tmpComponentsOfScalingVector;
                 }
             }
-            System.out.println(tmpFirstComponent + "---tmpFirstcomponent");
             for (int i = 0; i < tmpScalingVector.length; i++) {
                 float tmpScaledComponent = tmpScalingVector[i] / tmpFirstComponent;
                 tmpScalingVector[i] = tmpScaledComponent;
@@ -507,7 +505,6 @@ public class ART2aFloatClustering implements IART2aClustering {
             //<editor-fold desc="Last clustering process input."
             if(aAddClusteringResultFileAdditionally) {
                 this.clusteringProcess.add("Convergence status: " + tmpConvergence);
-                this.clusteringProcess.add("ClusterIndices" + java.util.Arrays.toString(tmpClusterOccupation)); // TODO delete
                 this.clusteringProcess.add("---------------------------------------");
             }
             //</editor-fold>
@@ -521,13 +518,6 @@ public class ART2aFloatClustering implements IART2aClustering {
             this.clusteringResult.add("---------------------------------------");
         }
         //</editor-fold>
-        /*
-        System.out.println(java.util.Arrays.toString(tmpClusterOccupation) + "----class view"); // TODO delete
-        for(int i = 0; i<10; i++) {
-            System.out.println(java.util.Arrays.toString(this.clusterMatrix[i])+ "------ cluster matrix" +i); // TODO delete
-        }
-
-         */
         //<editor-fold desc="Return object"
         if(!aAddClusteringResultFileAdditionally) {
             return new ART2aFloatClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
@@ -558,7 +548,7 @@ public class ART2aFloatClustering implements IART2aClustering {
                     for (int j = 0; j < this.numberOfComponents; j++) {
                         tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
                     }
-                    if (tmpScalarProductOfClassVector < this.requiredSimilarity) { // TODO
+                    if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
                         tmpConvergence = false;
                         break;
                     }
@@ -576,7 +566,7 @@ public class ART2aFloatClustering implements IART2aClustering {
             this.clusteringResult.add("Convergence failed for: " + this.vigilanceParameter);
             this.clusteringResult.add("Please increase the maximum number of epochs to get reliable results.");
             ART2aFloatClustering.LOGGER.log(Level.INFO,"Convergence failed for: " + this.vigilanceParameter +"\nPlease take the results of clustering of the vigilance parameter " + this.vigilanceParameter +" with caution.");
-           // throw new RuntimeException("Convergence failed"); // TODO own Exception, maybe ConvergenceFailedException?
+           // throw new RuntimeException("Convergence failed");
         }
         return tmpConvergence;
     }

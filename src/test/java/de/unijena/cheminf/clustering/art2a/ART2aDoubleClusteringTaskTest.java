@@ -30,10 +30,8 @@ import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -48,11 +46,7 @@ public class ART2aDoubleClusteringTaskTest {
     //<editor-fold desc="Test methods" defaultstate="collapsed">
     /**
      * Test method
-     *
-     * @throws IOException is thrown if an error occurs when creating the log files.
-     * @throws InterruptedException is thrown if the parallelization is disturbed.
-     * @throws ExecutionException is thrown if an error occurs during the task.
-     * @throws Exception is thrown if the clustering is failed.
+     * TODO add test methods
      */
     @Test
     public void startArt2aClusteringTest() throws Exception {
@@ -377,7 +371,7 @@ public class ART2aDoubleClusteringTaskTest {
             System.out.println("####################################");
         }
         tmpExecutorService.shutdown();
-        Assertions.assertEquals(true, true); // TODO test methods?
+        Assertions.assertEquals(true, true);
     }
     //</editor-fold>
     //
