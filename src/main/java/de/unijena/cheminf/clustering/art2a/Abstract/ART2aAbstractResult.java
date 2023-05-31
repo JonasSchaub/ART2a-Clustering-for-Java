@@ -25,13 +25,12 @@
 package de.unijena.cheminf.clustering.art2a.Abstract;
 
 import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
-import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract class
@@ -72,6 +71,17 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * Final number of clusters detected after successful completion of clustering.
      */
     private final int numberOfDetectedClusters;
+    /**
+     * Convergence status of the clustering. The convergence status is false, if the given maximum number of epochs
+     *  is not sufficient until the system converges.
+     *
+     */
+    private final boolean convergenceStatus;
+    /**
+     * Logger of this class
+     */
+    private static final Logger LOGGER = Logger.getLogger(ART2aAbstractResult.class.getName());
+
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
@@ -83,11 +93,24 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusterView array for cluster assignment of each input vector.
      */
-    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView) {
+    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus) {
+        if(aNumberOfEpochs < 0) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
+            throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
+        }
+        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
+        }
+        if(aNumberOfDetectedClusters < 1) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "aNumberOfDetectedClusters is invalid.");
+            throw new IllegalArgumentException("aNumberOfDetectedClusters is invalid.");
+        }
         this.vigilanceParameter = aVigilanceParameter;
         this.numberOfEpochs = aNumberOfEpochs;
         this.numberOfDetectedClusters = aNumberOfDetectedClusters;
         this.clusterView = aClusterView;
+        this.convergenceStatus = aConvergenceStatus;
     }
     //
     /**
@@ -100,13 +123,28 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
      */
-    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue, ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView) {
+    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
+                               ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                               ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus) {
+        if(aNumberOfEpochs < 0) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
+            throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
+        }
+        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
+        }
+        if(aNumberOfDetectedClusters < 1) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "aNumberOfDetectedClusters is invalid.");
+            throw new IllegalArgumentException("aNumberOfDetectedClusters is invalid.");
+        }
         this.clusterView = aClusterView;
         this.vigilanceParameter = aVigilanceParameter;
         this.numberOfEpochs = aNumberOfEpochs;
         this.numberOfDetectedClusters = aNumberOfDetectedClusters;
         this.clusteringProcess = aClusteringProcessQueue;
         this.clusteringResult = aClusteringResultQueue;
+        this.convergenceStatus = aConvergenceStatus;
     }
     //</editor-fold>
     //
@@ -133,6 +171,14 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     @Override
     public int getNumberOfDetectedClusters() {
         return this.numberOfDetectedClusters;
+    }
+    //
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean getConvergenceStatus() {
+        return this.convergenceStatus;
     }
     //</editor-fold>
     //

@@ -57,6 +57,14 @@ public interface IART2aClusteringResult {
      */
     int getNumberOfEpochs();
     //
+    /**
+     * Returns the convergence status after clustering. The convergence status is false, if the specified
+     * number of maximum epochs is not sufficient to achieve a convergence of the system.
+     *
+     * @return boolean true or false
+     */
+    boolean getConvergenceStatus();
+    //
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
      * Returns the input indices assigned to the given cluster.

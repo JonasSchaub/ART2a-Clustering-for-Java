@@ -63,11 +63,19 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
     /**
      * Default value of the learning parameter in float
      */
-    private final float DEFAULT_LEARNING_PARAMETER = 0.01f;
+    private final float DEFAULT_LEARNING_PARAMETER_FLOAT = 0.01f;
     /**
-     * Default value of the required similarity parameter
+     * Default value of the required similarity parameter in float
      */
-    private final float REQUIRED_SIMILARITY = 0.99f;
+    private final float REQUIRED_SIMILARITY_FLOAT = 0.99f;
+    /**
+     * Default value of the learning parameter in double
+     */
+    private final double DEFAULT_LEARNING_PARAMETER_DOUBLE = 0.01;
+    /**
+     * Default value of the required similarity parameter in double
+     */
+    private final double REQUIRED_SIMILARITY_DOUBLE = 0.99;
     //</editor-fold>
     //
     //<editor-fold desc="private static class variables" defaultstate="collapsed>

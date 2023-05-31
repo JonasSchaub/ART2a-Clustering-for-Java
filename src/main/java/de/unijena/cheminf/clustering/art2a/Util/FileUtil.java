@@ -111,7 +111,7 @@ public final class FileUtil {
     }
     //
     /**
-     * The text file contains fingerprints that are read in to prepare them for clustering.
+     * The text file contains fingerprints that are read in to prepare them for float clustering.
      * Each line of the text file represents one fingerprint. Each component of the fingerprint is
      * separated by a separator. The file has no header line.
      *
@@ -120,49 +120,40 @@ public final class FileUtil {
      * @return float matrix is returned that contains the fingerprints that were read in.
      * Each row of the matrix represents one fingerprint.
      * @throws IllegalArgumentException is thrown if the given file path is invalid.
+     * @throws IOException is thrown if
      */
-    public static float[][] importDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException, IOException {
+    public static float[][] importFloatDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
         BufferedReader tmpFingerprintFileReader = null;
-        try {
-            tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
-        } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, anException.toString()+ " File is not readable!", anException);
-        } finally {
-            try {
-                tmpFingerprintFileReader.close();
-            } catch (IOException anException) {
-                FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "FileReader can not close.");
-            }
-        }
         ArrayList<float[]> tmpFingerprintList = new ArrayList<>();
         String tmpFingerprintLine;
         int tmpDataMatrixRow = 0;
         try {
+            tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
             while ((tmpFingerprintLine = tmpFingerprintFileReader.readLine()) != null) {
                 String[] tmpFingerprint = tmpFingerprintLine.split(String.valueOf(aSeparator));
                 float[] tmpFingerprintFloatArray = new float[tmpFingerprint.length];
-                try {
-                    for (int i = 0; i < tmpFingerprint.length; i++) {
+                for (int i = 0; i < tmpFingerprint.length; i++) {
+                    try {
                         tmpFingerprintFloatArray[i] = Float.parseFloat(tmpFingerprint[i]);
+                    } catch (NumberFormatException anException) {
+                        FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException);
                     }
-                } catch (NumberFormatException anException) {
-                    FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException);
-                    //throw anException;
                 }
                 tmpDataMatrixRow++;
                 tmpFingerprintList.add(tmpFingerprintFloatArray);
             }
         } catch (IOException anException) {
             FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file. At least one line is not readable.");
-        }
-        finally {
-            try {
-                tmpFingerprintFileReader.close();
-            } catch (IOException anException) {
-                FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " FileReader can not close.");
+        } finally {
+            if (tmpFingerprintFileReader != null) {
+                try {
+                    tmpFingerprintFileReader.close();
+                } catch (IOException anException) {
+                   FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader could not be closed." );
+                }
             }
         }
         float[][] aDataMatrix = new float[tmpDataMatrixRow][tmpFingerprintList.get(0).length];
@@ -170,6 +161,57 @@ public final class FileUtil {
             aDataMatrix[tmpCurrentMatrixRow] = tmpFingerprintList.get(tmpCurrentMatrixRow);
         }
         return aDataMatrix;
+    }
+    /**
+     * The text file contains fingerprints that are read in to prepare them for double clustering.
+     * Each line of the text file represents one fingerprint. Each component of the fingerprint is
+     * separated by a separator. The file has no header line.
+     *
+     * @param aFilePath path of the text file
+     * @param aSeparator separator of the text file to separate the fingerprint components from each other.
+     * @return double matrix is returned that contains the fingerprints that were read in.
+     * Each row of the matrix represents one fingerprint.
+     * @throws IllegalArgumentException is thrown if the given file path is invalid.
+     */
+    public static double[][] importDoubleDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
+        if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
+            throw new IllegalArgumentException("aFileName is null or empty/blank.");
+        }
+        BufferedReader tmpFingerprintFileReader = null;
+        ArrayList<double[]> tmpFingerprintList = new ArrayList<>();
+        String tmpFingerprintLine;
+        int tmpDataMatrixRow = 0;
+        try {
+            tmpFingerprintFileReader = new BufferedReader(new FileReader(aFilePath));
+            while ((tmpFingerprintLine = tmpFingerprintFileReader.readLine()) != null) {
+                String[] tmpFingerprint = tmpFingerprintLine.split(String.valueOf(aSeparator));
+                double[] tmpFingerprintDoubleArray = new double[tmpFingerprint.length];
+                for (int i = 0; i < tmpFingerprint.length; i++) {
+                    try {
+                        tmpFingerprintDoubleArray[i] = Double.parseDouble(tmpFingerprint[i]);
+                    } catch (NumberFormatException anException) {
+                        FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException);
+                    }
+                }
+                tmpDataMatrixRow++;
+                tmpFingerprintList.add(tmpFingerprintDoubleArray);
+            }
+        } catch (IOException anException) {
+            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file. At least one line is not readable.");
+        } finally {
+            if (tmpFingerprintFileReader != null) {
+                try {
+                    tmpFingerprintFileReader.close();
+                } catch (IOException anException) {
+                    FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader could not be closed." );
+                }
+            }
+        }
+        double[][] tmpDataMatrix = new double[tmpDataMatrixRow][tmpFingerprintList.get(0).length];
+        for (int tmpCurrentMatrixRow = 0; tmpCurrentMatrixRow < tmpDataMatrixRow; tmpCurrentMatrixRow++) {
+            tmpDataMatrix[tmpCurrentMatrixRow] = tmpFingerprintList.get(tmpCurrentMatrixRow);
+        }
+        return tmpDataMatrix;
     }
     //
     /**
@@ -200,7 +242,7 @@ public final class FileUtil {
      */
     private static File createClusteringResultFiles(String aFileFolderName, String aPathName){
         LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
+        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
         FileUtil.workingPath = (new File(aPathName) + File.separator);
         new File(FileUtil.workingPath + aFileFolderName).mkdirs();
         File tmpClusteringReportFile = new File(FileUtil.workingPath + File.separator + aFileFolderName + File.separator

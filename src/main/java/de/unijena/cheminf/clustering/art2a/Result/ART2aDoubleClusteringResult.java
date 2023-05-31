@@ -27,6 +27,7 @@ package de.unijena.cheminf.clustering.art2a.Result;
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
 import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,8 +67,10 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      * @param aDataMatrix double matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
      */
-    public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, double[][] aDataMatrix, int[] aClusterView, int aNumberOfEpochs, int aNumberOfDetectedClusters) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters,aClusterView);
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus, double[][] aClusterMatrix, double[][] aDataMatrix) {
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aConvergenceStatus);
+        Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
+        Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
         this.doubleClusterMatrix = aClusterMatrix;
         this.dataMatrix = aDataMatrix;
     }
@@ -87,10 +90,12 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      *                    Each row in the matrix corresponds to an input vector.
      *
      */
-    public ART2aDoubleClusteringResult(float aVigilanceParameter, double[][] aClusterMatrix, double[][] aDataMatrix, int[] aClusterView,
-                                        int aNumberOfEpochs,int aNumberOfDetectedClusters,ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                        ConcurrentLinkedQueue<String> aClusteringResultQueue) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusteringProcessQueue, aClusteringResultQueue,aClusterView);
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                       ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus,
+                                       double[][] aClusterMatrix, double[][] aDataMatrix){
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusteringProcessQueue, aClusteringResultQueue,aClusterView, aConvergenceStatus);
+        Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
+        Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
         this.doubleClusterMatrix = aClusterMatrix;
         this.dataMatrix = aDataMatrix;
     }

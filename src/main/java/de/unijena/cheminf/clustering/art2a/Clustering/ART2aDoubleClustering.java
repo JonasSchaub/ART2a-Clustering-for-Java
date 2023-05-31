@@ -30,6 +30,7 @@ import de.unijena.cheminf.clustering.art2a.Result.ART2aDoubleClusteringResult;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -68,6 +69,14 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * Checks the clustering process. If clustering has failed clusteringStatus = false.
      */
     private boolean clusteringStatus;
+    /**
+     * Queue for clustering process.
+     */
+    private ConcurrentLinkedQueue<String> clusteringProcess;
+    /**
+     * Queue for clustering result.
+     */
+    private ConcurrentLinkedQueue<String> clusteringResult;
     /**
      * The seed value for permutation of the vector field.
      */
@@ -319,11 +328,11 @@ public class ART2aDoubleClustering implements IART2aClustering {
     public ART2aDoubleClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException {
         this.clusteringStatus = false;
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
-        ConcurrentLinkedQueue<String> tmpClusteringProcess = null;
-        ConcurrentLinkedQueue<String> tmpClusteringResult = null;
+        this.clusteringProcess = null;
+        this.clusteringResult = null;
         if(aAddClusteringResultFileAdditionally) {
-            tmpClusteringProcess = new ConcurrentLinkedQueue<>();
-            tmpClusteringResult = new ConcurrentLinkedQueue<>();
+            this.clusteringProcess = new ConcurrentLinkedQueue<>();
+            this.clusteringResult = new ConcurrentLinkedQueue<>();
         }
         //</editor-fold>
         //<editor-fold desc="Initialization and declaration of some important variables" defaultstate="collapsed">
@@ -354,16 +363,16 @@ public class ART2aDoubleClustering implements IART2aClustering {
         //<editor-fold desc="Clustering results in text files set up." defaultstate="collapsed">
         int tmpCurrentNumberOfEpochs = 0;
         if(aAddClusteringResultFileAdditionally) {
-            tmpClusteringResult.add("Vigilance parameter: " + aVigilanceParameter);
+            this.clusteringResult.add("Vigilance parameter: " + aVigilanceParameter);
         }
         //</editor-fold>
         //<editor-fold desc="Start clustering process." defaultstate="collapsed">
         while(!tmpConvergence && tmpCurrentNumberOfEpochs <= this.maximumNumberOfEpochs) {
             //<editor-fold desc="Randomization input vectors and start saving the clustering results to text files if desired." defaultstate="collapsed">
             if(aAddClusteringResultFileAdditionally) {
-                tmpClusteringProcess.add("ART-2a clustering result for vigilance parameter:" + aVigilanceParameter);
-                tmpClusteringProcess.add("Number of epochs: " + tmpCurrentNumberOfEpochs);
-                tmpClusteringProcess.add("");
+                this.clusteringProcess.add("ART-2a clustering result for vigilance parameter:" + aVigilanceParameter);
+                this.clusteringProcess.add("Number of epochs: " + tmpCurrentNumberOfEpochs);
+                this.clusteringProcess.add("");
             }
             int[] tmpSampleVectorIndicesInRandomOrder = this.randomizeVectorIndices();
             //</editor-fold>
@@ -378,13 +387,13 @@ public class ART2aDoubleClustering implements IART2aClustering {
                     }
                 }
                 if(aAddClusteringResultFileAdditionally) {
-                    tmpClusteringProcess.add("Input: " + tmpCurrentInput + " / Vector " + tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
+                    this.clusteringProcess.add("Input: " + tmpCurrentInput + " / Vector " + tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
                 }
                 //<editor-fold desc="If the input vector is a null vector, it will not be clustered." defaultstate="collapsed">
                 if(tmpCheckNullVector) {
                     tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = -1;
                     if(aAddClusteringResultFileAdditionally) {
-                        tmpClusteringProcess.add("This input is a null vector");
+                        this.clusteringProcess.add("This input is a null vector");
                     }
                 }
                 //</editor-fold>
@@ -412,8 +421,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
                         tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =tmpNumberOfDetectedClusters;
                         tmpNumberOfDetectedClusters++;
                         if(aAddClusteringResultFileAdditionally) {
-                            tmpClusteringProcess.add("Cluster number: 0");
-                            tmpClusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                            this.clusteringProcess.add("Cluster number: 0");
+                            this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
                         }
                     }
                     //</editor-fold>
@@ -450,12 +459,11 @@ public class ART2aDoubleClustering implements IART2aClustering {
                         //<editor-fold desc="Input does not fit in existing clusters. A new cluster is formed and the input vector is put into the new cluster vector."
                         if(tmpRhoWinner == true || tmpRho < aVigilanceParameter) {
                             tmpNumberOfDetectedClusters++;
-                            System.out.println(tmpNumberOfDetectedClusters + "--------- anzahl cluster falls ein neues hinzugefügt wird"); // TODO delete
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpNumberOfDetectedClusters - 1;
                             this.clusterMatrix[tmpNumberOfDetectedClusters - 1] = tmpInputVector;
                             if(aAddClusteringResultFileAdditionally) {
-                                tmpClusteringProcess.add("Cluster number: " + (tmpNumberOfDetectedClusters - 1));
-                                tmpClusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                                this.clusteringProcess.add("Cluster number: " + (tmpNumberOfDetectedClusters - 1));
+                                this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
                             }
                         }
                         //</editor-fold>
@@ -480,8 +488,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
                             this.clusterMatrix[tmpWinnerClassIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpWinnerClassIndex;
                             if(aAddClusteringResultFileAdditionally) {
-                                tmpClusteringProcess.add("Cluster number: " + tmpWinnerClassIndex);
-                                tmpClusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                                clusteringProcess.add("Cluster number: " + tmpWinnerClassIndex);
+                                clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
                             }
                             //</editor-fold>
                         }
@@ -497,18 +505,19 @@ public class ART2aDoubleClustering implements IART2aClustering {
             //</editor-fold>
             //<editor-fold desc="Last clustering process input."
             if(aAddClusteringResultFileAdditionally) {
-                tmpClusteringProcess.add("Convergence status: " + tmpConvergence);
-                tmpClusteringProcess.add("ClusterIndices" + java.util.Arrays.toString(tmpClusterOccupation)); // TODO delete
-                tmpClusteringProcess.add("---------------------------------------");
+                clusteringProcess.add("Convergence status: " + tmpConvergence);
+                clusteringProcess.add("ClusterIndices" + java.util.Arrays.toString(tmpClusterOccupation)); // TODO delete
+                clusteringProcess.add("---------------------------------------");
             }
             //</editor-fold>
         }
         //</editor-fold>
         //<editor-fold desc="Last clustering result input."
         if(aAddClusteringResultFileAdditionally) {
-            tmpClusteringResult.add("Number of epochs: " + (tmpCurrentNumberOfEpochs));
-            tmpClusteringResult.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
-            tmpClusteringResult.add("---------------------------------------");
+            this.clusteringResult.add("Number of epochs: " + (tmpCurrentNumberOfEpochs));
+            this.clusteringResult.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+            this.clusteringResult.add("Convergence status: " + tmpConvergence);
+            this.clusteringResult.add("---------------------------------------");
         }
         //</editor-fold>
         System.out.println(java.util.Arrays.toString(tmpClusterOccupation) + "----class view"); // TODO delete
@@ -517,36 +526,22 @@ public class ART2aDoubleClustering implements IART2aClustering {
         }
         //<editor-fold desc="Return object"
         if(!aAddClusteringResultFileAdditionally) {
-            return new ART2aDoubleClusteringResult(aVigilanceParameter, this.clusterMatrix,this.dataMatrix, tmpClusterOccupation, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters);
+            return new ART2aDoubleClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
         } else {
-            return new ART2aDoubleClusteringResult(aVigilanceParameter, this.clusterMatrix,this.dataMatrix, tmpClusterOccupation, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusteringProcess, tmpClusteringResult);
+            return new ART2aDoubleClusteringResult(aVigilanceParameter,tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, this.clusteringProcess, this.clusteringResult, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
         }
         //</editor-fold>
-
-        /*
-        catch(RuntimeException anRuntimeException) {
-            throw anRuntimeException;
-        }
-
-
-        catch(Exception anException) {
-
-          //  throw new Exception("The clustering process has failed.");
-            throw anException;
-        }
-
-         */
     }
     //
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws RuntimeException {
+    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) {
         boolean tmpConvergence = true;
         double[] tmpRow;
-        if(aConvergenceEpoch <= this.maximumNumberOfEpochs) {
-            if (tmpConvergence) {
+        if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
+           // if (tmpConvergence) {
                 // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
                 tmpConvergence = true;
                 double tmpScalarProductOfClassVector;
@@ -564,7 +559,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
                         break;
                     }
                 }
-            }
+           // }
             if(!tmpConvergence) {
                 for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
                     tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
@@ -572,8 +567,12 @@ public class ART2aDoubleClustering implements IART2aClustering {
                 }
             }
         } else {
-            LOGGER.severe("Convergence failed for: " + this.vigilanceParameter );
-            throw new RuntimeException("Convergence failed"); // TODO own Exception, maybe ConvergenceFailedException?
+            this.clusteringProcess.add("Convergence failed for: " + this.vigilanceParameter);
+            this.clusteringProcess.add("Please increase the maximum number of epochs to get reliable results.");
+            this.clusteringResult.add("Convergence failed for: " + this.vigilanceParameter);
+            this.clusteringResult.add("Please increase the maximum number of epochs to get reliable results.");
+            ART2aDoubleClustering.LOGGER.log(Level.INFO,"Convergence failed for: " + this.vigilanceParameter +"\nPlease take the results of clustering of the vigilance parameter " + this.vigilanceParameter +" with caution.");
+            //throw new RuntimeException("Convergence failed"); // TODO own Exception, maybe ConvergenceFailedException?
         }
         return tmpConvergence;
     }
