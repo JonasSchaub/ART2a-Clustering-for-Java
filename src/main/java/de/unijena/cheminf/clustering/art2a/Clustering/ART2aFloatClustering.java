@@ -125,7 +125,7 @@ public class ART2aFloatClustering implements IART2aClustering {
     /**
      * Initial capacity value for maps
      */
-    private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
+    private final double INITIAL_CAPACITY_VALUE = 1.5;
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="private static final constants">
@@ -143,6 +143,9 @@ public class ART2aFloatClustering implements IART2aClustering {
      * All input vectors must have the same length.
      * If there are components greater than 1, these input vectors are scaled so that all vector components
      * are between 0 and 1.
+     * <br>
+     * <u>WARNING</u>: If the data matrix consists only of null vectors, no clustering is possible,
+     * because they do not contain any information that can be used for similarity evaluation.
      *
      * @param aDataMatrix matrix contains all inputs for clustering.
      * @param aMaximumNumberOfEpochs maximum number of epochs that the system may use for convergence.
@@ -208,10 +211,12 @@ public class ART2aFloatClustering implements IART2aClustering {
             ART2aFloatClustering.LOGGER.log(Level.SEVERE, "The number of vectors must greater then 0 to cluster inputs.");
             throw new IllegalArgumentException("The number of vectors must greater then 0 to cluster inputs.");
         }
+        int tmpNumberOfNullComponentsInDataMatrix = 0;
+        int tmpNumberOfElementsInDataMatrix = aDataMatrix.length * aDataMatrix[0].length;
         int tmpNumberOfVectorComponents = aDataMatrix[0].length;
         float tmpCurrentVectorComponent;
         float[] tmpSingleFingerprint;
-        HashMap<float[],Integer> tmpFingerprintsForScalingToMatrixRowMap = new HashMap<>(aDataMatrix.length * this.INITIAL_CAPACITY_VALUE, 0.75f);
+        HashMap<float[],Integer> tmpFingerprintsForScalingToMatrixRowMap = new HashMap<>((int) (aDataMatrix.length * this.INITIAL_CAPACITY_VALUE), 0.75f);
         for(int i = 0; i < aDataMatrix.length; i++) {
             tmpSingleFingerprint = aDataMatrix[i];
             if(tmpNumberOfVectorComponents != tmpSingleFingerprint.length) {
@@ -227,6 +232,13 @@ public class ART2aFloatClustering implements IART2aClustering {
                     ART2aFloatClustering.LOGGER.log(Level.SEVERE, "Only positive values allowed.");
                     throw new IllegalArgumentException("Only positive values allowed.");
                 }
+                if(tmpCurrentVectorComponent == 0) {
+                    tmpNumberOfNullComponentsInDataMatrix++;
+                }
+            }
+            if(tmpNumberOfNullComponentsInDataMatrix == tmpNumberOfElementsInDataMatrix) {
+                ART2aFloatClustering.LOGGER.log(Level.SEVERE, "All vectors are null vectors. Clustering not possible.");
+                throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible");
             }
         }
         if(!tmpFingerprintsForScalingToMatrixRowMap.isEmpty()) {
@@ -417,7 +429,7 @@ public class ART2aFloatClustering implements IART2aClustering {
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
                     if(tmpNumberOfDetectedClusters == 0) {
                         this.clusterMatrix[0] = tmpInputVector;
-                        tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =tmpNumberOfDetectedClusters;
+                        tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpNumberOfDetectedClusters;
                         tmpNumberOfDetectedClusters++;
                         if(aAddClusteringResultFileAdditionally) {
                             this.clusteringProcess.add("Cluster number: 0");

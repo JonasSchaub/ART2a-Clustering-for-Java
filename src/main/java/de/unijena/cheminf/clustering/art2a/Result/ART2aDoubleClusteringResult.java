@@ -25,7 +25,6 @@
 package de.unijena.cheminf.clustering.art2a.Result;
 
 import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
-import de.unijena.cheminf.clustering.art2a.Clustering.ART2aDoubleClustering;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;

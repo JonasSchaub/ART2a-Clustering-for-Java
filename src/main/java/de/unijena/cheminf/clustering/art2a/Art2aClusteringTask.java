@@ -165,7 +165,7 @@ public class ART2aClusteringTask implements Callable<ART2aAbstractResult> {
             if(this.art2aFloatClusteringResult != null) {
                 return this.art2aFloatClusteringResult.startClustering(this.vigilanceParameter, this.addClusteringResultInTextFile);
             } else {
-                return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, addClusteringResultInTextFile);
+                return this.art2aDoubleClusteringResult.startClustering(this.vigilanceParameter, this.addClusteringResultInTextFile);
             }
         } catch (Exception anException) {
             ART2aClusteringTask.LOGGER.log(Level.SEVERE, anException.toString(), anException);

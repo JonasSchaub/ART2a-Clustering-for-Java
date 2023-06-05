@@ -72,11 +72,16 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      */
     private final int numberOfDetectedClusters;
     /**
+     * Initial capacity value for maps
+     */
+    private final double INITIAL_CAPACITY_VALUE = 1.5;
+    /**
      * Convergence status of the clustering. The convergence status is false, if the given maximum number of epochs
      * is not sufficient until the system converges.
      *
      */
     private final boolean convergenceStatus;
+
     /**
      * Logger of this class
      */
@@ -188,16 +193,17 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      */
     @Override
     public int[] getClusterIndices(int aClusterNumber) throws IllegalArgumentException {
-        if (aClusterNumber > this.numberOfDetectedClusters) {
+        if (aClusterNumber > this.numberOfDetectedClusters) { // TODO test
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "Thw specified cluster number does not exist and exceeds the maximum number of clusters.");
             throw new IllegalArgumentException("The specified cluster number does not exist and exceeds the maximum number of clusters.");
         } else {
             int[] tmpIndicesInCluster = new int[this.getClusterMembers(this.clusterView).get(aClusterNumber)];
             int tmpInputIndices = 0;
-            int i = 0;
+            int tmpIterator = 0;
             for (int tmpClusterMember : this.clusterView) {
                 if (tmpClusterMember == aClusterNumber) {
-                    tmpIndicesInCluster[i] = tmpInputIndices;
-                    i++;
+                    tmpIndicesInCluster[tmpIterator] = tmpInputIndices;
+                    tmpIterator++;
                 }
                 tmpInputIndices++;
             }
@@ -210,6 +216,12 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      */
     @Override
     public void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter)  {
+        if (this.clusteringProcess == null && this.clusteringResult == null) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "The associated argument to allow writing of the clustering results to text files is set to false.\n" +
+                    "Please set the argument to true.");
+            throw new NullPointerException("The associated argument to allow writing of the clustering results to text files is set to false.\n" +
+                    "Please set the argument to true.");
+        }
         for (String tmpClusteringResult : this.clusteringResult) {
             aClusteringResultWriter.write(tmpClusteringResult+"\n");
         } for(String tmpClusteringProcess : this.clusteringProcess) {
@@ -231,6 +243,10 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     //
     /**
      * Abstract method: calculates the angle between two clusters.
+     * The angle between the clusters defines the distance between them.
+     * Since all vectors are normalized to unit vectors in the first step of clustering
+     * and only positive components are allowed, they all lie in the positive quadrant
+     * of the unit sphere, so the maximum distance between two clusters can be 90 degrees.
      *
      * @param aFirstCluster first cluster
      * @param aSecondCluster second cluster
@@ -248,7 +264,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @return HashMap<Integer, Integer>
      */
     private HashMap<Integer, Integer> getClusterMembers(int[] aClusterView) {
-        HashMap<Integer, Integer> tmpClusterToMembersMap = new HashMap<>(this.getNumberOfDetectedClusters());
+        HashMap<Integer, Integer> tmpClusterToMembersMap = new HashMap<>((int) (this.getNumberOfDetectedClusters() * this.INITIAL_CAPACITY_VALUE));
         for(int tmpClusterMembers : aClusterView) {
             if (tmpClusterMembers == -1) {
                 continue;

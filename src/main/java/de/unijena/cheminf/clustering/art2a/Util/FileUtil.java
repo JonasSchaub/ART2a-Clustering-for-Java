@@ -73,41 +73,28 @@ public final class FileUtil {
      * Set up clustering result file.
      * If necessary, existing result files will also be deleted.
      *
-     * @return PrintWriter to write the clustering result into the file.
+     * @return PrintWriter[]
      * @throws IOException is thrown if an error occurs when creating the file.
      */
-    public static PrintWriter createClusteringResultInFile(String aPathName) {
-        PrintWriter tmpPrintWriter = null;
+    public static PrintWriter[] createClusteringResultInFile(String aPathName) {
+        PrintWriter tmpClusteringResultPrintWriter = null;
+        PrintWriter tmpClusteringProcessPrintWriter = null;
         try {
-            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false);
-            BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
-            tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
+            FileWriter tmpClusteringResultFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false);
+            BufferedWriter tmpClusteringResultBufferedWriter = new BufferedWriter(tmpClusteringResultFileWriter);
+            tmpClusteringResultPrintWriter = new PrintWriter(tmpClusteringResultBufferedWriter);
             FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
-        } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, "The file could not be created.");
-
-        }
-        return tmpPrintWriter;
-    }
-    //
-    /**
-     * Set up clustering process file.
-     * If necessary, existing process files will also be deleted.
-     *
-     * @return PrintWriter to write the clustering process into the file.
-     * @throws IOException is thrown if an error occurs when creating the file.
-     */
-    public static PrintWriter createClusteringProcessInFile(String aPathName) {
-        PrintWriter tmpPrintWriter = null;
-        try {
-            FileWriter tmpFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_PROCESS_FILE_NAME, aPathName), false);
-            BufferedWriter tmpBufferedWriter = new BufferedWriter(tmpFileWriter);
-            tmpPrintWriter = new PrintWriter(tmpBufferedWriter);
+            FileWriter tmpClusteringProcessFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_PROCESS_FILE_NAME, aPathName), false);
+            BufferedWriter tmpClusteringProcessBufferedWriter = new BufferedWriter(tmpClusteringProcessFileWriter);
+            tmpClusteringProcessPrintWriter = new PrintWriter(tmpClusteringProcessBufferedWriter);
             FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_PROCESS_FILE_NAME);
         } catch (IOException anException) {
             FileUtil.LOGGER.log(Level.SEVERE, "The file could not be created.");
         }
-        return tmpPrintWriter;
+        PrintWriter[] tmpPrintWriterArray = new PrintWriter[2];
+        tmpPrintWriterArray[0] = tmpClusteringResultPrintWriter;
+        tmpPrintWriterArray[1] = tmpClusteringProcessPrintWriter;
+        return tmpPrintWriterArray;
     }
     //
     /**
@@ -123,6 +110,7 @@ public final class FileUtil {
      */
     public static float[][] importFloatDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
+            FileUtil.LOGGER.log(Level.SEVERE, "aFileName is null or empty/blank.");
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
         BufferedReader tmpFingerprintFileReader = null;
@@ -174,6 +162,7 @@ public final class FileUtil {
      */
     public static double[][] importDoubleDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
+            FileUtil.LOGGER.log(Level.SEVERE, "aFileName is null or empty/blank.");
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
         BufferedReader tmpFingerprintFileReader = null;

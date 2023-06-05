@@ -358,29 +358,29 @@ public class ART2aFloatClusteringTaskTest {
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
+            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 10,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        PrintWriter tmpClusteringProcessWriter = FileUtil.createClusteringProcessInFile("ClusteringFolder");
-        PrintWriter tmpClusteringResultWriter = FileUtil.createClusteringResultInFile("ClusteringFolder");
+        PrintWriter[] tmpPrintWriter = FileUtil.createClusteringResultInFile("Clustering_Result_Folder");
         List<Future<ART2aAbstractResult>> tmpFuturesList;
         ART2aAbstractResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         System.out.println("\nCLUSTERING RESULTS:\n");
         for (Future<ART2aAbstractResult> tmpFuture : tmpFuturesList) {
             tmpClusteringResult = tmpFuture.get();
-            System.out.println("vigilance parameter: " + tmpClusteringResult.getVigilanceParameter() );
-            System.out.println("number of epochs: " + tmpClusteringResult.getNumberOfEpochs());
-            System.out.println("cluster indices in cluster 0: " + java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(0)));
-            System.out.println("convergence status: " +tmpClusteringResult.getConvergenceStatus());
-            System.out.println("Angle: " + tmpClusteringResult.getAngleBetweenClusters(0,1));
+            System.out.println("Vigilance parameter: " + tmpClusteringResult.getVigilanceParameter() );
+            System.out.println("Number of epochs: " + tmpClusteringResult.getNumberOfEpochs());
+            System.out.println("Cluster indices in cluster 0: " + java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(0)));
+            System.out.println("Convergence status: " +tmpClusteringResult.getConvergenceStatus());
+            System.out.println("Angle between cluster 0 and 1: " + tmpClusteringResult.getAngleBetweenClusters(0,1));
+            System.out.println("Cluster representatives in cluster 0: " + tmpClusteringResult.getClusterRepresentatives(0));
             System.out.println("####################################");
-            tmpClusteringResult.getClusteringResultsInTextFile(tmpClusteringProcessWriter, tmpClusteringResultWriter);
+            tmpClusteringResult.getClusteringResultsInTextFile(tmpPrintWriter[0], tmpPrintWriter[1]);
         }
-        tmpClusteringProcessWriter.flush();
-        tmpClusteringProcessWriter.close();
-        tmpClusteringResultWriter.flush();
-        tmpClusteringResultWriter.close();
+        tmpPrintWriter[0].flush();
+        tmpPrintWriter[0].close();
+        tmpPrintWriter[1].flush();
+        tmpPrintWriter[1].close();
         tmpExecutorService.shutdown();
         Assertions.assertEquals(true, true);
     }

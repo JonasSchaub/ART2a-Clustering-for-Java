@@ -63,6 +63,7 @@ public interface IART2aClusteringResult {
      */
     boolean getConvergenceStatus();
     //
+    // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
      * Returns the input indices assigned to the given cluster.
@@ -75,8 +76,12 @@ public interface IART2aClusteringResult {
     //
     /**
      * The result of the clustering is additionally recorded in 2 text files. One of these files is a
-     * very detailed representation of the results (clustering result file), while in the other only the
-     * most important results are summarized (clustering process file).
+     * very detailed representation of the results (clustering process file), while in the other only the
+     * most important results are summarized (clustering result file).
+     * <u>IMPORTANT: </u> In order to additionally capture the clustering results into text files,
+     * the folder must be created first. This requires the method call createClusteringResultInFile(String aPathName).
+     *
+     * @see de.unijena.cheminf.clustering.art2a.Util.FileUtil#createClusteringResultInFile(String) 
      *
      */
     void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter);
