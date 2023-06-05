@@ -1,7 +1,7 @@
 /*
  * GNU General Public License v3.0
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.Abstract.ART2aAbstractResult;
+import de.unijena.cheminf.clustering.art2a.abstractResult.ART2aAbstractResult;
 
-import de.unijena.cheminf.clustering.art2a.Util.FileUtil;
+import de.unijena.cheminf.clustering.art2a.util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
 /*
  * GNU General Public License v3.0
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package de.unijena.cheminf.clustering.art2a.Interfaces;
+package de.unijena.cheminf.clustering.art2a.interfaces;
 
 import java.io.PrintWriter;
 
@@ -81,7 +81,7 @@ public interface IART2aClusteringResult {
      * <u>IMPORTANT: </u> In order to additionally capture the clustering results into text files,
      * the folder must be created first. This requires the method call createClusteringResultInFile(String aPathName).
      *
-     * @see de.unijena.cheminf.clustering.art2a.Util.FileUtil#createClusteringResultInFile(String) 
+     * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#createClusteringResultInFile(String)
      *
      */
     void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter);

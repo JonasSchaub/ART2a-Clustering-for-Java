@@ -1,7 +1,7 @@
 /*
  * GNU General Public License v3.0
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package de.unijena.cheminf.clustering.art2a.Abstract;
+package de.unijena.cheminf.clustering.art2a.abstractResult;
 
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
 
 import java.io.PrintWriter;
 import java.util.HashMap;

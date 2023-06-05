@@ -1,7 +1,7 @@
 /*
  * GNU General Public License v3.0
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-package de.unijena.cheminf.clustering.art2a.Clustering;
+package de.unijena.cheminf.clustering.art2a.clustering;
 
-import de.unijena.cheminf.clustering.art2a.Interfaces.IART2aClustering;
-import de.unijena.cheminf.clustering.art2a.Result.ART2aDoubleClusteringResult;
+import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClustering;
+import de.unijena.cheminf.clustering.art2a.results.ART2aFloatClusteringResult;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The class implements an ART-2A algorithm in double machine precision for fast,
+ * The class implements an ART-2A algorithm in single machine precision for fast,
  * stable unsupervised clustering for open categorical problems. The class is primarily intended for the
  * clustering of fingerprints. <br>
  * LITERATURE SOURCE:<br>
@@ -45,22 +45,22 @@ import java.util.logging.Logger;
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public class ART2aDoubleClustering implements IART2aClustering {
+public class ART2aFloatClustering implements IART2aClustering {
     //<editor-fold desc="private class variables" defaultstate="collapsed">
     /**
      * Matrix with all fingerprints to be clustered.
      * Each row of the matrix represents a fingerprint.
      */
-    private double[][] dataMatrix;
+    private float[][] dataMatrix;
     /**
      * Matrix contains all cluster vectors.
      */
-    private double[][] clusterMatrix;
+    private float[][] clusterMatrix;
     /**
      * Matrix contains all cluster vectors of previous epoch. Is needed to check the convergence of
      * the system.
      */
-    private double[][] clusterMatrixPreviousEpoch;
+    private float[][] clusterMatrixPreviousEpoch;
     /**
      * Maximum number of epochs the system may need to converge.
      */
@@ -93,7 +93,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
     /**
      * Threshold for contrast enhancement. If a vector/fingerprint component is below the threshold, it is set to zero.
      */
-    private final double thresholdForContrastEnhancement;
+    private final float thresholdForContrastEnhancement;
     /**
      * Number of fingerprints to be clustered.
      */
@@ -109,19 +109,19 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * a high scaling factor will cause the new inputs to be added to existing clusters.<br>
      * Default value:  1 / Math.sqrt(numberOfComponents - 1)
      */
-    private final double scalingFactor;
+    private final float scalingFactor;
     /**
      * The required similarity parameter represents the minimum value that must exist between the current
      * cluster vector and the previous cluster vector for the system to be considered convergent.
      * The clustering process continues until there are no more significant changes between
      * the cluster vectors of the current epoch and the previous epoch.
      */
-    private final double requiredSimilarity;
+    private final float requiredSimilarity;
     /**
      * Parameter to define the intensity of keeping the old class vector in mind
      * before the system adapts it to the new sample vector.
      */
-    private final double learningParameter;
+    private final float learningParameter;
     /**
      * Initial capacity value for maps
      */
@@ -132,7 +132,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
     /**
      * Logger of this class
      */
-    private static final Logger LOGGER = Logger.getLogger(ART2aDoubleClustering.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ART2aFloatClustering.class.getName());
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -158,25 +158,25 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * @throws NullPointerException is thrown if aDataMatrix is null.
      *
      */
-    public ART2aDoubleClustering(double[][] aDataMatrix, int aMaximumNumberOfEpochs, float aVigilanceParameter, double aRequiredSimilarity, double aLearningParameter) throws IllegalArgumentException, NullPointerException {
+    public ART2aFloatClustering(float[][] aDataMatrix, int aMaximumNumberOfEpochs, float aVigilanceParameter, float aRequiredSimilarity, float aLearningParameter) throws IllegalArgumentException, NullPointerException {
         if(aDataMatrix == null) {
-            ART2aDoubleClustering.LOGGER.severe("The data matrix is null.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The data matrix is null.");
             throw new NullPointerException("aDataMatrix is null.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
-            ART2aDoubleClustering.LOGGER.severe("Number of epochs must be at least greater than zero.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"Number of epochs must be at least greater than zero.");
             throw new IllegalArgumentException("Number of epochs must be at least greater than zero.");
         }
-        if(aVigilanceParameter < 0 || aVigilanceParameter > 1) {
-            ART2aDoubleClustering.LOGGER.severe("The vigilance parameter must be greater than 0 and less than 1.");
+        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
         }
         if(aRequiredSimilarity < 0 || aRequiredSimilarity > 1) {
-            ART2aDoubleClustering.LOGGER.severe("The required similarity parameter must be greater than 0 and less than 1.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "The required similarity parameter must be greater than 0 and less than 1.");
             throw new IllegalArgumentException("The required similarity parameter must be greater than 0 and less than 1.");
         }
         if(aLearningParameter < 0 || aLearningParameter > 1) {
-            ART2aDoubleClustering.LOGGER.severe("The learning parameter must be greater than 0 and less than 1.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The learning parameter must be greater than 0 and less than 1.");
             throw new IllegalArgumentException("The learning parameter must be greater than 0 and less than 1.");
         }
         this.vigilanceParameter = aVigilanceParameter;
@@ -186,8 +186,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
         this.numberOfFingerprints = this.dataMatrix.length;
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.numberOfComponents = this.dataMatrix[0].length;
-        this.scalingFactor = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
-        this.thresholdForContrastEnhancement = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
+        this.scalingFactor = (float) (1.0 / Math.sqrt(this.numberOfComponents + 1.0));
+        this.thresholdForContrastEnhancement = (float) (1.0 / Math.sqrt(this.numberOfComponents + 1.0));
     }
     //</editor-fold>
     //
@@ -202,25 +202,25 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * @throws NullPointerException is thrown if the given data matrix is null.
      * @throws IllegalArgumentException is thrown if the input vectors are invalid
      */
-    private double[][] checkDataMatrix(double[][] aDataMatrix) throws NullPointerException, IllegalArgumentException {
+    private float[][] checkDataMatrix(float[][] aDataMatrix) throws NullPointerException, IllegalArgumentException {
         if(aDataMatrix == null) {
-            ART2aDoubleClustering.LOGGER.severe("aDataMatrix is null.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"aDataMatrix is null.");
             throw new IllegalArgumentException("aDataMatrix is null.");
         }
         if(aDataMatrix.length <= 0) {
-            ART2aDoubleClustering.LOGGER.severe("The number of vectors must greater then 0 to cluster inputs.");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "The number of vectors must greater then 0 to cluster inputs.");
             throw new IllegalArgumentException("The number of vectors must greater then 0 to cluster inputs.");
         }
         int tmpNumberOfNullComponentsInDataMatrix = 0;
         int tmpNumberOfElementsInDataMatrix = aDataMatrix.length * aDataMatrix[0].length;
         int tmpNumberOfVectorComponents = aDataMatrix[0].length;
-        double tmpCurrentVectorComponent;
-        double[] tmpSingleFingerprint;
-        HashMap<double[],Integer> tmpFingerprintsForScalingToMatrixRowMap = new HashMap<>((int) (aDataMatrix.length * this.INITIAL_CAPACITY_VALUE), 0.75f);
+        float tmpCurrentVectorComponent;
+        float[] tmpSingleFingerprint;
+        HashMap<float[],Integer> tmpFingerprintsForScalingToMatrixRowMap = new HashMap<>((int) (aDataMatrix.length * this.INITIAL_CAPACITY_VALUE), 0.75f);
         for(int i = 0; i < aDataMatrix.length; i++) {
             tmpSingleFingerprint = aDataMatrix[i];
             if(tmpNumberOfVectorComponents != tmpSingleFingerprint.length) {
-                ART2aDoubleClustering.LOGGER.severe("The input vectors must be have the same length!");
+                ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The input vectors must be have the same length!");
                 throw new IllegalArgumentException("The input vectors must be have the same length!");
             }
             for(int j = 0; j < tmpSingleFingerprint.length; j++) {
@@ -229,7 +229,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
                     tmpFingerprintsForScalingToMatrixRowMap.put(aDataMatrix[i],i);
                 }
                 if(tmpCurrentVectorComponent < 0) {
-                    ART2aDoubleClustering.LOGGER.severe("Only positive values allowed.");
+                    ART2aFloatClustering.LOGGER.log(Level.SEVERE, "Only positive values allowed.");
                     throw new IllegalArgumentException("Only positive values allowed.");
                 }
                 if(tmpCurrentVectorComponent == 0) {
@@ -237,7 +237,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
                 }
             }
             if(tmpNumberOfNullComponentsInDataMatrix == tmpNumberOfElementsInDataMatrix) {
-                ART2aDoubleClustering.LOGGER.log(Level.SEVERE, "All vectors are null vectors. Clustering not possible.");
+                ART2aFloatClustering.LOGGER.log(Level.SEVERE, "All vectors are null vectors. Clustering not possible.");
                 throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible");
             }
         }
@@ -251,20 +251,20 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * Calculates the length of a vector. The length is needed for the normalisation of the vector.
      *
      * @param anInputVector vector whose length is calculated.
-     * @return double vector length.
+     * @return float vector length.
      * @throws ArithmeticException is thrown if the addition of the vector components results in zero.
      */
-    private double getVectorLength (double[] anInputVector) throws ArithmeticException {
-        double tmpVectorComponentsSqrtSum = 0;
-        double tmpVectorLength;
+    private float getVectorLength (float[] anInputVector) throws ArithmeticException {
+        float tmpVectorComponentsSqrtSum = 0;
+        float tmpVectorLength;
         for (int i = 0; i < anInputVector.length; i++) {
             tmpVectorComponentsSqrtSum += anInputVector[i] * anInputVector[i];
         }
         if (tmpVectorComponentsSqrtSum == 0) {
-            ART2aDoubleClustering.LOGGER.severe("Addition of the vector components result in zero!");
+            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "Addition of the vector components result in zero!");
             throw new ArithmeticException("Addition of the vector components results in zero!");
         } else {
-            tmpVectorLength = Math.sqrt(tmpVectorComponentsSqrtSum);
+            tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum);
         }
         return tmpVectorLength;
     }
@@ -277,16 +277,16 @@ public class ART2aDoubleClustering implements IART2aClustering {
      *                                   outside 0-1 to the row position in the matrix.
      * @param aDataMatrix the matrix contains all input vectors/fingerprints to be clustered.
      */
-    private void scaleInput (HashMap <double[],Integer> aFingerprintToMatrixRowMap, double[][] aDataMatrix){
-        for (double[] tmpScalingVector : aFingerprintToMatrixRowMap.keySet()) {
-            double tmpFirstComponent = tmpScalingVector[0];
-            for (double tmpComponentsOfScalingVector : tmpScalingVector) {
+    private void scaleInput (HashMap <float[],Integer> aFingerprintToMatrixRowMap, float[][] aDataMatrix){
+        for (float[] tmpScalingVector : aFingerprintToMatrixRowMap.keySet()) {
+            float tmpFirstComponent = tmpScalingVector[0];
+            for (float tmpComponentsOfScalingVector : tmpScalingVector) {
                 if (tmpComponentsOfScalingVector > tmpFirstComponent) {
                     tmpFirstComponent = tmpComponentsOfScalingVector;
                 }
             }
             for (int i = 0; i < tmpScalingVector.length; i++) {
-                double tmpScaledComponent = tmpScalingVector[i] / tmpFirstComponent;
+                float tmpScaledComponent = tmpScalingVector[i] / tmpFirstComponent;
                 tmpScalingVector[i] = tmpScaledComponent;
                 // this.dataMatrix[aFingerprintToMatrixRowMap.get(tmpScalingVector)] = tmpScalingVector;
                 aDataMatrix[aFingerprintToMatrixRowMap.get(tmpScalingVector)] = tmpScalingVector;
@@ -301,8 +301,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
      */
     @Override
     public void initializeMatrices() {
-        this.clusterMatrix = new double[this.numberOfFingerprints][this.numberOfComponents];
-        this.clusterMatrixPreviousEpoch = new double[this.numberOfFingerprints][this.numberOfComponents];
+        this.clusterMatrix = new float[this.numberOfFingerprints][this.numberOfComponents];
+        this.clusterMatrixPreviousEpoch = new float[this.numberOfFingerprints][this.numberOfComponents];
     }
     //
     /**
@@ -335,9 +335,10 @@ public class ART2aDoubleClustering implements IART2aClustering {
      * {@inheritDoc}
      */
     @Override
-    public ART2aDoubleClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException {
+    public ART2aFloatClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException  {
         this.clusteringStatus = false;
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
+       // ConcurrentLinkedQueue<String> tmpClusteringProcess = null;
         this.clusteringProcess = null;
         this.clusteringResult = null;
         if(aAddClusteringResultFileAdditionally) {
@@ -348,15 +349,15 @@ public class ART2aDoubleClustering implements IART2aClustering {
         //<editor-fold desc="Initialization and declaration of some important variables" defaultstate="collapsed">
         this.initializeMatrices();
         this.seed = 1;
-        double[] tmpClusterMatrixRow;
-        double[] tmpClusterMatrixRowOld;
-        double tmpInitialClusterVectorWeightValue = 1.0 / Math.sqrt(this.numberOfComponents);
+        float[] tmpClusterMatrixRow;
+        float[] tmpClusterMatrixRowOld;
+        float tmpInitialClusterVectorWeightValue = (float) (1.0 / Math.sqrt(this.numberOfComponents));
         int tmpNumberOfDetectedClusters = 0;
         int[] tmpClusterOccupation = new int[this.numberOfFingerprints];
-        double tmpVectorLengthForFirstNormalizationStep;
-        double tmpVectorLengthAfterContrastEnhancement;
-        double tmpRho;
-        double tmpVectorLengthForModificationWinnerCluster;
+        float tmpVectorLengthForFirstNormalizationStep;
+        float tmpVectorLengthAfterContrastEnhancement;
+        float tmpRho;
+        float tmpVectorLengthForModificationWinnerCluster;
         int tmpWinnerClassIndex;
         boolean tmpConvergence = false;
         // </editor-fold>
@@ -370,7 +371,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
             }
         }
         //</editor-fold>
-        //<editor-fold desc="Clustering results in text files set up." defaultstate="collapsed">
+        //<editor-fold desc="Clustering results in text file set up." defaultstate="collapsed">
         int tmpCurrentNumberOfEpochs = 0;
         if(aAddClusteringResultFileAdditionally) {
             this.clusteringResult.add("Vigilance parameter: " + aVigilanceParameter);
@@ -388,7 +389,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
             //</editor-fold>
             //<editor-fold desc="Check current input vector for null vector." defaultstate="collapsed">
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfFingerprints; tmpCurrentInput++) {
-                double[] tmpInputVector = new double[this.numberOfComponents];
+                float[] tmpInputVector = new float[this.numberOfComponents];
                 boolean tmpCheckNullVector = true;
                 for(int tmpCurrentInputVectorComponents = 0; tmpCurrentInputVectorComponents < this.numberOfComponents; tmpCurrentInputVectorComponents++) {
                     tmpInputVector[tmpCurrentInputVectorComponents] = this.dataMatrix[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]][tmpCurrentInputVectorComponents];
@@ -428,7 +429,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
                     if(tmpNumberOfDetectedClusters == 0) {
                         this.clusterMatrix[0] = tmpInputVector;
-                        tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =tmpNumberOfDetectedClusters;
+                        tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpNumberOfDetectedClusters;
                         tmpNumberOfDetectedClusters++;
                         if(aAddClusteringResultFileAdditionally) {
                             this.clusteringProcess.add("Cluster number: 0");
@@ -438,8 +439,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
                     //</editor-fold>
                     else {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
-                        double tmpSumCom = 0;
-                        for(double tmpVectorComponentsOfNormalizeVector : tmpInputVector) {
+                        float tmpSumCom = 0;
+                        for(float tmpVectorComponentsOfNormalizeVector : tmpInputVector) {
                             tmpSumCom += tmpVectorComponentsOfNormalizeVector;
                         }
                         tmpWinnerClassIndex = tmpNumberOfDetectedClusters;
@@ -451,8 +452,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
                         for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters; tmpCurrentClusterMatrixRow++) {
-                            double[] tmpRow;
-                            double tmpRhoForExistingClusters = 0;
+                            float[] tmpRow;
+                            float tmpRhoForExistingClusters = 0;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
                             for(int tmpElementsInRow = 0; tmpElementsInRow < this.numberOfComponents; tmpElementsInRow++) {
                                 tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow];
@@ -485,9 +486,9 @@ public class ART2aDoubleClustering implements IART2aClustering {
                                 }
                             }
                             //<editor-fold desc="Modification of the winner cluster vector."
-                            double tmpVectorLength = this.getVectorLength(tmpInputVector);
-                            double tmpFactor1 = this.learningParameter / tmpVectorLength;
-                            double tmpFactor2 = 1 - this.learningParameter;
+                            float tmpVectorLength = this.getVectorLength(tmpInputVector);
+                            float tmpFactor1 = this.learningParameter / tmpVectorLength;
+                            float tmpFactor2 = 1 - this.learningParameter;
                             for(int tmpAdaptedComponents = 0; tmpAdaptedComponents < this.numberOfComponents; tmpAdaptedComponents++) {
                                 tmpInputVector[tmpAdaptedComponents] = tmpInputVector[tmpAdaptedComponents] * tmpFactor1 + tmpFactor2 * this.clusterMatrix[tmpWinnerClassIndex][tmpAdaptedComponents];
                             }
@@ -498,8 +499,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
                             this.clusterMatrix[tmpWinnerClassIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpWinnerClassIndex;
                             if(aAddClusteringResultFileAdditionally) {
-                                clusteringProcess.add("Cluster number: " + tmpWinnerClassIndex);
-                                clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                                this.clusteringProcess.add("Cluster number: " + tmpWinnerClassIndex);
+                                this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
                             }
                             //</editor-fold>
                         }
@@ -515,8 +516,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
             //</editor-fold>
             //<editor-fold desc="Last clustering process input."
             if(aAddClusteringResultFileAdditionally) {
-                clusteringProcess.add("Convergence status: " + tmpConvergence);
-                clusteringProcess.add("---------------------------------------");
+                this.clusteringProcess.add("Convergence status: " + tmpConvergence);
+                this.clusteringProcess.add("---------------------------------------");
             }
             //</editor-fold>
         }
@@ -531,27 +532,27 @@ public class ART2aDoubleClustering implements IART2aClustering {
         //</editor-fold>
         //<editor-fold desc="Return object"
         if(!aAddClusteringResultFileAdditionally) {
-            return new ART2aDoubleClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
+            return new ART2aFloatClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
         } else {
-            return new ART2aDoubleClusteringResult(aVigilanceParameter,tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, this.clusteringProcess, this.clusteringResult, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
+            return new ART2aFloatClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters,this.clusteringProcess, this.clusteringResult, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
         }
-        //</editor-fold>
     }
     //
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) {
-        boolean tmpConvergence = true;
-        double[] tmpRow;
+    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) { // throws RuntimeException
+       // boolean tmpConvergence = true;
+        boolean tmpConvergence = false;
+        float[] tmpRow;
         if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
-           // if (tmpConvergence) {
+          //  if (tmpConvergence) {
                 // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
                 tmpConvergence = true;
-                double tmpScalarProductOfClassVector;
-                double[] tmpCurrentRowInClusterMatrix;
-                double[] tmpPreviousEpochRow;
+                float tmpScalarProductOfClassVector;
+                float[] tmpCurrentRowInClusterMatrix;
+                float[] tmpPreviousEpochRow;
                 for (int i = 0; i < aNumberOfDetectedClasses; i++) {
                     tmpScalarProductOfClassVector = 0;
                     tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
@@ -564,7 +565,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
                         break;
                     }
                 }
-           // }
+          //  }
             if(!tmpConvergence) {
                 for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
                     tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
@@ -576,8 +577,8 @@ public class ART2aDoubleClustering implements IART2aClustering {
             this.clusteringProcess.add("Please increase the maximum number of epochs to get reliable results.");
             this.clusteringResult.add("Convergence failed for: " + this.vigilanceParameter);
             this.clusteringResult.add("Please increase the maximum number of epochs to get reliable results.");
-            ART2aDoubleClustering.LOGGER.log(Level.INFO,"Convergence failed for: " + this.vigilanceParameter +"\nPlease take the results of clustering of the vigilance parameter " + this.vigilanceParameter +" with caution.");
-            //throw new RuntimeException("Convergence failed"); //
+            ART2aFloatClustering.LOGGER.log(Level.INFO,"Convergence failed for: " + this.vigilanceParameter +"\nPlease take the results of clustering of the vigilance parameter " + this.vigilanceParameter +" with caution.");
+           // throw new RuntimeException("Convergence failed");
         }
         return tmpConvergence;
     }
