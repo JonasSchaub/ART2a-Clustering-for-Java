@@ -338,7 +338,6 @@ public class ART2aFloatClustering implements IART2aClustering {
     public ART2aFloatClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException  {
         this.clusteringStatus = false;
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
-       // ConcurrentLinkedQueue<String> tmpClusteringProcess = null;
         this.clusteringProcess = null;
         this.clusteringResult = null;
         if(aAddClusteringResultFileAdditionally) {

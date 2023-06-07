@@ -167,7 +167,7 @@ public class ART2aDoubleClustering implements IART2aClustering {
             ART2aDoubleClustering.LOGGER.severe("Number of epochs must be at least greater than zero.");
             throw new IllegalArgumentException("Number of epochs must be at least greater than zero.");
         }
-        if(aVigilanceParameter < 0 || aVigilanceParameter > 1) {
+        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
             ART2aDoubleClustering.LOGGER.severe("The vigilance parameter must be greater than 0 and less than 1.");
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
         }

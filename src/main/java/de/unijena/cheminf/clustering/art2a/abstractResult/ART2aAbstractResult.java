@@ -99,7 +99,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @param aClusterView array for cluster assignment of each input vector.
      */
     public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus) {
-        if(aNumberOfEpochs < 0) {
+        if(aNumberOfEpochs <= 0) {
             ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
             throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
         }
@@ -131,7 +131,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
                                ConcurrentLinkedQueue<String> aClusteringProcessQueue,
                                ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus) {
-        if(aNumberOfEpochs < 0) {
+        if(aNumberOfEpochs <= 0) {
             ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
             throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
         }
@@ -193,8 +193,8 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      */
     @Override
     public int[] getClusterIndices(int aClusterNumber) throws IllegalArgumentException {
-        if (aClusterNumber > this.numberOfDetectedClusters) { // TODO test
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "Thw specified cluster number does not exist and exceeds the maximum number of clusters.");
+        if (aClusterNumber >= this.numberOfDetectedClusters) {
+            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "The specified cluster number does not exist and exceeds the maximum number of clusters.");
             throw new IllegalArgumentException("The specified cluster number does not exist and exceeds the maximum number of clusters.");
         } else {
             int[] tmpIndicesInCluster = new int[this.getClusterMembers(this.clusterView).get(aClusterNumber)];
