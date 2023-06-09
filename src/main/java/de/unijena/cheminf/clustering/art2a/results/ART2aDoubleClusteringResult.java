@@ -28,7 +28,6 @@ import de.unijena.cheminf.clustering.art2a.abstractResult.ART2aAbstractResult;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,6 +48,7 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      */
     private final double[][] dataMatrix;
     //</editor-fold>
+    //
     //<editor-fold desc="Private final static class variables" defaultstate="collapsed">
     private static final Logger LOGGER = Logger.getLogger(ART2aDoubleClusteringResult.class.getName());
     //</editor-fold>
@@ -60,14 +60,21 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
+     * @param aClusteringProcessQueue clustering result (process) queue.
+     * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
-     * @param aClusterMatrix double cluster vector matrix. All cluster vectors created after double ART-2a clustering are
+     * @param aClusterMatrix cluster vector matrix. All cluster vectors created after double ART-2a clustering are
      *                       stored in this matrix.
-     * @param aDataMatrix double matrix with all input vectors/fingerprints.
+     * @param aConvergenceStatus false, if the system has not converged within the specified maximum epoch,
+     *                           otherwise it is true.
+     * @param aDataMatrix matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
+     *
      */
-    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus, double[][] aClusterMatrix, double[][] aDataMatrix) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aConvergenceStatus);
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                       ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus,
+                                       double[][] aClusterMatrix, double[][] aDataMatrix){
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters,aClusterView, aConvergenceStatus,aClusteringProcessQueue, aClusteringResultQueue);
         Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
         Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
         this.doubleClusterMatrix = aClusterMatrix;
@@ -80,23 +87,16 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue.
-     * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
-     * @param aClusterMatrix cluster vector matrix. All cluster vectors created after double ART-2a clustering are
+     * @param aConvergenceStatus false, if the system has not converged within the specified maximum epoch,
+     *                           otherwise it is true.
+     * @param aClusterMatrix double cluster vector matrix. All cluster vectors created after double ART-2a clustering are
      *                       stored in this matrix.
-     * @param aDataMatrix matrix with all input vectors/fingerprints.
+     * @param aDataMatrix double matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
-     *
      */
-    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                       ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus,
-                                       double[][] aClusterMatrix, double[][] aDataMatrix){
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusteringProcessQueue, aClusteringResultQueue,aClusterView, aConvergenceStatus);
-        Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
-        Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
-        this.doubleClusterMatrix = aClusterMatrix;
-        this.dataMatrix = aDataMatrix;
+    public ART2aDoubleClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus, double[][] aClusterMatrix, double[][] aDataMatrix) {
+        this(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, null, null, aClusterView,aConvergenceStatus, aClusterMatrix, aDataMatrix);
     }
     //</editor-fold>
     //
@@ -106,8 +106,7 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
      */
     @Override
     public int getClusterRepresentatives(int aClusterNumber) throws IllegalArgumentException {
-        if(aClusterNumber > this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
-            ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist or is invalid.");
+        if(aClusterNumber >= this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
             throw new IllegalArgumentException("The given cluster number does not exist or is invalid.");
         }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
@@ -139,17 +138,17 @@ public class ART2aDoubleClusteringResult extends ART2aAbstractResult {
     @Override
     public Double getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException {
         if(aFirstCluster < 0 || aSecondCluster < 0) {
-            ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number is negative/invalid.");
             throw new IllegalArgumentException("The given cluster number is negative/invalid.");
         }
+        int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters();
         double tmpAngle;
-        if(aFirstCluster == aSecondCluster) {
+        if(aFirstCluster == aSecondCluster && (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster)) {
+            throw new IllegalArgumentException("The given cluster number(s) do(es) not exist");
+        } else if (aFirstCluster == aSecondCluster) {
             tmpAngle = 0;
         } else {
-            int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters() - 1;
-            if (aFirstCluster > tmpNumberOfDetectedCluster || aSecondCluster > tmpNumberOfDetectedCluster) {
-                ART2aDoubleClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist.");
-                throw new IllegalArgumentException("The given cluster number does not exist.");
+            if (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster) {
+                throw new IllegalArgumentException("The given cluster number(s) do(es) not exist.");
             }
             double[] tmpFirstCluster = this.doubleClusterMatrix[aFirstCluster];
             double[] tmpSecondCluster = this.doubleClusterMatrix[aSecondCluster];

@@ -25,12 +25,12 @@
 package de.unijena.cheminf.clustering.art2a.clustering;
 
 import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClustering;
+import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.results.ART2aFloatClusteringResult;
 
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -160,24 +160,19 @@ public class ART2aFloatClustering implements IART2aClustering {
      */
     public ART2aFloatClustering(float[][] aDataMatrix, int aMaximumNumberOfEpochs, float aVigilanceParameter, float aRequiredSimilarity, float aLearningParameter) throws IllegalArgumentException, NullPointerException {
         if(aDataMatrix == null) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The data matrix is null.");
             throw new NullPointerException("aDataMatrix is null.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"Number of epochs must be at least greater than zero.");
             throw new IllegalArgumentException("Number of epochs must be at least greater than zero.");
         }
         if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
-            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
         }
         if(aRequiredSimilarity < 0 || aRequiredSimilarity > 1) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "The required similarity parameter must be greater than 0 and less than 1.");
-            throw new IllegalArgumentException("The required similarity parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The required similarity parameter must be between 0 and 1");
         }
         if(aLearningParameter < 0 || aLearningParameter > 1) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The learning parameter must be greater than 0 and less than 1.");
-            throw new IllegalArgumentException("The learning parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The learning parameter must be greater than 0 and smaller than 1.");
         }
         this.vigilanceParameter = aVigilanceParameter;
         this.requiredSimilarity = aRequiredSimilarity;
@@ -204,12 +199,10 @@ public class ART2aFloatClustering implements IART2aClustering {
      */
     private float[][] checkDataMatrix(float[][] aDataMatrix) throws NullPointerException, IllegalArgumentException {
         if(aDataMatrix == null) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE,"aDataMatrix is null.");
             throw new IllegalArgumentException("aDataMatrix is null.");
         }
         if(aDataMatrix.length <= 0) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "The number of vectors must greater then 0 to cluster inputs.");
-            throw new IllegalArgumentException("The number of vectors must greater then 0 to cluster inputs.");
+            throw new IllegalArgumentException("The number of vectors must greater than 0 to cluster inputs.");
         }
         int tmpNumberOfNullComponentsInDataMatrix = 0;
         int tmpNumberOfElementsInDataMatrix = aDataMatrix.length * aDataMatrix[0].length;
@@ -220,7 +213,6 @@ public class ART2aFloatClustering implements IART2aClustering {
         for(int i = 0; i < aDataMatrix.length; i++) {
             tmpSingleFingerprint = aDataMatrix[i];
             if(tmpNumberOfVectorComponents != tmpSingleFingerprint.length) {
-                ART2aFloatClustering.LOGGER.log(Level.SEVERE,"The input vectors must be have the same length!");
                 throw new IllegalArgumentException("The input vectors must be have the same length!");
             }
             for(int j = 0; j < tmpSingleFingerprint.length; j++) {
@@ -229,7 +221,6 @@ public class ART2aFloatClustering implements IART2aClustering {
                     tmpFingerprintsForScalingToMatrixRowMap.put(aDataMatrix[i],i);
                 }
                 if(tmpCurrentVectorComponent < 0) {
-                    ART2aFloatClustering.LOGGER.log(Level.SEVERE, "Only positive values allowed.");
                     throw new IllegalArgumentException("Only positive values allowed.");
                 }
                 if(tmpCurrentVectorComponent == 0) {
@@ -237,7 +228,6 @@ public class ART2aFloatClustering implements IART2aClustering {
                 }
             }
             if(tmpNumberOfNullComponentsInDataMatrix == tmpNumberOfElementsInDataMatrix) {
-                ART2aFloatClustering.LOGGER.log(Level.SEVERE, "All vectors are null vectors. Clustering not possible.");
                 throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible");
             }
         }
@@ -261,7 +251,6 @@ public class ART2aFloatClustering implements IART2aClustering {
             tmpVectorComponentsSqrtSum += anInputVector[i] * anInputVector[i];
         }
         if (tmpVectorComponentsSqrtSum == 0) {
-            ART2aFloatClustering.LOGGER.log(Level.SEVERE, "Addition of the vector components result in zero!");
             throw new ArithmeticException("Addition of the vector components results in zero!");
         } else {
             tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum);
@@ -335,7 +324,7 @@ public class ART2aFloatClustering implements IART2aClustering {
      * {@inheritDoc}
      */
     @Override
-    public ART2aFloatClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException  {
+    public IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally)  {
         this.clusteringStatus = false;
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
         this.clusteringProcess = null;
@@ -516,6 +505,7 @@ public class ART2aFloatClustering implements IART2aClustering {
             //<editor-fold desc="Last clustering process input."
             if(aAddClusteringResultFileAdditionally) {
                 this.clusteringProcess.add("Convergence status: " + tmpConvergence);
+                this.clusteringProcess.add("Cluster view:" + java.util.Arrays.toString(tmpClusterOccupation));
                 this.clusteringProcess.add("---------------------------------------");
             }
             //</editor-fold>
@@ -535,13 +525,14 @@ public class ART2aFloatClustering implements IART2aClustering {
         } else {
             return new ART2aFloatClusteringResult(aVigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters,this.clusteringProcess, this.clusteringResult, tmpClusterOccupation, tmpConvergence, this.clusterMatrix, this.dataMatrix);
         }
+        //</editor-fold>
     }
     //
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) { // throws RuntimeException
+    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) {
        // boolean tmpConvergence = true;
         boolean tmpConvergence = false;
         float[] tmpRow;
@@ -572,12 +563,7 @@ public class ART2aFloatClustering implements IART2aClustering {
                 }
             }
         } else {
-            this.clusteringProcess.add("Convergence failed for: " + this.vigilanceParameter);
-            this.clusteringProcess.add("Please increase the maximum number of epochs to get reliable results.");
-            this.clusteringResult.add("Convergence failed for: " + this.vigilanceParameter);
-            this.clusteringResult.add("Please increase the maximum number of epochs to get reliable results.");
-            ART2aFloatClustering.LOGGER.log(Level.INFO,"Convergence failed for: " + this.vigilanceParameter +"\nPlease take the results of clustering of the vigilance parameter " + this.vigilanceParameter +" with caution.");
-           // throw new RuntimeException("Convergence failed");
+            throw new RuntimeException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
         }
         return tmpConvergence;
     }

@@ -82,8 +82,11 @@ public interface IART2aClusteringResult {
      * the folder must be created first. This requires the method call createClusteringResultInFile(String aPathName).
      *
      * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#createClusteringResultInFile(String)
+     * @param aClusteringProcessWriter
+     * @param aClusteringResultWriter
+     * @throws NullPointerException is thrown, if the Writers are null.
      *
      */
-    void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter);
+    void exportClusteringResultsToTextFiles(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter) throws NullPointerException;
     // </editor-fold>
 }

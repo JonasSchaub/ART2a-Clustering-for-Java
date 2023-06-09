@@ -64,9 +64,8 @@ public interface IART2aClustering {
      *                                             If the parameter == false, the information is not written
      *                                             out in text files.
      * @return IART2aClusteringResult
-     * @throws RuntimeException is thrown if the system cannot converge within the specified number of epochs.
      */
-    IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally) throws RuntimeException; // early Exception
+    IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally);
     //
     /**
      * At the end of each epoch, it is checked whether the system has converged or not. If the system has not

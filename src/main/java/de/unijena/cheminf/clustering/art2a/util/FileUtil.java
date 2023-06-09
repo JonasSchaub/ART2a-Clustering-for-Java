@@ -74,7 +74,6 @@ public final class FileUtil {
      * If necessary, existing result files will also be deleted.
      *
      * @return PrintWriter[]
-     * @throws IOException is thrown if an error occurs when creating the file.
      */
     public static PrintWriter[] createClusteringResultInFile(String aPathName) {
         PrintWriter tmpClusteringResultPrintWriter = null;
@@ -110,7 +109,6 @@ public final class FileUtil {
      */
     public static float[][] importFloatDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
-            FileUtil.LOGGER.log(Level.SEVERE, "aFileName is null or empty/blank.");
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
         BufferedReader tmpFingerprintFileReader = null;
@@ -162,7 +160,6 @@ public final class FileUtil {
      */
     public static double[][] importDoubleDataMatrixFromTextFile(String aFilePath, char aSeparator) throws IllegalArgumentException {
         if (aFilePath == null || aFilePath.isEmpty() || aFilePath.isBlank()) {
-            FileUtil.LOGGER.log(Level.SEVERE, "aFileName is null or empty/blank.");
             throw new IllegalArgumentException("aFileName is null or empty/blank.");
         }
         BufferedReader tmpFingerprintFileReader = null;

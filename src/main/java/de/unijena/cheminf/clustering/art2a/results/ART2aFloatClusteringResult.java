@@ -28,7 +28,6 @@ import de.unijena.cheminf.clustering.art2a.abstractResult.ART2aAbstractResult;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,6 +48,7 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
      */
     private final float[][] dataMatrix;
     //</editor-fold>
+    //
     //<editor-fold desc="Private final static class variables" defaultstate="collapsed">
     /**
      * Logger of this class
@@ -63,15 +63,20 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
+     * @param aClusteringProcessQueue clustering result (process) queue.
+     * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
+     * @param aConvergenceStatus false, if the system has not converged within the specified maximum epoch,
+     *                           otherwise it is true.
      * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float ART-2a clustering are
      *                       stored in this matrix.
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
+     *
      */
-    public ART2aFloatClusteringResult(float aVigilanceParameter,int aNumberOfEpochs, int aNumberOfDetectedClusters,
-                                      int[] aClusterView, boolean aConvergenceStatus, float[][] aClusterMatrix, float[][] aDataMatrix) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aConvergenceStatus);
+    public ART2aFloatClusteringResult(float aVigilanceParameter,int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                      ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus, float[][] aClusterMatrix, float[][] aDataMatrix) {
+        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aConvergenceStatus, aClusteringProcessQueue, aClusteringResultQueue);
         Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
         Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
         this.floatClusterMatrix = aClusterMatrix;
@@ -84,22 +89,17 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue.
-     * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
+     * @param aConvergenceStatus false, if the system has not converged within the specified maximum epoch,
+     *                           otherwise it is true.
      * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float ART-2a clustering are
      *                       stored in this matrix.
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
-     *
      */
-    public ART2aFloatClusteringResult(float aVigilanceParameter,int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                      ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus, float[][] aClusterMatrix, float[][] aDataMatrix) {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusteringProcessQueue, aClusteringResultQueue, aClusterView, aConvergenceStatus);
-        Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
-        Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
-        this.floatClusterMatrix = aClusterMatrix;
-        this.dataMatrix = aDataMatrix;
+    public ART2aFloatClusteringResult(float aVigilanceParameter,int aNumberOfEpochs, int aNumberOfDetectedClusters,
+                                      int[] aClusterView, boolean aConvergenceStatus, float[][] aClusterMatrix, float[][] aDataMatrix) {
+        this(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, null, null, aClusterView, aConvergenceStatus, aClusterMatrix, aDataMatrix);
     }
     //</editor-fold>
     //
@@ -109,8 +109,7 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
      */
     @Override
     public int getClusterRepresentatives(int aClusterNumber) throws IllegalArgumentException {
-        if(aClusterNumber > this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
-            ART2aFloatClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist or is invalid.");
+        if(aClusterNumber >= this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
             throw new IllegalArgumentException("The given cluster number does not exist or is invalid.");
         }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
@@ -142,16 +141,17 @@ public class ART2aFloatClusteringResult extends ART2aAbstractResult  {
     @Override
     public Float getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException {
         if(aFirstCluster < 0 || aSecondCluster < 0) {
-            ART2aFloatClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number is negative/invalid.");
             throw new IllegalArgumentException("The given cluster number is negative/invalid.");
         }
+        int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters();
         float tmpAngle;
-        if(aFirstCluster == aSecondCluster) {
+        if(aFirstCluster == aSecondCluster && (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster)) {
+            throw new IllegalArgumentException("The given cluster number(s) do(es) not exist");
+        } else if (aFirstCluster == aSecondCluster) {
             tmpAngle = 0;
         } else {
-            int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters() - 1;
-            if (aFirstCluster > tmpNumberOfDetectedCluster || aSecondCluster > tmpNumberOfDetectedCluster) {
-                ART2aFloatClusteringResult.LOGGER.log(Level.SEVERE, "The given cluster number does not exist.");
+            //int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters();
+            if (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster) {
                 throw new IllegalArgumentException("The given cluster number does not exist.");
             }
             float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];

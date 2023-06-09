@@ -34,7 +34,7 @@ hs_err_pid*
 # Ignore Gradle GUI config
 gradle-app.setting
 
-# Avoid ignoring Gradle wrapperrootProject.name = 'MORTAR' jar file (.jar files are usually ignored)
+# Avoid ignoring Gradle wrapperrootProject.name = 'ART-2a-Clustering-for-Java' jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
 # Cache of project

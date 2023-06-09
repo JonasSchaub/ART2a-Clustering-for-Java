@@ -29,23 +29,32 @@ import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Abstract class
+ * Abstract class.
+ * This abstract class implements the IART2aClusteringResult interface.
+ * The interface provides methods to access clustering results.
+ * The abstract class implements all methods of the interface concretely and offers additionally 2 further
+ * abstract methods. The abstract methods are used to determine cluster representatives
+ * and to calculate cluster distances.
  *
- * @param <T> generic parameter
+ * @param <T> generic parameter. This parameter is either a Double or a Float.
+ *           The type of one of the clustering results ('at'see getAngleBetweenCluster(int,int)
+ *           is calculated either as a float or as a double, depending on the clustering precision option.
+ * @see# getAngleBetweenClusters(int aFirstCluster, aSecondCluster)
+ *
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
 public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     //<editor-fold desc="Private class variables" defaultstate="collapsed">
     /**
-     * Represents the cluster assignment of each input vector. For example clusterView[4] = 0 means that
-     * input vector 5 cluster 0 has been assigned.
+     * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
+     * A vigilance parameter close to 0 leads to a coarse clustering (few clusters) and a vigilance
+     * parameter close to 1, on the other hand, leads to a fine clustering (many clusters).
      */
-    private final int[] clusterView;
+    private float vigilanceParameter;
     /**
      * Queue for clustering result (process)
      */
@@ -56,13 +65,12 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     private  ConcurrentLinkedQueue<String> clusteringResult;
     //</editor-fold>
     //
-    //<editor-fold desc="private final variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
     /**
-     * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
-     * A vigilance parameter close to 0 leads to a coarse clustering (few clusters) and a vigilance
-     * parameter close to 1, on the other hand, leads to a fine clustering (many clusters).
+     * Represents the cluster assignment of each input vector. For example clusterView[4] = 0 means that
+     * input vector 5 cluster 0 has been assigned.
      */
-    private float vigilanceParameter;
+    private final int[] clusterView;
     /**
      * Final number of epochs the system needed to converge.
      */
@@ -81,12 +89,13 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      *
      */
     private final boolean convergenceStatus;
-
+    //</editor-fold>
+    //
+    //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(ART2aAbstractResult.class.getName());
-
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
@@ -96,51 +105,22 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusterView array for cluster assignment of each input vector.
-     */
-    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView, boolean aConvergenceStatus) {
-        if(aNumberOfEpochs <= 0) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
-            throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
-        }
-        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
-            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
-        }
-        if(aNumberOfDetectedClusters < 1) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "aNumberOfDetectedClusters is invalid.");
-            throw new IllegalArgumentException("aNumberOfDetectedClusters is invalid.");
-        }
-        this.vigilanceParameter = aVigilanceParameter;
-        this.numberOfEpochs = aNumberOfEpochs;
-        this.numberOfDetectedClusters = aNumberOfDetectedClusters;
-        this.clusterView = aClusterView;
-        this.convergenceStatus = aConvergenceStatus;
-    }
-    //
-    /**
-     * Constructor.
-     *
-     * @param aVigilanceParameter parameter to influence the number of clusters.
-     * @param aNumberOfEpochs final epoch number.
-     * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusteringProcessQueue clustering result (process) queue.
      * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
+     * @param aConvergenceStatus  false, if the system has not converged within the specified maximum epoch,
+     *                            otherwise it is true.
      */
     public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
-                               ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                               ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, boolean aConvergenceStatus) {
+                                int[] aClusterView, boolean aConvergenceStatus,
+                               ConcurrentLinkedQueue<String> aClusteringProcessQueue,ConcurrentLinkedQueue<String> aClusteringResultQueue) {
         if(aNumberOfEpochs <= 0) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"aNumberOfEpochs is invalid.");
             throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
         }
         if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE,"The vigilance parameter must be greater than 0 and less than 1.");
-            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and less than 1.");
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
         }
         if(aNumberOfDetectedClusters < 1) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "aNumberOfDetectedClusters is invalid.");
             throw new IllegalArgumentException("aNumberOfDetectedClusters is invalid.");
         }
         this.clusterView = aClusterView;
@@ -194,7 +174,6 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     @Override
     public int[] getClusterIndices(int aClusterNumber) throws IllegalArgumentException {
         if (aClusterNumber >= this.numberOfDetectedClusters) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "The specified cluster number does not exist and exceeds the maximum number of clusters.");
             throw new IllegalArgumentException("The specified cluster number does not exist and exceeds the maximum number of clusters.");
         } else {
             int[] tmpIndicesInCluster = new int[this.getClusterMembers(this.clusterView).get(aClusterNumber)];
@@ -215,10 +194,8 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * {@inheritDoc}
      */
     @Override
-    public void getClusteringResultsInTextFile(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter)  {
-        if (this.clusteringProcess == null && this.clusteringResult == null) {
-            ART2aAbstractResult.LOGGER.log(Level.SEVERE, "The associated argument to allow writing of the clustering results to text files is set to false.\n" +
-                    "Please set the argument to true.");
+    public void exportClusteringResultsToTextFiles(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter) throws NullPointerException {
+        if (this.clusteringProcess == null || this.clusteringResult == null) {
             throw new NullPointerException("The associated argument to allow writing of the clustering results to text files is set to false.\n" +
                     "Please set the argument to true.");
         }
@@ -232,7 +209,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     //
     //<editor-fold desc="Abstract methods" defaultstate="collapsed">
     /**
-     * Abstract method: calculates the cluster representative. This means that the input that is most
+     * Calculates the cluster representative. This means that the input that is most
      * similar to the cluster vector is determined.
      *
      * @param aClusterNumber Cluster number for which the representative is to be calculated.
@@ -242,7 +219,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     public abstract int getClusterRepresentatives(int aClusterNumber) throws IllegalArgumentException;
     //
     /**
-     * Abstract method: calculates the angle between two clusters.
+     * Calculates the angle between two clusters.
      * The angle between the clusters defines the distance between them.
      * Since all vectors are normalized to unit vectors in the first step of clustering
      * and only positive components are allowed, they all lie in the positive quadrant
@@ -258,7 +235,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     //
     //<editor-fold desc="Private methods" defaultstate="collapsed">
     /**
-     * Method to map the cluster number to the number of cluster members.
+     * Method for determining the size of the detected clusters.
      *
      * @param aClusterView represents the cluster assignment of each input vector.
      * @return HashMap<Integer, Integer>
