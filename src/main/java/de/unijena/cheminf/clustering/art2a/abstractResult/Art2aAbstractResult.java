@@ -24,7 +24,7 @@
 
 package de.unijena.cheminf.clustering.art2a.abstractResult;
 
-import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -33,21 +33,16 @@ import java.util.logging.Logger;
 
 /**
  * Abstract class.
- * This abstract class implements the IART2aClusteringResult interface.
+ * This abstract class implements the IArt2aClusteringResult interface.
  * The interface provides methods to access clustering results.
- * The abstract class implements all methods of the interface concretely and offers additionally 2 further
- * abstract methods. The abstract methods are used to determine cluster representatives
- * and to calculate cluster distances.
+ * The concrete implementation of the clustering result properties in the IArt2aClusteringResult interface
+ * is taken over by this abstract class.
  *
- * @param <T> generic parameter. This parameter is either a Double or a Float.
- *           The type of one of the clustering results ('at'see getAngleBetweenCluster(int,int)
- *           is calculated either as a float or as a double, depending on the clustering precision option.
- * @see# getAngleBetweenClusters(int aFirstCluster, aSecondCluster)
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
+public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     //<editor-fold desc="Private class variables" defaultstate="collapsed">
     /**
      * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
@@ -63,6 +58,10 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * Queue for clustering result
      */
     private  ConcurrentLinkedQueue<String> clusteringResult;
+    /**
+     * The map maps the cluster number to the number of inputs in the cluster.
+     */
+    private HashMap<Integer, Integer> clusterNumberToClusterMemberMap;
     //</editor-fold>
     //
     //<editor-fold desc="Private final class variables" defaultstate="collapsed">
@@ -83,19 +82,13 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * Initial capacity value for maps
      */
     private final double INITIAL_CAPACITY_VALUE = 1.5;
-    /**
-     * Convergence status of the clustering. The convergence status is false, if the given maximum number of epochs
-     * is not sufficient until the system converges.
-     *
-     */
-    private final boolean convergenceStatus;
     //</editor-fold>
     //
     //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
      * Logger of this class
      */
-    private static final Logger LOGGER = Logger.getLogger(ART2aAbstractResult.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Art2aAbstractResult.class.getName());
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
@@ -108,12 +101,11 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * @param aClusteringProcessQueue clustering result (process) queue.
      * @param aClusteringResultQueue clustering result queue.
      * @param aClusterView array for cluster assignment of each input vector.
-     * @param aConvergenceStatus  false, if the system has not converged within the specified maximum epoch,
-     *                            otherwise it is true.
+     * @throws IllegalArgumentException is thrown, if the given arguments are invalid.
      */
-    public ART2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
-                                int[] aClusterView, boolean aConvergenceStatus,
-                               ConcurrentLinkedQueue<String> aClusteringProcessQueue,ConcurrentLinkedQueue<String> aClusteringResultQueue) {
+    public Art2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
+                               int[] aClusterView, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                               ConcurrentLinkedQueue<String> aClusteringResultQueue) throws IllegalArgumentException {
         if(aNumberOfEpochs <= 0) {
             throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
         }
@@ -129,7 +121,7 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
         this.numberOfDetectedClusters = aNumberOfDetectedClusters;
         this.clusteringProcess = aClusteringProcessQueue;
         this.clusteringResult = aClusteringResultQueue;
-        this.convergenceStatus = aConvergenceStatus;
+        this.clusterNumberToClusterMemberMap = this.getClusterSize(this.clusterView);
     }
     //</editor-fold>
     //
@@ -162,21 +154,11 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
      * {@inheritDoc}
      */
     @Override
-    public boolean getConvergenceStatus() {
-        return this.convergenceStatus;
-    }
-    //</editor-fold>
-    //
-    //<editor-fold desc="Overriden public methods" defaultstate="collapsed">
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public int[] getClusterIndices(int aClusterNumber) throws IllegalArgumentException {
         if (aClusterNumber >= this.numberOfDetectedClusters) {
             throw new IllegalArgumentException("The specified cluster number does not exist and exceeds the maximum number of clusters.");
         } else {
-            int[] tmpIndicesInCluster = new int[this.getClusterMembers(this.clusterView).get(aClusterNumber)];
+            int[] tmpIndicesInCluster = new int[this.clusterNumberToClusterMemberMap.get(aClusterNumber)];
             int tmpInputIndices = 0;
             int tmpIterator = 0;
             for (int tmpClusterMember : this.clusterView) {
@@ -189,6 +171,9 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
             return tmpIndicesInCluster;
         }
     }
+    //</editor-fold>
+    //
+    //<editor-fold desc="Overriden public methods" defaultstate="collapsed">
     //
     /**
      * {@inheritDoc}
@@ -207,40 +192,14 @@ public abstract class ART2aAbstractResult<T> implements IART2aClusteringResult {
     }
     //</editor-fold>
     //
-    //<editor-fold desc="Abstract methods" defaultstate="collapsed">
-    /**
-     * Calculates the cluster representative. This means that the input that is most
-     * similar to the cluster vector is determined.
-     *
-     * @param aClusterNumber Cluster number for which the representative is to be calculated.
-     * @return int input indices of the representative input in the cluster.
-     * @throws IllegalArgumentException is thrown if the given cluster number is invalid.
-     */
-    public abstract int getClusterRepresentatives(int aClusterNumber) throws IllegalArgumentException;
-    //
-    /**
-     * Calculates the angle between two clusters.
-     * The angle between the clusters defines the distance between them.
-     * Since all vectors are normalized to unit vectors in the first step of clustering
-     * and only positive components are allowed, they all lie in the positive quadrant
-     * of the unit sphere, so the maximum distance between two clusters can be 90 degrees.
-     *
-     * @param aFirstCluster first cluster
-     * @param aSecondCluster second cluster
-     * @return generic angle double or float.
-     * @throws IllegalArgumentException if the given parameters are invalid.
-     */
-    public abstract T getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException;
-    //</editor-fold>
-    //
     //<editor-fold desc="Private methods" defaultstate="collapsed">
     /**
      * Method for determining the size of the detected clusters.
      *
      * @param aClusterView represents the cluster assignment of each input vector.
-     * @return HashMap<Integer, Integer>
+     * @return HashMap<Integer, Integer> maps the cluster number to the number of inputs in the cluster.
      */
-    private HashMap<Integer, Integer> getClusterMembers(int[] aClusterView) {
+    private HashMap<Integer, Integer> getClusterSize(int[] aClusterView) {
         HashMap<Integer, Integer> tmpClusterToMembersMap = new HashMap<>((int) (this.getNumberOfDetectedClusters() * this.INITIAL_CAPACITY_VALUE));
         for(int tmpClusterMembers : aClusterView) {
             if (tmpClusterMembers == -1) {

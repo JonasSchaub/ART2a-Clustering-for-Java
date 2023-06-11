@@ -24,9 +24,7 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.abstractResult.ART2aAbstractResult;
-
-import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,7 +48,7 @@ public class ART2aFloatClusteringTaskTest {
     /**
      * Clustering result instance
      */
-    private static ART2aAbstractResult clusteringResult;
+    private static IArt2aClusteringResult clusteringResult;
     /**
      * Array for storing number of epochs for all vigilance parameters
      */
@@ -386,13 +384,13 @@ public class ART2aFloatClusteringTaskTest {
         tmpTestDataMatrix[9][27] = 1;
 
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
-        List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
+        List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
+            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        PrintWriter[] tmpPrintWriter = FileUtil.createClusteringResultInFile("Clustering_Result_Folder");
-        List<Future<IART2aClusteringResult>> tmpFuturesList;
+        PrintWriter[] tmpPrintWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder");
+        List<Future<IArt2aClusteringResult>> tmpFuturesList;
       //  ART2aAbstractResult tmpClusteringResult;
         ART2aFloatClusteringTaskTest.numberOfEpochsForAllVigilanceParameter = new int[9];
         ART2aFloatClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
@@ -410,13 +408,17 @@ public class ART2aFloatClusteringTaskTest {
         ART2aFloatClusteringTaskTest.clusterAnglesForAllVigilanceParameter = new float[9];
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         int tmpIterator = 0;
-        for (Future<IART2aClusteringResult> tmpFuture : tmpFuturesList) {
+        for (Future<IArt2aClusteringResult> tmpFuture : tmpFuturesList) {
             try {
-                ART2aFloatClusteringTaskTest.clusteringResult = (ART2aAbstractResult) tmpFuture.get();
+                ART2aFloatClusteringTaskTest.clusteringResult =  tmpFuture.get();
                 ART2aFloatClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getNumberOfEpochs();
+                System.out.println(clusteringResult.getVigilanceParameter());
+                System.out.println(clusteringResult.getNumberOfEpochs());
+                System.out.println(clusteringResult.getNumberOfDetectedClusters());
+                System.out.println("##################");
                 ART2aFloatClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getNumberOfDetectedClusters();
                 ART2aFloatClusteringTaskTest.clusterIndicesForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getClusterIndices(tmpIterator);
-                ART2aFloatClusteringTaskTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (float) ART2aFloatClusteringTaskTest.clusteringResult.getAngleBetweenClusters(tmpIterator, tmpIterator + 1);
+                ART2aFloatClusteringTaskTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (float) ART2aFloatClusteringTaskTest.clusteringResult.calculateAngleBetweenClusters(tmpIterator, tmpIterator + 1);
                 ART2aFloatClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getClusterRepresentatives(tmpIterator);
                 ART2aFloatClusteringTaskTest.clusteringResult.exportClusteringResultsToTextFiles(tmpPrintWriter[0], tmpPrintWriter[1]);
                 tmpIterator++;

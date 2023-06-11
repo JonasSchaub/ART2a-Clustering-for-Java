@@ -40,7 +40,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * File utility
+ * File utility.
+ * The class provides convenience methods.
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
@@ -48,11 +49,11 @@ import java.util.logging.Logger;
 public final class FileUtil {
     //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
-     * Name of file for writing clustering process.
+     * Name of file for exporting clustering process.
      */
     private static final String CLUSTERING_PROCESS_FILE_NAME = "Clustering_Process";
     /**
-     * Name of the file for writing clustering result.
+     * Name of the file for exporting clustering result.
      */
     private static final String CLUSTERING_RESULT_FILE_NAME = "Clustering_Result";
     /**
@@ -65,30 +66,47 @@ public final class FileUtil {
     /**
      * The working directory
      */
-    private static String workingPath;
+   // private  String workingPath;
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Set up clustering result file.
+     * Set up the clustering result text file printers.This method creates two PrintWriter objects for writing
+     * the clustering result and clustering process to separate text files. The file names will include a
+     * timestamp to make them unique. The method creates the necessary files in the specified path.
+     *
      * If necessary, existing result files will also be deleted.
      *
-     * @return PrintWriter[]
+     * @param aPathName path to the export folder where the text files are to be saved.
+     * @return PrintWriter[] an array of PrintWriter objects,
+     * where index 0 corresponds to the clustering result PrintWriter,
+     *  and index 1 corresponds to the clustering process PrintWriter.
      */
-    public static PrintWriter[] createClusteringResultInFile(String aPathName) {
+    public static PrintWriter[] setUpClusteringResultTextFilePrinters(String aPathName) {
         PrintWriter tmpClusteringResultPrintWriter = null;
         PrintWriter tmpClusteringProcessPrintWriter = null;
+        String tmpWorkingPath;
         try {
-            FileWriter tmpClusteringResultFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_RESULT_FILE_NAME, aPathName), false);
+            LocalDateTime tmpDateTime = LocalDateTime.now();
+            String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
+            tmpWorkingPath = (new File(aPathName) + File.separator);
+            new File(tmpWorkingPath + FileUtil.CLUSTERING_RESULT_FILE_NAME).mkdirs();
+            File tmpClusteringResultFile = new File(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME + File.separator
+                    + FileUtil.CLUSTERING_RESULT_FILE_NAME + "_"+tmpProcessingTime+ ".txt");
+            FileWriter tmpClusteringResultFileWriter = new FileWriter(tmpClusteringResultFile, false);
             BufferedWriter tmpClusteringResultBufferedWriter = new BufferedWriter(tmpClusteringResultFileWriter);
             tmpClusteringResultPrintWriter = new PrintWriter(tmpClusteringResultBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
-            FileWriter tmpClusteringProcessFileWriter = new FileWriter(FileUtil.createClusteringResultFiles(FileUtil.CLUSTERING_PROCESS_FILE_NAME, aPathName), false);
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
+            //
+            new File(tmpWorkingPath + FileUtil.CLUSTERING_PROCESS_FILE_NAME).mkdirs();
+            File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator +FileUtil.CLUSTERING_PROCESS_FILE_NAME + File.separator
+                    + FileUtil.CLUSTERING_PROCESS_FILE_NAME + "_"+tmpProcessingTime+ ".txt");
+            FileWriter tmpClusteringProcessFileWriter = new FileWriter(tmpClusteringProcessFile, false);
             BufferedWriter tmpClusteringProcessBufferedWriter = new BufferedWriter(tmpClusteringProcessFileWriter);
             tmpClusteringProcessPrintWriter = new PrintWriter(tmpClusteringProcessBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(FileUtil.workingPath + File.separator + FileUtil.CLUSTERING_PROCESS_FILE_NAME);
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_PROCESS_FILE_NAME);
         } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, "The file could not be created.");
+            FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
         }
         PrintWriter[] tmpPrintWriterArray = new PrintWriter[2];
         tmpPrintWriterArray[0] = tmpClusteringResultPrintWriter;
@@ -198,7 +216,9 @@ public final class FileUtil {
         }
         return tmpDataMatrix;
     }
+    //</editor-fold>
     //
+    //<editor-fold defaultstate="collapsed" desc="Private static methods">
     /**
      * Clustering files are deleted when their number is greater than 10.
      *
@@ -215,24 +235,6 @@ public final class FileUtil {
                 FileUtil.LOGGER.log(Level.INFO,"Deleted file: " + tmpClusteringFiles[0].getName());
             }
         }
-    }
-    //</editor-fold>
-    //
-    //<editor-fold defaultstate="collapsed" desc="Private static methods">
-    /**
-     * Clustering files are generated.
-     *
-     * @param aFileFolderName for clustering files typ.
-     * @return File
-     */
-    private static File createClusteringResultFiles(String aFileFolderName, String aPathName){
-        LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
-        FileUtil.workingPath = (new File(aPathName) + File.separator);
-        new File(FileUtil.workingPath + aFileFolderName).mkdirs();
-        File tmpClusteringReportFile = new File(FileUtil.workingPath + File.separator + aFileFolderName + File.separator
-                + aFileFolderName + "_"+tmpProcessingTime+ ".txt");
-        return tmpClusteringReportFile;
     }
     //</editor-fold>
 }

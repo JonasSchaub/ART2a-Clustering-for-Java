@@ -24,13 +24,15 @@
 
 package de.unijena.cheminf.clustering.art2a.interfaces;
 
+import de.unijena.cheminf.clustering.art2a.exceptions.ConvergenceFailedException;
+
 /**
- * Interface for implementing float and double ART-2a clustering.
+ * Interface for implementing float and double Art-2a clustering.
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public interface IART2aClustering {
+public interface IArt2aClustering {
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
      * Initialise the cluster matrices.
@@ -38,44 +40,46 @@ public interface IART2aClustering {
     void initializeMatrices();
     //
     /**
-     * Since the ART-2a algorithm randomly selects any input vector, the input vectors must first be randomized.
+     * Since the Art-2a algorithm randomly selects any input vector, the input vectors must first be randomized.
      * The input vectors/fingerprints are randomized so that all input vectors can be clustered by random selection.
      *
      * Here, the Fisher-Yates method is used to randomize the inputs.
      *
      * @return an array with vector indices in a random order
-     * @author Thomas Kuhn
-     *
      */
     int[] randomizeVectorIndices();
     //
     /**
-     * Starts an ART-2A clustering algorithm in single machine precision.
+     * Starts an Art-2A clustering algorithm.
      * The clustering process begins by randomly selecting an input vector/fingerprint from the data matrix.
      * After normalizing the first input vector, it is assigned to the first cluster. For all other subsequent
      * input vectors, they also undergo certain normalization steps. If there is sufficient similarity to an
      * existing cluster, they are assigned to that cluster. Otherwise, a new cluster is formed, and the
      * input is added to it. Null vectors are not clustered.
      *
-     * @param aVigilanceParameter parameter that influence the number of clusters
-     * @param aAddClusteringResultFileAdditionally if the parameter == true, then all information
-     *                                             about the clustering is written out
-     *                                             once in detail and once roughly additionally in text files.
-     *                                             If the parameter == false, the information is not written
-     *                                             out in text files.
-     * @return IART2aClusteringResult
+     * @param aExportClusteringResultsToTextFiles If the parameter == true, all information about the
+     *                                            clustering is exported to 2 text files.
+     *                                            The first exported text file is a detailed log of the clustering
+     *                                            process and the intermediate results and the second file is a
+     *                                            rough overview of the final result.
+     * @return IArt2aClusteringResult
+     * @throws ConvergenceFailedException is thrown, when convergence fails.
      */
-    IART2aClusteringResult startClustering(float aVigilanceParameter, boolean aAddClusteringResultFileAdditionally);
+    IArt2aClusteringResult startClustering(boolean aExportClusteringResultsToTextFiles) throws ConvergenceFailedException;
     //
     /**
      * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
      * converged, a new epoch is performed, otherwise the clustering is completed successfully.
+     * The system is considered converged if the cluster vectors of the current epoch and the previous epoch
+     * have a minimum similarity. The default value of the similarity parameter is 0.09, but it can also be set
+     * by the user when initialising the clustering.
      *
      * @param aNumberOfDetectedClasses number of detected clusters per epoch.
      * @param aConvergenceEpoch current epochs number.
      * @return boolean true is returned if the system has converged.
      * False is returned if the system has not converged to the epoch.
+     * @throws ConvergenceFailedException is thrown, when convergence fails.
      */
-    boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch);
+    boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException;
     // </editor-fold>
 }

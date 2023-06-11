@@ -24,8 +24,10 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.interfaces.IART2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.clustering.ART2aDoubleClustering;
+import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 
+import de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult;
 import de.unijena.cheminf.clustering.art2a.util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -51,30 +53,41 @@ public class ART2aDoubleClusteringTaskTest {
     @Test
     public void startArt2aClusteringTest() throws Exception {
 
-        double tmpImportBitFingerprints [][] = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Fingerprints.txt",',');
+
+        double tmpImportBitFingerprints [][] = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints_10.txt",',');
+        /*
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
-        List<ART2aClusteringTask> tmpClusteringTask = new LinkedList<>();
+        List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            ART2aClusteringTask tmpART2aFloatClusteringTask = new ART2aClusteringTask(tmpVigilanceParameter, tmpImportBitFingerprints, 2, false);
+            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpImportBitFingerprints, 10, false);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        List<Future<IART2aClusteringResult>> tmpFuturesList;
-        IART2aClusteringResult tmpClusteringResult;
+        List<Future<IArt2aClusteringResult>> tmpFuturesList;
+        IArt2aClusteringResult tmpClusteringResult;
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         System.out.println("\nCLUSTERING RESULTS\n");
-        for (Future<IART2aClusteringResult> tmpFuture : tmpFuturesList) {
+        for (Future<IArt2aClusteringResult> tmpFuture : tmpFuturesList) {
             try {
                 tmpClusteringResult = tmpFuture.get();
                 System.out.println("vigilance parameter: " + tmpClusteringResult.getVigilanceParameter() );
                 System.out.println("number of epochs: " + tmpClusteringResult.getNumberOfEpochs());
                 System.out.println("cluster indices in cluster 0: " + java.util.Arrays.toString(tmpClusteringResult.getClusterIndices(0)));
                 System.out.println("####################################");
-            } catch (RuntimeException anException) {
-                System.out.println(anException);
+            } catch (NullPointerException anException) {
+                System.out.println("naaaaaaaaa");
+               System.out.println(anException + "----no clustering result, because convergence failed for:");
             }
         }
         tmpExecutorService.shutdown();
         Assertions.assertEquals(true, true);
+
+         */
+
+        ART2aDoubleClustering de = new ART2aDoubleClustering(tmpImportBitFingerprints,100, 0.2f,0.99,0.01);
+        Art2aDoubleClusteringResult resu =  de.startClustering( false);
+        System.out.println(resu.getNumberOfDetectedClusters());
+        System.out.println(java.util.Arrays.toString(resu.getClusterIndices(0)));
+
     }
     //</editor-fold>
     //
