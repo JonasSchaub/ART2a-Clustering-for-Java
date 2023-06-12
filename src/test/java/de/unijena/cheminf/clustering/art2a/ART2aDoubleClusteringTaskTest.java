@@ -24,19 +24,11 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.clustering.ART2aDoubleClustering;
-import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.clustering.Art2aDoubleClustering;
 
 import de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult;
 import de.unijena.cheminf.clustering.art2a.util.FileUtil;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Test class for double clustering.
@@ -84,7 +76,7 @@ public class ART2aDoubleClusteringTaskTest {
 
          */
 
-        ART2aDoubleClustering de = new ART2aDoubleClustering(tmpImportBitFingerprints,100, 0.2f,0.99,0.01);
+        Art2aDoubleClustering de = new Art2aDoubleClustering(tmpImportBitFingerprints,100, 0.2f,0.99,0.01);
         Art2aDoubleClusteringResult resu =  de.startClustering( false);
         System.out.println(resu.getNumberOfDetectedClusters());
         System.out.println(java.util.Arrays.toString(resu.getClusterIndices(0)));

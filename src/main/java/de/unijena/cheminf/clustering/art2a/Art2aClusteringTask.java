@@ -24,8 +24,8 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.clustering.ART2aDoubleClustering;
-import de.unijena.cheminf.clustering.art2a.clustering.ART2aFloatClustering;
+import de.unijena.cheminf.clustering.art2a.clustering.Art2aDoubleClustering;
+import de.unijena.cheminf.clustering.art2a.clustering.Art2aFloatClustering;
 import de.unijena.cheminf.clustering.art2a.exceptions.ConvergenceFailedException;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClustering;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
@@ -108,7 +108,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
     public Art2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
                                float aRequiredSimilarity, float aLearningParameter) throws IllegalArgumentException, NullPointerException {
         this.exportClusteringResults = aExportClusteringResults;
-        this.art2aClustering = new ART2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
+        this.art2aClustering = new Art2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
@@ -145,7 +145,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
     public Art2aClusteringTask(double aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
                                double aRequiredSimilarity, double aLearningParameter) throws IllegalArgumentException, NullPointerException {
         this.exportClusteringResults = aExportClusteringResults;
-        this.art2aClustering = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
+        this.art2aClustering = new Art2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
