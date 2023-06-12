@@ -47,6 +47,12 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * Each row in the matrix corresponds to an input vector.
      */
     private final float[][] dataMatrix;
+    /**
+     * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
+     * A vigilance parameter close to 0 leads to a coarse clustering (few clusters) and a vigilance
+     * parameter close to 1, on the other hand, leads to a fine clustering (many clusters).
+     */
+    private final float vigilanceParameter;
     //</editor-fold>
     //
     //<editor-fold desc="Private final static class variables" defaultstate="collapsed">
@@ -73,13 +79,19 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
+     * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      *
      */
-    public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                      ConcurrentLinkedQueue<String> aClusteringResultQueue, int[] aClusterView, float[][] aClusterMatrix, float[][] aDataMatrix) throws NullPointerException {
-        super(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aClusteringProcessQueue, aClusteringResultQueue);
+    public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView,
+                                      float[][] aClusterMatrix, float[][] aDataMatrix,ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                      ConcurrentLinkedQueue<String> aClusteringResultQueue) throws NullPointerException, IllegalArgumentException {
+        super(aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aClusteringProcessQueue, aClusteringResultQueue);
         Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
         Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
+        if (aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
+        }
+        this.vigilanceParameter = aVigilanceParameter;
         this.floatClusterMatrix = aClusterMatrix;
         this.dataMatrix = aDataMatrix;
     }
@@ -96,17 +108,25 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
      *                    Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
+     * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      * <br><br>
      *
-     *  @see de.unijena.cheminf.clustering.art2a.results.Art2aFloatClusteringResult#Art2aFloatClusteringResult(float, int, int, ConcurrentLinkedQueue, ConcurrentLinkedQueue, int[], float[][], float[][])
+     *  @see de.unijena.cheminf.clustering.art2a.results.Art2aFloatClusteringResult#Art2aFloatClusteringResult(float, int, int, int[], float[][], float[][],ConcurrentLinkedQueue, ConcurrentLinkedQueue)
      */
     public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
                                       int[] aClusterView, float[][] aClusterMatrix, float[][] aDataMatrix) throws NullPointerException {
-        this(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, null, null, aClusterView, aClusterMatrix, aDataMatrix);
+        this(aVigilanceParameter, aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aClusterMatrix, aDataMatrix,null, null);
     }
     //</editor-fold>
     //
     //<editor-fold desc="Overriden public methods" defaultstate="collapsed">
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Float getVigilanceParameter() {
+        return this.vigilanceParameter;
+    }
     /**
      * {@inheritDoc}
      */
@@ -117,7 +137,7 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
         }
         int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
         float[] tmpCurrentClusterVector = this.floatClusterMatrix[aClusterNumber];
-        float tmpFactor = 0;
+        float tmpFactor = 0.0f;
         float[] tmpMatrixRow;
         float[] tmpScalarProductArray = new float[tmpClusterIndices.length+1];
         int tmpIterator = 0;
@@ -148,19 +168,18 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
         }
         int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters();
         float tmpAngle;
-        if(aFirstCluster == aSecondCluster && (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster)) {
+        if(aFirstCluster == aSecondCluster && (aFirstCluster >= tmpNumberOfDetectedCluster)) {
             throw new IllegalArgumentException("The given cluster number(s) do(es) not exist");
         } else if (aFirstCluster == aSecondCluster) {
-            tmpAngle = 0;
+            tmpAngle = 0.0f;
         } else {
-            //int tmpNumberOfDetectedCluster = this.getNumberOfDetectedClusters();
             if (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster) {
                 throw new IllegalArgumentException("The given cluster number does not exist.");
             }
             float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];
             float[] tmpSecondCluster = this.floatClusterMatrix[aSecondCluster];
             float tmpFactor = (float) (180 / Math.PI);
-            float tmpProduct = 0;
+            float tmpProduct = 0.0f;
             for (int i = 0; i < tmpFirstCluster.length; i++) {
                 tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];
             }

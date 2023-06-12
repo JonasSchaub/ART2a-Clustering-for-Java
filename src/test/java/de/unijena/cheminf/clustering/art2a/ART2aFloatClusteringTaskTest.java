@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.PrintWriter;
+import java.io.BufferedWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -389,7 +389,8 @@ public class ART2aFloatClusteringTaskTest {
             Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        PrintWriter[] tmpPrintWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder");
+        //PrintWriter[] tmpPrintWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder");
+        BufferedWriter[] tmpWriter = FileUtil.createWriters("Clustering_Result_Folder", BufferedWriter.class);
         List<Future<IArt2aClusteringResult>> tmpFuturesList;
       //  ART2aAbstractResult tmpClusteringResult;
         ART2aFloatClusteringTaskTest.numberOfEpochsForAllVigilanceParameter = new int[9];
@@ -420,16 +421,16 @@ public class ART2aFloatClusteringTaskTest {
                 ART2aFloatClusteringTaskTest.clusterIndicesForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getClusterIndices(tmpIterator);
                 ART2aFloatClusteringTaskTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (float) ART2aFloatClusteringTaskTest.clusteringResult.calculateAngleBetweenClusters(tmpIterator, tmpIterator + 1);
                 ART2aFloatClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[tmpIterator] = ART2aFloatClusteringTaskTest.clusteringResult.getClusterRepresentatives(tmpIterator);
-                ART2aFloatClusteringTaskTest.clusteringResult.exportClusteringResultsToTextFiles(tmpPrintWriter[0], tmpPrintWriter[1]);
+                ART2aFloatClusteringTaskTest.clusteringResult.exportClusteringResultsToTextFiles(tmpWriter[0], tmpWriter[1]);
                 tmpIterator++;
             } catch (RuntimeException anException) {
                 System.out.println(anException);
             }
         }
-        tmpPrintWriter[0].flush();
-        tmpPrintWriter[0].close();
-        tmpPrintWriter[1].flush();
-        tmpPrintWriter[1].close();
+        tmpWriter[0].flush();
+        tmpWriter[0].close();
+        tmpWriter[1].flush();
+        tmpWriter[1].close();
         tmpExecutorService.shutdown();
       //  Assertions.assertEquals(true, true);
     }

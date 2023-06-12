@@ -54,7 +54,8 @@ public class ART2aDoubleClusteringTaskTest {
     public void startArt2aClusteringTest() throws Exception {
 
 
-        double tmpImportBitFingerprints [][] = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints_10.txt",',');
+
+        double tmpImportBitFingerprints [][] = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Fingerprints.txt",',');
         /*
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
@@ -87,6 +88,7 @@ public class ART2aDoubleClusteringTaskTest {
         Art2aDoubleClusteringResult resu =  de.startClustering( false);
         System.out.println(resu.getNumberOfDetectedClusters());
         System.out.println(java.util.Arrays.toString(resu.getClusterIndices(0)));
+        System.out.println(resu.calculateAngleBetweenClusters(1,10));
 
     }
     //</editor-fold>

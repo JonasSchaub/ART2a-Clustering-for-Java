@@ -24,7 +24,9 @@
 
 package de.unijena.cheminf.clustering.art2a.interfaces;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * Interface for implementing clustering result classes.
@@ -36,14 +38,14 @@ import java.io.PrintWriter;
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public interface IArt2aClusteringResult<T> {
+public interface IArt2aClusteringResult<T extends Number> {
     // <editor-fold defaultstate="collapsed" desc="Public properties">
     /**
      * Returns the vigilance parameter of the clustering algorithm.
      *
      * @return float vigilance parameter
      */
-    float getVigilanceParameter();
+    T getVigilanceParameter();
     //
     /**
      * Returns the number of detected clusters.
@@ -87,14 +89,14 @@ public interface IArt2aClusteringResult<T> {
      * <u>IMPORTANT: </u> In order to additionally export the clustering results into text files,
      * the folder must be created first. This requires the method call createClusteringResultInFile(String aPathName).
      *
-     * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#setUpClusteringResultTextFilePrinters(String)
+     * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#setUpClusteringResultTextFilePrinters(String, Class)
      * But this method call is optional, the folder can also be created by the user.
      * @param aClusteringProcessWriter clustering result (process) writer
      * @param aClusteringResultWriter clustering result writer
      * @throws NullPointerException is thrown, if the Writers are null.
      *
      */
-    void exportClusteringResultsToTextFiles(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter) throws NullPointerException;
+    void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter) throws NullPointerException;
     //
     /**
      * Calculates the angle between two clusters.

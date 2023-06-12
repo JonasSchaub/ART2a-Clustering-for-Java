@@ -26,9 +26,11 @@ package de.unijena.cheminf.clustering.art2a.abstractResult;
 
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -44,12 +46,6 @@ import java.util.logging.Logger;
  */
 public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     //<editor-fold desc="Private class variables" defaultstate="collapsed">
-    /**
-     * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
-     * A vigilance parameter close to 0 leads to a coarse clustering (few clusters) and a vigilance
-     * parameter close to 1, on the other hand, leads to a fine clustering (many clusters).
-     */
-    private float vigilanceParameter;
     /**
      * Queue for clustering result (process)
      */
@@ -95,7 +91,6 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     /**
      * Constructor.
      *
-     * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusteringProcessQueue clustering result (process) queue.
@@ -103,20 +98,16 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      * @param aClusterView array for cluster assignment of each input vector.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid.
      */
-    public Art2aAbstractResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
+    public Art2aAbstractResult(int aNumberOfEpochs, int aNumberOfDetectedClusters,
                                int[] aClusterView, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
                                ConcurrentLinkedQueue<String> aClusteringResultQueue) throws IllegalArgumentException {
         if(aNumberOfEpochs <= 0) {
             throw new IllegalArgumentException("aNumberOfEpochs is invalid.");
         }
-        if(aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
-            throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
-        }
         if(aNumberOfDetectedClusters < 1) {
             throw new IllegalArgumentException("aNumberOfDetectedClusters is invalid.");
         }
         this.clusterView = aClusterView;
-        this.vigilanceParameter = aVigilanceParameter;
         this.numberOfEpochs = aNumberOfEpochs;
         this.numberOfDetectedClusters = aNumberOfDetectedClusters;
         this.clusteringProcess = aClusteringProcessQueue;
@@ -124,16 +115,8 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
         this.clusterNumberToClusterMemberMap = this.getClusterSize(this.clusterView);
     }
     //</editor-fold>
-    //
+
     //<editor-fold desc="Overriden public properties" defaultstate="collapsed">
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public float getVigilanceParameter() {
-        return this.vigilanceParameter;
-    }
-    //
     /**
      * {@inheritDoc}
      */
@@ -179,15 +162,24 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      * {@inheritDoc}
      */
     @Override
-    public void exportClusteringResultsToTextFiles(PrintWriter aClusteringResultWriter, PrintWriter aClusteringProcessWriter) throws NullPointerException {
+    public void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter) throws NullPointerException {
+        if(aClusteringResultWriter == null || aClusteringProcessWriter == null) {
+            throw new NullPointerException("At least one of the writers is null.");
+        }
         if (this.clusteringProcess == null || this.clusteringResult == null) {
             throw new NullPointerException("The associated argument to allow writing of the clustering results to text files is set to false.\n" +
                     "Please set the argument to true.");
         }
-        for (String tmpClusteringResult : this.clusteringResult) {
-            aClusteringResultWriter.write(tmpClusteringResult+"\n");
-        } for(String tmpClusteringProcess : this.clusteringProcess) {
-            aClusteringProcessWriter.write(tmpClusteringProcess+"\n");
+        try {
+            for (String tmpClusteringResult : this.clusteringResult) {
+                aClusteringResultWriter.write(tmpClusteringResult + "\n");
+            }
+            for (String tmpClusteringProcess : this.clusteringProcess) {
+                aClusteringProcessWriter.write(tmpClusteringProcess + "\n");
+            }
+        }
+        catch(IOException anException) {
+            Art2aAbstractResult.LOGGER.log(Level.SEVERE, "Texts could not written in the files");
         }
     }
     //</editor-fold>

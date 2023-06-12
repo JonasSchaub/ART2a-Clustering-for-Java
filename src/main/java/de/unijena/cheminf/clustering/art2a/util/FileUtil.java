@@ -26,11 +26,16 @@ package de.unijena.cheminf.clustering.art2a.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -71,47 +76,67 @@ public final class FileUtil {
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Set up the clustering result text file printers.This method creates two PrintWriter objects for writing
-     * the clustering result and clustering process to separate text files. The file names will include a
-     * timestamp to make them unique. The method creates the necessary files in the specified path.
+     * Set up the clustering result text file writers. This method creates a set of Writer objects based on the
+     * specified and desired Writer typ for writing the clustering result and clustering process to
+     * separate text files. This methode allows the user to create 3 different Writer types, e.g. FileWriter,
+     * PrintWriter and BufferedWriter. The user can specify the Writer typ via the aWriterClass parameter.
+     * The file names will include a timestamp to make them unique.
+     * The method creates the necessary files in the specified path.
      *
      * If necessary, existing result files will also be deleted.
      *
      * @param aPathName path to the export folder where the text files are to be saved.
-     * @return PrintWriter[] an array of PrintWriter objects,
-     * where index 0 corresponds to the clustering result PrintWriter,
-     *  and index 1 corresponds to the clustering process PrintWriter.
+     * @param aWriterClass Writer ytp to be created. The user can choose one of the supported classes.
+     * @param <T> generic typ of the Writer. This will be determined, based on the specified aWriterClass parameter.
+     * @return PrintWriter[] an array of a Writer objects,
+     * where index 0 corresponds to the clustering result Writer,
+     * and index 1 corresponds to the clustering process Writer.
      */
-    public static PrintWriter[] setUpClusteringResultTextFilePrinters(String aPathName) {
-        PrintWriter tmpClusteringResultPrintWriter = null;
-        PrintWriter tmpClusteringProcessPrintWriter = null;
+    public static <T extends java.io.Writer> T[] setUpClusteringResultTextFilePrinters(String aPathName, Class<T> aWriterClass) {
+        T tmpClusteringResultWriter = null;
+        T tmpClusteringProcessWriter = null;
         String tmpWorkingPath;
         try {
             LocalDateTime tmpDateTime = LocalDateTime.now();
             String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
             tmpWorkingPath = (new File(aPathName) + File.separator);
-            new File(tmpWorkingPath + FileUtil.CLUSTERING_RESULT_FILE_NAME).mkdirs();
-            File tmpClusteringResultFile = new File(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME + File.separator
-                    + FileUtil.CLUSTERING_RESULT_FILE_NAME + "_"+tmpProcessingTime+ ".txt");
-            FileWriter tmpClusteringResultFileWriter = new FileWriter(tmpClusteringResultFile, false);
-            BufferedWriter tmpClusteringResultBufferedWriter = new BufferedWriter(tmpClusteringResultFileWriter);
-            tmpClusteringResultPrintWriter = new PrintWriter(tmpClusteringResultBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_RESULT_FILE_NAME);
-            //
-            new File(tmpWorkingPath + FileUtil.CLUSTERING_PROCESS_FILE_NAME).mkdirs();
-            File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator +FileUtil.CLUSTERING_PROCESS_FILE_NAME + File.separator
-                    + FileUtil.CLUSTERING_PROCESS_FILE_NAME + "_"+tmpProcessingTime+ ".txt");
-            FileWriter tmpClusteringProcessFileWriter = new FileWriter(tmpClusteringProcessFile, false);
-            BufferedWriter tmpClusteringProcessBufferedWriter = new BufferedWriter(tmpClusteringProcessFileWriter);
-            tmpClusteringProcessPrintWriter = new PrintWriter(tmpClusteringProcessBufferedWriter);
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + FileUtil.CLUSTERING_PROCESS_FILE_NAME);
-        } catch (IOException anException) {
+            new File(tmpWorkingPath + CLUSTERING_RESULT_FILE_NAME).mkdirs();
+            File tmpClusteringResultFile = new File(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME +
+                    File.separator + CLUSTERING_RESULT_FILE_NAME + "_" + tmpProcessingTime + ".txt");
+            if (aWriterClass.equals(PrintWriter.class)) {
+                tmpClusteringResultWriter = (T) new PrintWriter(tmpClusteringResultFile);
+            } else if (aWriterClass.equals(BufferedWriter.class)) {
+                tmpClusteringResultWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringResultFile));
+            } else if (aWriterClass.equals(FileWriter.class)) {
+                tmpClusteringResultWriter = (T) new FileWriter(tmpClusteringResultFile);
+            } else if (aWriterClass.equals(StringWriter.class)) {
+                tmpClusteringResultWriter = (T) new StringWriter();
+            } else if (aWriterClass.equals(CharArrayWriter.class)) {
+                tmpClusteringResultWriter = (T) new CharArrayWriter();
+            }
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME); // TODO optimize the method, if possible!!!
+            new File(tmpWorkingPath + CLUSTERING_PROCESS_FILE_NAME).mkdirs();
+            File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME +
+                    File.separator + CLUSTERING_PROCESS_FILE_NAME + "_" + tmpProcessingTime + ".txt");
+            if (aWriterClass.equals(PrintWriter.class)) {
+                tmpClusteringProcessWriter = (T) new PrintWriter(tmpClusteringProcessFile);
+            } else if (aWriterClass.equals(BufferedWriter.class)) {
+                tmpClusteringProcessWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringProcessFile));
+            } else if (aWriterClass.equals(FileWriter.class)) {
+                tmpClusteringProcessWriter = (T) new FileWriter(tmpClusteringProcessFile);
+            } else if (aWriterClass.equals(StringWriter.class)) {
+                tmpClusteringProcessWriter = (T) new StringWriter();
+            } else if (aWriterClass.equals(CharArrayWriter.class)) {
+                tmpClusteringProcessWriter = (T) new CharArrayWriter();
+            }
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME); // TODO optimize the method, if possible !!!
+        } catch (IOException e) {
             FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
         }
-        PrintWriter[] tmpPrintWriterArray = new PrintWriter[2];
-        tmpPrintWriterArray[0] = tmpClusteringResultPrintWriter;
-        tmpPrintWriterArray[1] = tmpClusteringProcessPrintWriter;
-        return tmpPrintWriterArray;
+        T[] tmpWriterArray = (T[]) Array.newInstance(aWriterClass, 2);
+        tmpWriterArray[0] = tmpClusteringResultWriter;
+        tmpWriterArray[1] = tmpClusteringProcessWriter;
+        return tmpWriterArray;
     }
     //
     /**
@@ -236,5 +261,72 @@ public final class FileUtil {
             }
         }
     }
+    public static <T extends java.io.Writer> T[] createWriters(String aPathName, Class<T> writerClass) {
+        T tmpClusteringResultWriter = null;
+        T tmpClusteringProcessWriter = null;
+        String tmpWorkingPath;
+        try {
+            LocalDateTime tmpDateTime = LocalDateTime.now();
+            String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
+            tmpWorkingPath = (new File(aPathName) + File.separator);
+
+            new File(tmpWorkingPath + CLUSTERING_RESULT_FILE_NAME).mkdirs();
+            File tmpClusteringResultFile = new File(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME +
+                    File.separator + CLUSTERING_RESULT_FILE_NAME + "_" + tmpProcessingTime + ".txt");
+
+            if (writerClass.equals(PrintWriter.class)) {
+                tmpClusteringResultWriter = (T) new PrintWriter(tmpClusteringResultFile);
+            } else if (writerClass.equals(BufferedWriter.class)) {
+                tmpClusteringResultWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringResultFile));
+            } else if (writerClass.equals(FileWriter.class)) {
+                tmpClusteringResultWriter = (T) new FileWriter(tmpClusteringResultFile);
+            } else if (writerClass.equals(StringWriter.class)) {
+                tmpClusteringResultWriter = (T) new StringWriter();
+            } else if (writerClass.equals(CharArrayWriter.class)) {
+                tmpClusteringResultWriter = (T) new CharArrayWriter();
+            }
+
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME);
+
+            new File(tmpWorkingPath + CLUSTERING_PROCESS_FILE_NAME).mkdirs();
+            File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME +
+                    File.separator + CLUSTERING_PROCESS_FILE_NAME + "_" + tmpProcessingTime + ".txt");
+
+            if (writerClass.equals(PrintWriter.class)) {
+                tmpClusteringProcessWriter = (T) new PrintWriter(tmpClusteringProcessFile);
+            } else if (writerClass.equals(BufferedWriter.class)) {
+                tmpClusteringProcessWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringProcessFile));
+            } else if (writerClass.equals(FileWriter.class)) {
+                tmpClusteringProcessWriter = (T) new FileWriter(tmpClusteringProcessFile);
+            } else if (writerClass.equals(StringWriter.class)) {
+                tmpClusteringProcessWriter = (T) new StringWriter();
+            } else if (writerClass.equals(CharArrayWriter.class)) {
+                tmpClusteringProcessWriter = (T) new CharArrayWriter();
+            }
+
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME);
+        } catch (IOException e) {
+            FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
+        }
+        T[] tmpWriterArray = (T[]) Array.newInstance(writerClass, 2);
+        tmpWriterArray[0] = tmpClusteringResultWriter;
+        tmpWriterArray[1] = tmpClusteringProcessWriter;
+        return tmpWriterArray;
+    }
+    private static <T extends Writer> T createWriterInstance(Class<T> writerClass, Writer writer) throws NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException, InstantiationException {
+        if (writerClass == PrintWriter.class) {
+            return writerClass.getConstructor(Writer.class, boolean.class).newInstance(writer, true);
+        } else if (writerClass == BufferedWriter.class) {
+            return writerClass.getConstructor(Writer.class).newInstance(writer);
+        } else if (writerClass == FileWriter.class) {
+            return writerClass.getConstructor(Writer.class, boolean.class).newInstance(writer, false);
+        } else {
+            throw new IllegalArgumentException("Unsupported writer class: " + writerClass.getName());
+        }
+    }
+
+
+
     //</editor-fold>
 }

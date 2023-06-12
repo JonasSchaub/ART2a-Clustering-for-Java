@@ -39,9 +39,11 @@ import java.util.logging.Logger;
  * stable unsupervised clustering for open categorical problems. The class is primarily intended for the
  * clustering of fingerprints. <br>
  * LITERATURE SOURCE:<br>
- * Primary : G.A. Carpenter,S. Grossberg and D.B. Rosen, Neural Networks 4 (1991) 493-504<br>
- * Secondary : D. Wienke et al., Chemometrics and Intelligent Laboratory Systems 24
- * (1994) 367-387<br>
+ *
+ * @see <a href="https://www.sciencedirect.com/science/article/abs/pii/0893608091900457">
+ *     "Primary : G.A. Carpenter,S. Grossberg and D.B. Rosen, Neural Networks 4 (1991) 493-504"</a> <br><br>
+ *      <a href="https://www.sciencedirect.com/science/article/abs/pii/0169743994850542">
+ *          "Secondary : D. Wienke et al., Chemometrics and Intelligent Laboratory Systems 24 (1994) 367-387"</a>
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
@@ -63,10 +65,6 @@ public class ART2aFloatClustering implements IArt2aClustering {
      */
     private float[][] clusterMatrixPreviousEpoch;
     /**
-     * Maximum number of epochs the system may need to converge.
-     */
-    private int maximumNumberOfEpochs;
-    /**
      * Queue for clustering process.
      */
     private ConcurrentLinkedQueue<String> clusteringProcess;
@@ -78,15 +76,19 @@ public class ART2aFloatClustering implements IArt2aClustering {
      * The seed value for permutation of the vector field.
      */
     private int seed;
+    //</editor-fold>
+    //
+    //<editor-fold desc="private final variables" defaultstate="collapsed">
+    /**
+     * Maximum number of epochs the system may need to converge.
+     */
+    private int maximumNumberOfEpochs;
     /**
      * The vigilance parameter is between 0 and 1. The parameter influences the type of clustering.
      * A vigilance parameter close to 0 leads to a coarse clustering (few clusters) and a vigilance
      * parameter close to 1, on the other hand, leads to a fine clustering (many clusters).
      */
     private float vigilanceParameter;
-    //</editor-fold>
-    //
-    //<editor-fold desc="private final variables" defaultstate="collapsed">
     /**
      * Threshold for contrast enhancement. If a vector/fingerprint component is below the threshold, it is set to zero.
      */
@@ -191,6 +193,7 @@ public class ART2aFloatClustering implements IArt2aClustering {
      * following steps so that all components of an input vector range between 0 and 1.
      *
      * @param aDataMatrix the matrix contains all input vectors/fingerprints to be clustered.
+     * @return valid data matrix
      * @throws NullPointerException is thrown if the given data matrix is null.
      * @throws IllegalArgumentException is thrown if the input vectors are invalid
      */
@@ -204,9 +207,11 @@ public class ART2aFloatClustering implements IArt2aClustering {
         int tmpNumberOfNullComponentsInDataMatrix = 0;
         int tmpNumberOfElementsInDataMatrix = aDataMatrix.length * aDataMatrix[0].length;
         int tmpNumberOfVectorComponents = aDataMatrix[0].length;
+        float tmpMaxValueInDataMatrix = aDataMatrix[0][0];
+        float tmpMinValueInDatamatrix = aDataMatrix[0][0];
         float tmpCurrentVectorComponent;
         float[] tmpSingleFingerprint;
-        HashMap<float[],Integer> tmpFingerprintsForScalingToMatrixRowMap = new HashMap<>((int) (aDataMatrix.length * this.INITIAL_CAPACITY_VALUE), 0.75f);
+        boolean tmpCorrectRangeOfValuesInDataMatrix = false;
         for(int i = 0; i < aDataMatrix.length; i++) {
             tmpSingleFingerprint = aDataMatrix[i];
             if(tmpNumberOfVectorComponents != tmpSingleFingerprint.length) {
@@ -214,8 +219,14 @@ public class ART2aFloatClustering implements IArt2aClustering {
             }
             for(int j = 0; j < tmpSingleFingerprint.length; j++) {
                 tmpCurrentVectorComponent = tmpSingleFingerprint[j];
+                if(tmpCurrentVectorComponent > tmpMaxValueInDataMatrix) {
+                    tmpMaxValueInDataMatrix = tmpCurrentVectorComponent;
+                }
+                if(tmpCurrentVectorComponent < tmpMinValueInDatamatrix) {
+                    tmpMinValueInDatamatrix = tmpCurrentVectorComponent;
+                }
                 if(tmpCurrentVectorComponent > 1) {
-                    tmpFingerprintsForScalingToMatrixRowMap.put(aDataMatrix[i],i);
+                    tmpCorrectRangeOfValuesInDataMatrix = true;
                 }
                 if(tmpCurrentVectorComponent < 0) {
                     throw new IllegalArgumentException("Only positive values allowed.");
@@ -228,10 +239,35 @@ public class ART2aFloatClustering implements IArt2aClustering {
                 throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible.");
             }
         }
-        if(!tmpFingerprintsForScalingToMatrixRowMap.isEmpty()) {
-            this.scaleInput(tmpFingerprintsForScalingToMatrixRowMap, aDataMatrix); // TODO replace method? why?
+        if(tmpCorrectRangeOfValuesInDataMatrix) {
+           this.getScaledDataMatrix(aDataMatrix, tmpMinValueInDatamatrix, tmpMaxValueInDataMatrix);
         }
         return aDataMatrix;
+    }
+    //
+    /**
+     * Method for scaling the input vectors/fingerprints if they are not between 0 and 1.
+     * Thus serves for the scaling of count fingerprints.
+     *
+     * @param aDataMatrixToScale the matrix contains input vectors and at least one component
+     *                           of an input vector is not in the specified range, i.e. between 0 and 1.
+     * @param aMaxValue is the highest value in the matrix.
+     * @param aMinValue is the lowest value in the matrix.
+     *
+     */
+    private void getScaledDataMatrix(float[][] aDataMatrixToScale, float aMinValue, float aMaxValue) {
+        float[] tmpSingleFingerprint;
+        float tmpScaledVectorComponent;
+        float tmpCurrentVectorComponent;
+        for(int i = 0; i < aDataMatrixToScale.length; i++) {
+            tmpSingleFingerprint = aDataMatrixToScale[i];
+            for (int j = 0; j < tmpSingleFingerprint.length; j++) {
+                tmpCurrentVectorComponent = tmpSingleFingerprint[j];
+                tmpScaledVectorComponent = (tmpCurrentVectorComponent-aMinValue)/(aMaxValue-aMinValue); // normalization
+                tmpSingleFingerprint[j] = tmpScaledVectorComponent;
+                aDataMatrixToScale[i] = tmpSingleFingerprint;
+            }
+        }
     }
     //
     /**
@@ -242,7 +278,7 @@ public class ART2aFloatClustering implements IArt2aClustering {
      * @throws ArithmeticException is thrown if the addition of the vector components results in zero.
      */
     private float getVectorLength (float[] anInputVector) throws ArithmeticException {
-        float tmpVectorComponentsSqrtSum = 0;
+        float tmpVectorComponentsSqrtSum = 0.0f;
         float tmpVectorLength;
         for (int i = 0; i < anInputVector.length; i++) {
             tmpVectorComponentsSqrtSum += anInputVector[i] * anInputVector[i];
@@ -250,35 +286,11 @@ public class ART2aFloatClustering implements IArt2aClustering {
         if (tmpVectorComponentsSqrtSum == 0) {
             throw new ArithmeticException("Addition of the vector components results in zero!");
         } else {
-            tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum);
+            tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum); // TODO optimize sqrt!!
         }
         return tmpVectorLength;
     }
     //
-    /**
-     * Method for scaling the input vectors/fingerprints if they are not between 0 and 1.
-     * Thus serves for the scaling of count fingerprints.
-     *
-     * @param aFingerprintToMatrixRowMap is a map that maps the fingerprints with components
-     *                                   outside 0-1 to the row position in the matrix.
-     * @param aDataMatrix the matrix contains all input vectors/fingerprints to be clustered.
-     */
-    private void scaleInput(HashMap <float[],Integer> aFingerprintToMatrixRowMap, float[][] aDataMatrix){
-        for (float[] tmpScalingVector : aFingerprintToMatrixRowMap.keySet()) {
-            float tmpFirstComponent = tmpScalingVector[0];
-            for (float tmpComponentsOfScalingVector : tmpScalingVector) {
-                if (tmpComponentsOfScalingVector > tmpFirstComponent) {
-                    tmpFirstComponent = tmpComponentsOfScalingVector;
-                }
-            }
-            for (int i = 0; i < tmpScalingVector.length; i++) {
-                float tmpScaledComponent = tmpScalingVector[i] / tmpFirstComponent;
-                tmpScalingVector[i] = tmpScaledComponent;
-                // this.dataMatrix[aFingerprintToMatrixRowMap.get(tmpScalingVector)] = tmpScalingVector;
-                aDataMatrix[aFingerprintToMatrixRowMap.get(tmpScalingVector)] = tmpScalingVector;
-            }
-        }
-    }
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="overriden public methods">
@@ -377,18 +389,18 @@ public class ART2aFloatClustering implements IArt2aClustering {
             //<editor-fold desc="Check current input vector for null vector." defaultstate="collapsed">
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfFingerprints; tmpCurrentInput++) {
                 float[] tmpInputVector = new float[this.numberOfComponents];
-                boolean tmpCheckNullVector = true;
+                boolean tmpIsNullVector = true;
                 for(int tmpCurrentInputVectorComponents = 0; tmpCurrentInputVectorComponents < this.numberOfComponents; tmpCurrentInputVectorComponents++) {
                     tmpInputVector[tmpCurrentInputVectorComponents] = this.dataMatrix[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]][tmpCurrentInputVectorComponents];
                     if(tmpInputVector[tmpCurrentInputVectorComponents] !=0) {
-                        tmpCheckNullVector = false;
+                        tmpIsNullVector = false;
                     }
                 }
                 if(aExportClusteringResultsToTextFiles) {
                     this.clusteringProcess.add("Input: " + tmpCurrentInput + " / Vector " + tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
                 }
                 //<editor-fold desc="If the input vector is a null vector, it will not be clustered." defaultstate="collapsed">
-                if(tmpCheckNullVector) {
+                if(tmpIsNullVector) {
                     tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = -1;
                     if(aExportClusteringResultsToTextFiles) {
                         this.clusteringProcess.add("This input is a null vector");
@@ -426,12 +438,12 @@ public class ART2aFloatClustering implements IArt2aClustering {
                     //</editor-fold>
                     else {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
-                        float tmpSumCom = 0;
+                        float tmpSumCom = 0.0f;
                         for(float tmpVectorComponentsOfNormalizeVector : tmpInputVector) {
                             tmpSumCom += tmpVectorComponentsOfNormalizeVector;
                         }
                         tmpWinnerClassIndex = tmpNumberOfDetectedClusters;
-                        boolean tmpRhoWinner = true;
+                        boolean tmpIsMatchingClusterAvailable = true;
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps."
                         //</editor-fold>
                         //<editor-fold desc="Calculate first rho value."
@@ -440,7 +452,7 @@ public class ART2aFloatClustering implements IArt2aClustering {
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
                         for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters; tmpCurrentClusterMatrixRow++) {
                             float[] tmpRow;
-                            float tmpRhoForExistingClusters = 0;
+                            float tmpRhoForExistingClusters = 0.0f;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
                             for(int tmpElementsInRow = 0; tmpElementsInRow < this.numberOfComponents; tmpElementsInRow++) {
                                 tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow];
@@ -448,14 +460,14 @@ public class ART2aFloatClustering implements IArt2aClustering {
                             if(tmpRhoForExistingClusters > tmpRho) {
                                 tmpRho = tmpRhoForExistingClusters;
                                 tmpWinnerClassIndex = tmpCurrentClusterMatrixRow;
-                                tmpRhoWinner = false;
+                                tmpIsMatchingClusterAvailable = false;
                             }
                         }
                         //</editor-fold>
                         //<editor-fold desc="Deciding whether the input fits into an existing cluster or whether a new cluster must be formed."
                         //</editor-fold>
                         //<editor-fold desc="Input does not fit in existing clusters. A new cluster is formed and the input vector is put into the new cluster vector."
-                        if(tmpRhoWinner || tmpRho < this.vigilanceParameter) {
+                        if(tmpIsMatchingClusterAvailable || tmpRho < this.vigilanceParameter) {
                             tmpNumberOfDetectedClusters++;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpNumberOfDetectedClusters - 1;
                             this.clusterMatrix[tmpNumberOfDetectedClusters - 1] = tmpInputVector;
@@ -522,7 +534,7 @@ public class ART2aFloatClustering implements IArt2aClustering {
         if(!aExportClusteringResultsToTextFiles) {
             return new Art2aFloatClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation,this.clusterMatrix, this.dataMatrix);
         } else {
-            return new Art2aFloatClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters,this.clusteringProcess, this.clusteringResult, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix);
+            return new Art2aFloatClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix,this.clusteringProcess, this.clusteringResult);
         }
         //</editor-fold>
     }
@@ -541,7 +553,7 @@ public class ART2aFloatClustering implements IArt2aClustering {
             float[] tmpCurrentRowInClusterMatrix;
             float[] tmpPreviousEpochRow;
             for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpScalarProductOfClassVector = 0;
+                tmpScalarProductOfClassVector = 0.0f;
                 tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
                 tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
                 for (int j = 0; j < this.numberOfComponents; j++) {

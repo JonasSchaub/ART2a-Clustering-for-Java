@@ -142,7 +142,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      * @throws NullPointerException is thrown, if the given aDataMatrix is null. The checking of the data matrix is
      *                              done in the constructor of the ArtaFloatClustering.
      */
-    public Art2aClusteringTask(float aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
+    public Art2aClusteringTask(double aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
                                double aRequiredSimilarity, double aLearningParameter) throws IllegalArgumentException, NullPointerException {
         this.exportClusteringResults = aExportClusteringResults;
         this.art2aClustering = new ART2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
@@ -153,7 +153,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      * Creates a new Art2aDoubleClustering instance with the specified parameters.
      * For the required similarity and learning parameter default values are used.
      * 
-     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(float, double[][], int, boolean, double, double)
+     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(double, double[][], int, boolean, double, double)
      *
      */
     public Art2aClusteringTask(float vigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber,
