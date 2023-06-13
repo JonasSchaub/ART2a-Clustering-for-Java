@@ -26,6 +26,7 @@ package de.unijena.cheminf.clustering.art2a.results;
 
 import de.unijena.cheminf.clustering.art2a.abstractResult.Art2aAbstractResult;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
@@ -37,6 +38,17 @@ import java.util.logging.Logger;
  * @version 1.0.0.0
  */
 public class Art2aFloatClusteringResult extends Art2aAbstractResult {
+    //<editor-fold desc="Private class variables" defaultstate="collapsed">
+    /**
+     * Cache for cluster representatives.
+     */
+    private int[] cacheClusterRepresentativesIndices;
+    /**
+     * Cache for cluster angles.
+     */
+    private float[][] cacheAngleBetweenClusters;
+    //</editor-fold>
+    //
     //<editor-fold desc="Private final class variables" defaultstate="collapsed">
     /**
      * Matrix contains all cluster vectors.
@@ -94,6 +106,9 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
         this.vigilanceParameter = aVigilanceParameter;
         this.floatClusterMatrix = aClusterMatrix;
         this.dataMatrix = aDataMatrix;
+        this.cacheClusterRepresentativesIndices = new int[aNumberOfDetectedClusters];
+        Arrays.fill(this.cacheClusterRepresentativesIndices, -2);
+        this.cacheAngleBetweenClusters = new float[aNumberOfDetectedClusters][aNumberOfDetectedClusters];
     }
     //
     /**
@@ -135,27 +150,33 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
         if(aClusterNumber >= this.getNumberOfDetectedClusters() || aClusterNumber < 0) {
             throw new IllegalArgumentException("The given cluster number does not exist or is invalid.");
         }
-        int[] tmpClusterIndices =  this.getClusterIndices(aClusterNumber);
-        float[] tmpCurrentClusterVector = this.floatClusterMatrix[aClusterNumber];
-        float tmpFactor = 0.0f;
-        float[] tmpMatrixRow;
-        float[] tmpScalarProductArray = new float[tmpClusterIndices.length+1];
-        int tmpIterator = 0;
-        for(int tmpCurrentInput : tmpClusterIndices) {
-            tmpMatrixRow = this.dataMatrix[tmpCurrentInput];
-            for(int i = 0; i < tmpMatrixRow.length; i++) {
-                tmpFactor += tmpMatrixRow[i] * tmpCurrentClusterVector[i];
+        if(this.cacheClusterRepresentativesIndices[aClusterNumber] == -2) {
+            int[] tmpClusterIndices = this.getClusterIndices(aClusterNumber);
+            float[] tmpCurrentClusterVector = this.floatClusterMatrix[aClusterNumber];
+            float tmpFactor;
+            float[] tmpMatrixRow;
+            float[] tmpScalarProductArray = new float[tmpClusterIndices.length + 1];
+            int tmpIterator = 0;
+            for (int tmpCurrentInput : tmpClusterIndices) {
+                tmpMatrixRow = this.dataMatrix[tmpCurrentInput];
+                tmpFactor = 0.0f;
+                for (int i = 0; i < tmpMatrixRow.length; i++) {
+                    tmpFactor += tmpMatrixRow[i] * tmpCurrentClusterVector[i];
+                }
+                tmpScalarProductArray[tmpIterator] = tmpFactor;
+                tmpIterator++;
             }
-            tmpScalarProductArray[tmpIterator] = tmpFactor;
-            tmpIterator++;
-        }
-        int tmpIndexOfGreatestScalarProduct = 0;
-        for(int i = 0; i < tmpScalarProductArray.length; i++) {
-            if(tmpScalarProductArray[i] > tmpScalarProductArray[tmpIndexOfGreatestScalarProduct]) {
-                tmpIndexOfGreatestScalarProduct = i;
+            int tmpIndexOfGreatestScalarProduct = 0;
+            for (int i = 0; i < tmpScalarProductArray.length; i++) {
+                if (tmpScalarProductArray[i] > tmpScalarProductArray[tmpIndexOfGreatestScalarProduct]) {
+                    tmpIndexOfGreatestScalarProduct = i;
+                }
             }
+            this.cacheClusterRepresentativesIndices[aClusterNumber] = tmpClusterIndices[tmpIndexOfGreatestScalarProduct];
+            return tmpClusterIndices[tmpIndexOfGreatestScalarProduct];
+        } else {
+            return this.cacheClusterRepresentativesIndices[aClusterNumber];
         }
-        return tmpClusterIndices[tmpIndexOfGreatestScalarProduct];
     }
     //
     /**
@@ -171,21 +192,27 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
         if(aFirstCluster == aSecondCluster && (aFirstCluster >= tmpNumberOfDetectedCluster)) {
             throw new IllegalArgumentException("The given cluster number(s) do(es) not exist");
         } else if (aFirstCluster == aSecondCluster) {
-            tmpAngle = 0.0f;
+           return 0.0f;
         } else {
             if (aFirstCluster >= tmpNumberOfDetectedCluster || aSecondCluster >= tmpNumberOfDetectedCluster) {
                 throw new IllegalArgumentException("The given cluster number does not exist.");
             }
-            float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];
-            float[] tmpSecondCluster = this.floatClusterMatrix[aSecondCluster];
-            float tmpFactor = (float) (180 / Math.PI);
-            float tmpProduct = 0.0f;
-            for (int i = 0; i < tmpFirstCluster.length; i++) {
-                tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];
+            if(this.cacheAngleBetweenClusters[aFirstCluster] [aSecondCluster] == 0) {
+                float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];
+                float[] tmpSecondCluster = this.floatClusterMatrix[aSecondCluster];
+                float tmpFactor = (float) (180 / Math.PI);
+                float tmpProduct = 0.0f;
+                for (int i = 0; i < tmpFirstCluster.length; i++) {
+                    tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];
+                }
+                tmpAngle = (float) (tmpFactor * Math.acos(tmpProduct));
+                this.cacheAngleBetweenClusters[aFirstCluster][aSecondCluster] = tmpAngle;
+                this.cacheAngleBetweenClusters[aSecondCluster][aFirstCluster] = tmpAngle;
+                return tmpAngle;
+            } else {
+                return this.cacheAngleBetweenClusters[aFirstCluster][aSecondCluster];
             }
-            tmpAngle = (float) (tmpFactor * Math.acos(tmpProduct));
         }
-        return tmpAngle;
     }
     //</editor-fold>
 }

@@ -33,9 +33,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -65,13 +63,6 @@ public final class FileUtil {
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(FileUtil.class.getName());
-    //</editor-fold>
-    //
-    //<editor-fold defaultstate="collapsed" desc="Private static class variables">
-    /**
-     * The working directory
-     */
-   // private  String workingPath;
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Public static methods">
@@ -261,72 +252,5 @@ public final class FileUtil {
             }
         }
     }
-    public static <T extends java.io.Writer> T[] createWriters(String aPathName, Class<T> writerClass) {
-        T tmpClusteringResultWriter = null;
-        T tmpClusteringProcessWriter = null;
-        String tmpWorkingPath;
-        try {
-            LocalDateTime tmpDateTime = LocalDateTime.now();
-            String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
-            tmpWorkingPath = (new File(aPathName) + File.separator);
-
-            new File(tmpWorkingPath + CLUSTERING_RESULT_FILE_NAME).mkdirs();
-            File tmpClusteringResultFile = new File(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME +
-                    File.separator + CLUSTERING_RESULT_FILE_NAME + "_" + tmpProcessingTime + ".txt");
-
-            if (writerClass.equals(PrintWriter.class)) {
-                tmpClusteringResultWriter = (T) new PrintWriter(tmpClusteringResultFile);
-            } else if (writerClass.equals(BufferedWriter.class)) {
-                tmpClusteringResultWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringResultFile));
-            } else if (writerClass.equals(FileWriter.class)) {
-                tmpClusteringResultWriter = (T) new FileWriter(tmpClusteringResultFile);
-            } else if (writerClass.equals(StringWriter.class)) {
-                tmpClusteringResultWriter = (T) new StringWriter();
-            } else if (writerClass.equals(CharArrayWriter.class)) {
-                tmpClusteringResultWriter = (T) new CharArrayWriter();
-            }
-
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME);
-
-            new File(tmpWorkingPath + CLUSTERING_PROCESS_FILE_NAME).mkdirs();
-            File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME +
-                    File.separator + CLUSTERING_PROCESS_FILE_NAME + "_" + tmpProcessingTime + ".txt");
-
-            if (writerClass.equals(PrintWriter.class)) {
-                tmpClusteringProcessWriter = (T) new PrintWriter(tmpClusteringProcessFile);
-            } else if (writerClass.equals(BufferedWriter.class)) {
-                tmpClusteringProcessWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringProcessFile));
-            } else if (writerClass.equals(FileWriter.class)) {
-                tmpClusteringProcessWriter = (T) new FileWriter(tmpClusteringProcessFile);
-            } else if (writerClass.equals(StringWriter.class)) {
-                tmpClusteringProcessWriter = (T) new StringWriter();
-            } else if (writerClass.equals(CharArrayWriter.class)) {
-                tmpClusteringProcessWriter = (T) new CharArrayWriter();
-            }
-
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME);
-        } catch (IOException e) {
-            FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
-        }
-        T[] tmpWriterArray = (T[]) Array.newInstance(writerClass, 2);
-        tmpWriterArray[0] = tmpClusteringResultWriter;
-        tmpWriterArray[1] = tmpClusteringProcessWriter;
-        return tmpWriterArray;
-    }
-    private static <T extends Writer> T createWriterInstance(Class<T> writerClass, Writer writer) throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (writerClass == PrintWriter.class) {
-            return writerClass.getConstructor(Writer.class, boolean.class).newInstance(writer, true);
-        } else if (writerClass == BufferedWriter.class) {
-            return writerClass.getConstructor(Writer.class).newInstance(writer);
-        } else if (writerClass == FileWriter.class) {
-            return writerClass.getConstructor(Writer.class, boolean.class).newInstance(writer, false);
-        } else {
-            throw new IllegalArgumentException("Unsupported writer class: " + writerClass.getName());
-        }
-    }
-
-
-
     //</editor-fold>
 }

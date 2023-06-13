@@ -120,10 +120,6 @@ public class Art2aFloatClustering implements IArt2aClustering {
      * before the system adapts it to the new sample vector.
      */
     private final float learningParameter;
-    /**
-     * Initial capacity value for maps
-     */
-    private final double INITIAL_CAPACITY_VALUE = 1.5;
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="private static final constants">
@@ -192,9 +188,9 @@ public class Art2aFloatClustering implements IArt2aClustering {
      * following steps so that all components of an input vector range between 0 and 1.
      *
      * @param aDataMatrix the matrix contains all input vectors/fingerprints to be clustered.
-     * @return valid data matrix
+     * @return a valid data matrix.
      * @throws NullPointerException is thrown if the given data matrix is null.
-     * @throws IllegalArgumentException is thrown if the input vectors are invalid
+     * @throws IllegalArgumentException is thrown if the input vectors are invalid.
      */
     private float[][] checkAndScaleDataMatrix(float[][] aDataMatrix) throws NullPointerException, IllegalArgumentException {
         if(aDataMatrix == null) {
@@ -285,11 +281,56 @@ public class Art2aFloatClustering implements IArt2aClustering {
         if (tmpVectorComponentsSqrtSum == 0) {
             throw new ArithmeticException("Addition of the vector components results in zero!");
         } else {
-            tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum); // TODO optimize sqrt!!
+            tmpVectorLength = (float) Math.sqrt(tmpVectorComponentsSqrtSum);
         }
         return tmpVectorLength;
     }
     //
+    /**
+     * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
+     * converged, a new epoch is performed, otherwise the clustering is completed successfully.
+     * The system is considered converged if the cluster vectors of the current epoch and the previous epoch
+     * have a minimum similarity. The default value of the similarity parameter is 0.09, but it can also be set
+     * by the user when initialising the clustering.
+     *
+     * @param aNumberOfDetectedClasses number of detected clusters per epoch.
+     * @param aConvergenceEpoch current epochs number.
+     * @return boolean true is returned if the system has converged.
+     * False is returned if the system has not converged to the epoch.
+     * @throws ConvergenceFailedException is thrown, when convergence fails.
+     */
+    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException {
+        boolean tmpConvergence;
+        float[] tmpRow;
+        if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
+            // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
+            tmpConvergence = true;
+            float tmpScalarProductOfClassVector;
+            float[] tmpCurrentRowInClusterMatrix;
+            float[] tmpPreviousEpochRow;
+            for (int i = 0; i < aNumberOfDetectedClasses; i++) {
+                tmpScalarProductOfClassVector = 0.0f;
+                tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
+                tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
+                for (int j = 0; j < this.numberOfComponents; j++) {
+                    tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
+                }
+                if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
+                    tmpConvergence = false;
+                    break;
+                }
+            }
+            if(!tmpConvergence) {
+                for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
+                    tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
+                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = tmpRow;
+                }
+            }
+        } else {
+            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
+        }
+        return tmpConvergence;
+    }
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="overriden public methods">
@@ -410,18 +451,18 @@ public class Art2aFloatClustering implements IArt2aClustering {
                     //<editor-fold desc=" normalisation of the randomly selected input vector.
                     //                    Subsequently, all components of the input vector are transformed
                     //                    with a non-linear threshold function for contrast enhancement." defaultstate="collapsed">
-                    tmpVectorLengthForFirstNormalizationStep = this.getVectorLength(tmpInputVector);
+                    tmpVectorLengthForFirstNormalizationStep = this.getVectorLength(tmpInputVector); // TODO ask
                     for(int tmpManipulateComponents = 0; tmpManipulateComponents < tmpInputVector.length; tmpManipulateComponents++) {
-                        tmpInputVector[tmpManipulateComponents] *= (1 / tmpVectorLengthForFirstNormalizationStep);
+                        tmpInputVector[tmpManipulateComponents] *= (1 / tmpVectorLengthForFirstNormalizationStep); // TODO ask
                         if(tmpInputVector[tmpManipulateComponents] <= this.thresholdForContrastEnhancement) {
                             tmpInputVector[tmpManipulateComponents] = 0;
                         }
                     }
                     //</editor-fold>
                     //<editor-fold desc="the transformed input vector is normalised again." defaultstate="collapsed">
-                    tmpVectorLengthAfterContrastEnhancement = this.getVectorLength(tmpInputVector);
+                    tmpVectorLengthAfterContrastEnhancement = this.getVectorLength(tmpInputVector); // TODO ask
                     for(int tmpNormalizeInputComponents = 0; tmpNormalizeInputComponents < tmpInputVector.length; tmpNormalizeInputComponents++) {
-                        tmpInputVector[tmpNormalizeInputComponents] *= (1 / tmpVectorLengthAfterContrastEnhancement);
+                        tmpInputVector[tmpNormalizeInputComponents] *= (1 / tmpVectorLengthAfterContrastEnhancement); // TODO ask
                     }
                     //</editor-fold>
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
@@ -446,7 +487,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps."
                         //</editor-fold>
                         //<editor-fold desc="Calculate first rho value."
-                        tmpRho = this.scalingFactor * tmpSumCom;
+                        tmpRho = this.scalingFactor * tmpSumCom; // TODO ask
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
                         for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters; tmpCurrentClusterMatrixRow++) {
@@ -454,7 +495,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                             float tmpRhoForExistingClusters = 0.0f;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
                             for(int tmpElementsInRow = 0; tmpElementsInRow < this.numberOfComponents; tmpElementsInRow++) {
-                                tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow];
+                                tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow]; // TODO ask
                             }
                             if(tmpRhoForExistingClusters > tmpRho) {
                                 tmpRho = tmpRhoForExistingClusters;
@@ -492,7 +533,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                             }
                             tmpVectorLengthForModificationWinnerCluster = this.getVectorLength(tmpInputVector);
                             for(int i = 0; i < tmpInputVector.length; i++) {
-                                tmpInputVector[i] *= (1 / tmpVectorLengthForModificationWinnerCluster);
+                                tmpInputVector[i] *= (1 / tmpVectorLengthForModificationWinnerCluster); // TODO ask
                             }
                             this.clusterMatrix[tmpWinnerClassIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpWinnerClassIndex;
@@ -536,42 +577,6 @@ public class Art2aFloatClustering implements IArt2aClustering {
             return new Art2aFloatClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix,this.clusteringProcess, this.clusteringResult);
         }
         //</editor-fold>
-    }
-    //
-    /**
-     * {@inheritDoc}
-     */
-    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException {
-        boolean tmpConvergence;
-        float[] tmpRow;
-        if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
-            // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
-            tmpConvergence = true;
-            float tmpScalarProductOfClassVector;
-            float[] tmpCurrentRowInClusterMatrix;
-            float[] tmpPreviousEpochRow;
-            for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpScalarProductOfClassVector = 0.0f;
-                tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
-                tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
-                for (int j = 0; j < this.numberOfComponents; j++) {
-                    tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
-                }
-                if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
-                    tmpConvergence = false;
-                    break;
-                }
-            }
-            if(!tmpConvergence) {
-                for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
-                    tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
-                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = tmpRow;
-                }
-            }
-        } else {
-            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
-        }
-        return tmpConvergence;
     }
     //</editor-fold>
 }

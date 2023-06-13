@@ -115,7 +115,7 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
         this.clusterNumberToClusterMemberMap = this.getClusterSize(this.clusterView);
     }
     //</editor-fold>
-
+    //
     //<editor-fold desc="Overriden public properties" defaultstate="collapsed">
     /**
      * {@inheritDoc}

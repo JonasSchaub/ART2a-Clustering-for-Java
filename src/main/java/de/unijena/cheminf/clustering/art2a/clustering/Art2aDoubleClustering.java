@@ -26,6 +26,7 @@ package de.unijena.cheminf.clustering.art2a.clustering;
 
 import de.unijena.cheminf.clustering.art2a.exceptions.ConvergenceFailedException;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClustering;
+import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult;
 
 import java.util.Random;
@@ -284,6 +285,52 @@ public class Art2aDoubleClustering implements IArt2aClustering {
             }
         }
     }
+    //
+    /**
+     * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
+     * converged, a new epoch is performed, otherwise the clustering is completed successfully.
+     * The system is considered converged if the cluster vectors of the current epoch and the previous epoch
+     * have a minimum similarity. The default value of the similarity parameter is 0.09, but it can also be set
+     * by the user when initialising the clustering.
+     *
+     * @param aNumberOfDetectedClasses number of detected clusters per epoch.
+     * @param aConvergenceEpoch current epochs number.
+     * @return boolean true is returned if the system has converged.
+     * False is returned if the system has not converged to the epoch.
+     * @throws ConvergenceFailedException is thrown, when convergence fails.
+     */
+    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException {
+        boolean tmpConvergence;
+        double[] tmpRow;
+        if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
+            // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
+            tmpConvergence = true;
+            double tmpScalarProductOfClassVector;
+            double[] tmpCurrentRowInClusterMatrix;
+            double[] tmpPreviousEpochRow;
+            for (int i = 0; i < aNumberOfDetectedClasses; i++) {
+                tmpScalarProductOfClassVector = 0.0;
+                tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
+                tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
+                for (int j = 0; j < this.numberOfComponents; j++) {
+                    tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
+                }
+                if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
+                    tmpConvergence = false;
+                    break;
+                }
+            }
+            if(!tmpConvergence) {
+                for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
+                    tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
+                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = tmpRow;
+                }
+            }
+        } else {
+            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
+        }
+        return tmpConvergence;
+    }
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Overriden public methods">
@@ -329,7 +376,7 @@ public class Art2aDoubleClustering implements IArt2aClustering {
      * Starts the clustering in double machine precision.
      */
     @Override
-    public Art2aDoubleClusteringResult startClustering(boolean aExportClusteringResultsToTextFiles) throws ConvergenceFailedException {
+    public IArt2aClusteringResult startClustering(boolean aExportClusteringResultsToTextFiles) throws ConvergenceFailedException {
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
         this.clusteringProcess = null;
         this.clusteringResult = null;
@@ -378,7 +425,6 @@ public class Art2aDoubleClustering implements IArt2aClustering {
                 this.clusteringProcess.add("");
             }
             int[] tmpSampleVectorIndicesInRandomOrder = this.randomizeVectorIndices();
-            System.out.println(java.util.Arrays.toString(tmpSampleVectorIndicesInRandomOrder));
             //</editor-fold>
             //<editor-fold desc="Check current input vector for null vector." defaultstate="collapsed">
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfInputVectors; tmpCurrentInput++) {
@@ -390,7 +436,6 @@ public class Art2aDoubleClustering implements IArt2aClustering {
                         tmpIsNullVector = false;
                     }
                 }
-                System.out.println(java.util.Arrays.toString(tmpInputVector));
                 if(aExportClusteringResultsToTextFiles) {
                     this.clusteringProcess.add("Input: " + tmpCurrentInput + " / Vector " + tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
                 }
@@ -531,42 +576,6 @@ public class Art2aDoubleClustering implements IArt2aClustering {
             return new Art2aDoubleClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs, tmpNumberOfDetectedClusters, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix, this.clusteringProcess, this.clusteringResult);
         }
         //</editor-fold>
-    }
-    //
-    /**
-     *{@inheritDoc}
-     */
-    public boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException {
-        boolean tmpConvergence;
-        double[] tmpRow;
-        if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
-            // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
-            tmpConvergence = true;
-            double tmpScalarProductOfClassVector;
-            double[] tmpCurrentRowInClusterMatrix;
-            double[] tmpPreviousEpochRow;
-            for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpScalarProductOfClassVector = 0.0;
-                tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
-                tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
-                for (int j = 0; j < this.numberOfComponents; j++) {
-                    tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
-                }
-                if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
-                    tmpConvergence = false;
-                    break;
-                }
-            }
-            if(!tmpConvergence) {
-                for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length; tmpCurrentClusterMatrixVector++) {
-                    tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
-                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = tmpRow;
-                }
-            }
-        } else {
-            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
-        }
-        return tmpConvergence;
     }
     // </editor-fold>
 }

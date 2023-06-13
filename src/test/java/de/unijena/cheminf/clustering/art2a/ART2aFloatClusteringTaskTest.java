@@ -24,7 +24,11 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.clustering.Art2aDoubleClustering;
+import de.unijena.cheminf.clustering.art2a.clustering.Art2aFloatClustering;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
+import de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult;
+import de.unijena.cheminf.clustering.art2a.results.Art2aFloatClusteringResult;
 import de.unijena.cheminf.clustering.art2a.util.FileUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -383,16 +387,15 @@ public class ART2aFloatClusteringTaskTest {
         tmpTestDataMatrix[9][26] = 1;
         tmpTestDataMatrix[9][27] = 1;
 
+
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 2,true);
+            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        //PrintWriter[] tmpPrintWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder");
-        BufferedWriter[] tmpWriter = FileUtil.createWriters("Clustering_Result_Folder", BufferedWriter.class);
+        BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder", BufferedWriter.class);
         List<Future<IArt2aClusteringResult>> tmpFuturesList;
-      //  ART2aAbstractResult tmpClusteringResult;
         ART2aFloatClusteringTaskTest.numberOfEpochsForAllVigilanceParameter = new int[9];
         ART2aFloatClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
         ART2aFloatClusteringTaskTest.clusterIndicesForAllVigilanceParameter = new int[9][];
@@ -432,7 +435,7 @@ public class ART2aFloatClusteringTaskTest {
         tmpWriter[1].flush();
         tmpWriter[1].close();
         tmpExecutorService.shutdown();
-      //  Assertions.assertEquals(true, true);
+
     }
     //</editor-fold>
     //
@@ -634,7 +637,7 @@ public class ART2aFloatClusteringTaskTest {
     }
     //</editor-fold>
     //
-    // <editor-fold defaultstate="collapsed" desc="tests the number of detected clusters for all vigilance parameter">
+    // <editor-fold defaultstate="collapsed" desc="tests the cluster indices of detected clusters for all vigilance parameter">
     /**
      * Tests the cluster indices in cluster 0 for vigilance parameter 0.1f
      */

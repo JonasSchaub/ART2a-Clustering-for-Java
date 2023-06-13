@@ -87,7 +87,9 @@ public interface IArt2aClusteringResult<T extends Number> {
      * very detailed representation of the results (clustering process file), while in the other only the
      * most important results are summarized (clustering result file).
      * <u>IMPORTANT: </u> In order to additionally export the clustering results into text files,
-     * the folder must be created first. This requires the method call createClusteringResultInFile(String aPathName).
+     * the folder must be created first.
+     * This requires the method call setUpClusteringResultTextFilePrinter(String aPathName, Class)
+     * or user own Writer and text files.
      *
      * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#setUpClusteringResultTextFilePrinters(String, Class)
      * But this method call is optional, the folder can also be created by the user.

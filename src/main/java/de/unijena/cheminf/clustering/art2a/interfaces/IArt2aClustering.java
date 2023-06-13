@@ -66,20 +66,5 @@ public interface IArt2aClustering {
      * @throws ConvergenceFailedException is thrown, when convergence fails.
      */
     IArt2aClusteringResult startClustering(boolean aExportClusteringResultsToTextFiles) throws ConvergenceFailedException;
-    //
-    /**
-     * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
-     * converged, a new epoch is performed, otherwise the clustering is completed successfully.
-     * The system is considered converged if the cluster vectors of the current epoch and the previous epoch
-     * have a minimum similarity. The default value of the similarity parameter is 0.09, but it can also be set
-     * by the user when initialising the clustering.
-     *
-     * @param aNumberOfDetectedClasses number of detected clusters per epoch.
-     * @param aConvergenceEpoch current epochs number.
-     * @return boolean true is returned if the system has converged.
-     * False is returned if the system has not converged to the epoch.
-     * @throws ConvergenceFailedException is thrown, when convergence fails.
-     */
-    boolean checkConvergence(int aNumberOfDetectedClasses, int aConvergenceEpoch) throws ConvergenceFailedException;
     // </editor-fold>
 }
