@@ -47,11 +47,11 @@ import java.util.logging.Logger;
 public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     //<editor-fold desc="Private class variables" defaultstate="collapsed">
     /**
-     * Queue for clustering result (process)
+     * Queue of typ String for clustering result (process)
      */
     private ConcurrentLinkedQueue<String> clusteringProcess;
     /**
-     * Queue for clustering result
+     * Queue of typ String for clustering result
      */
     private  ConcurrentLinkedQueue<String> clusteringResult;
     /**
@@ -93,8 +93,8 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      *
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue.
-     * @param aClusteringResultQueue clustering result queue.
+     * @param aClusteringProcessQueue clustering result (process) queue of typ string.
+     * @param aClusteringResultQueue clustering result queue of typ string.
      * @param aClusterView array for cluster assignment of each input vector.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid.
      */

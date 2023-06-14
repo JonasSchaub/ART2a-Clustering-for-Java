@@ -81,10 +81,11 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue. The queue is required to be able to export
+     * @param aClusteringProcessQueue clustering result (process) queue of typ String.
+     *                                The queue is required to be able to export
      *                                the cluster results. If it is not specified, they are set to null and
      *                                export is not possible.
-     * @param aClusteringResultQueue clustering result queue. See {@code #aClusteringProcessQueue}
+     * @param aClusteringResultQueue clustering result queue of typ String. See {@code #aClusteringProcessQueue}
      * @param aClusterView array for cluster assignment of each input vector.
      * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float ART-2a clustering are
      *                       stored in this matrix.

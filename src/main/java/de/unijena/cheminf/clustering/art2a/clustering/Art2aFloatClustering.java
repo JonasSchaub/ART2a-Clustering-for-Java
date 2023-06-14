@@ -64,11 +64,11 @@ public class Art2aFloatClustering implements IArt2aClustering {
      */
     private float[][] clusterMatrixPreviousEpoch;
     /**
-     * Queue for clustering process.
+     * Queue of typ String for clustering process.
      */
     private ConcurrentLinkedQueue<String> clusteringProcess;
     /**
-     * Queue for clustering result.
+     * Queue of typ String for clustering result.
      */
     private ConcurrentLinkedQueue<String> clusteringResult;
     /**
@@ -451,18 +451,18 @@ public class Art2aFloatClustering implements IArt2aClustering {
                     //<editor-fold desc=" normalisation of the randomly selected input vector.
                     //                    Subsequently, all components of the input vector are transformed
                     //                    with a non-linear threshold function for contrast enhancement." defaultstate="collapsed">
-                    tmpVectorLengthForFirstNormalizationStep = this.getVectorLength(tmpInputVector); // TODO ask
+                    tmpVectorLengthForFirstNormalizationStep = this.getVectorLength(tmpInputVector);
                     for(int tmpManipulateComponents = 0; tmpManipulateComponents < tmpInputVector.length; tmpManipulateComponents++) {
-                        tmpInputVector[tmpManipulateComponents] *= (1 / tmpVectorLengthForFirstNormalizationStep); // TODO ask
+                        tmpInputVector[tmpManipulateComponents] *= (1 / tmpVectorLengthForFirstNormalizationStep);
                         if(tmpInputVector[tmpManipulateComponents] <= this.thresholdForContrastEnhancement) {
                             tmpInputVector[tmpManipulateComponents] = 0;
                         }
                     }
                     //</editor-fold>
                     //<editor-fold desc="the transformed input vector is normalised again." defaultstate="collapsed">
-                    tmpVectorLengthAfterContrastEnhancement = this.getVectorLength(tmpInputVector); // TODO ask
+                    tmpVectorLengthAfterContrastEnhancement = this.getVectorLength(tmpInputVector);
                     for(int tmpNormalizeInputComponents = 0; tmpNormalizeInputComponents < tmpInputVector.length; tmpNormalizeInputComponents++) {
-                        tmpInputVector[tmpNormalizeInputComponents] *= (1 / tmpVectorLengthAfterContrastEnhancement); // TODO ask
+                        tmpInputVector[tmpNormalizeInputComponents] *= (1 / tmpVectorLengthAfterContrastEnhancement);
                     }
                     //</editor-fold>
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
@@ -487,7 +487,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps."
                         //</editor-fold>
                         //<editor-fold desc="Calculate first rho value."
-                        tmpRho = this.scalingFactor * tmpSumCom; // TODO ask
+                        tmpRho = this.scalingFactor * tmpSumCom;
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
                         for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters; tmpCurrentClusterMatrixRow++) {
@@ -495,7 +495,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                             float tmpRhoForExistingClusters = 0.0f;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
                             for(int tmpElementsInRow = 0; tmpElementsInRow < this.numberOfComponents; tmpElementsInRow++) {
-                                tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow]; // TODO ask
+                                tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRow] * tmpRow[tmpElementsInRow];
                             }
                             if(tmpRhoForExistingClusters > tmpRho) {
                                 tmpRho = tmpRhoForExistingClusters;
@@ -533,7 +533,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                             }
                             tmpVectorLengthForModificationWinnerCluster = this.getVectorLength(tmpInputVector);
                             for(int i = 0; i < tmpInputVector.length; i++) {
-                                tmpInputVector[i] *= (1 / tmpVectorLengthForModificationWinnerCluster); // TODO ask
+                                tmpInputVector[i] *= (1 / tmpVectorLengthForModificationWinnerCluster);
                             }
                             this.clusterMatrix[tmpWinnerClassIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpWinnerClassIndex;

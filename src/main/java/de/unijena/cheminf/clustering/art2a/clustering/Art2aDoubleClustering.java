@@ -64,11 +64,11 @@ public class Art2aDoubleClustering implements IArt2aClustering {
      */
     private double[][] clusterMatrixPreviousEpoch;
     /**
-     * Queue for clustering process.
+     * Queue of typ String for clustering process.
      */
     private ConcurrentLinkedQueue<String> clusteringProcess;
     /**
-     * Queue for clustering result.
+     * Queue of typ String for clustering result.
      */
     private ConcurrentLinkedQueue<String> clusteringResult;
     /**

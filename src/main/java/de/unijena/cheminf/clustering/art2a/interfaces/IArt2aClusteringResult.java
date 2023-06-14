@@ -24,8 +24,6 @@
 
 package de.unijena.cheminf.clustering.art2a.interfaces;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
@@ -38,7 +36,7 @@ import java.io.Writer;
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public interface IArt2aClusteringResult<T extends Number> {
+public interface IArt2aClusteringResult<T> {
     // <editor-fold defaultstate="collapsed" desc="Public properties">
     /**
      * Returns the vigilance parameter of the clustering algorithm.
