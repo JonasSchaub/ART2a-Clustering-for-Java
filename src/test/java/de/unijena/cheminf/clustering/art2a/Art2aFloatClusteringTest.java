@@ -131,20 +131,6 @@ public class Art2aFloatClusteringTest {
     }
     //</editor-fold>
     //
-    //<editor-fold desc="Private method" defaultstate="collapsed">
-    /**
-     * Sets a user defined numeric tolerance between the excepted number and actual number.
-     *
-     * @param tmpExpectedNumber excepted number
-     * @param tmpActualNumber actual number
-     * @param tmpTolerance user defined tolerance
-     * @return true, if the tolerance is not exceeded, otherwise false.
-     */
-    public boolean isEqual(float tmpExpectedNumber, float tmpActualNumber, float tmpTolerance) {
-        return Math.abs(tmpExpectedNumber-tmpActualNumber) <= tmpTolerance;
-    }
-    //</editor-fold>
-    //
     // <editor-fold defaultstate="collapsed" desc="tests the number of epochs for all vigilance parameter">
     /**
      * Tests number of epoch for vigilance parameter 0.1f
@@ -521,7 +507,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster0And1For01() {
         float tmpTestAngleBetweenCluster0And1For01 = 64.71957f;
         float tmpAngleBetweenCluster0And1For01 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[0];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster0And1For01, tmpAngleBetweenCluster0And1For01, 1e-4f);
     }
     //
@@ -532,7 +517,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster1And2For02() {
         float tmpTestAngleBetweenCluster1And2For02 = 80.98592f;
         float tmpAngleBetweenCluster1And2For02 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[1];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster1And2For02, tmpAngleBetweenCluster1And2For02, 1e-4f);
     }
     //
@@ -543,7 +527,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster2And3For03() {
         float tmpTestAngleBetweenCluster2And3For03 = 90.000f;
         float tmpAngleBetweenCluster2And3For03 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[2];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster2And3For03, tmpAngleBetweenCluster2And3For03, 1e-4f);
     }
     //
@@ -554,7 +537,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster3And4For04() {
         float tmpTestAngleBetweenCluster3And4For04 = 90.000f;
         float tmpAngleBetweenCluster3And4For04 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[3];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster3And4For04, tmpAngleBetweenCluster3And4For04, 1e-4f);
     }
     //
@@ -565,7 +547,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster4And5For05() {
         float tmpTestAngleBetweenCluster4And5For05 = 71.56505f;
         float tmpAngleBetweenCluster4And5For05 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[4];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster4And5For05, tmpAngleBetweenCluster4And5For05, 1e-4f);
     }
     //
@@ -576,7 +557,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster5And6For06() {
         float tmpTestAngleBetweenCluster5And6For06 = 71.56505f;
         float tmpAngleBetweenCluster5And6For06 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[5];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster5And6For06, tmpAngleBetweenCluster5And6For06, 1e-4f);
     }
     //
@@ -587,7 +567,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster6And7For07() {
         float tmpTestAngleBetweenCluster6And7For07 = 75.03678f;
         float tmpAngleBetweenCluster6And7For07 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[6];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster6And7For07, tmpAngleBetweenCluster6And7For07, 1e-4f);
     }
     //
@@ -598,7 +577,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster7And8For08() {
         float tmpTestAngleBetweenCluster7And8For08 = 90.000f;
         float tmpAngleBetweenCluster7And8For08 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[7];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster7And8For08, tmpAngleBetweenCluster7And8For08, 1e-4f);
     }
     //
@@ -609,7 +587,6 @@ public class Art2aFloatClusteringTest {
     public void testAngleBetweenCluster8And9For09() {
         float tmpTestAngleBetweenCluster8And9For09 = 90.000f;
         float tmpAngleBetweenCluster8And9For09 = Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[8];
-        float tmpTolerance = 1e-3f;
         Assertions.assertEquals(tmpTestAngleBetweenCluster8And9For09, tmpAngleBetweenCluster8And9For09, 1e-4f);
     }
     //</editor-fold>
