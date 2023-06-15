@@ -81,22 +81,23 @@ public interface IArt2aClusteringResult<T> {
     //
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
-     * The result of the clustering is additionally exported in 2 text files. One of these files is a
+     * The result of the clustering is additionally exported in two text files. One of these files is a
      * very detailed representation of the results (clustering process file), while in the other only the
      * most important results are summarized (clustering result file).
      * <u>IMPORTANT: </u> In order to additionally export the clustering results into text files,
      * the folder must be created first.
      * This requires the method call setUpClusteringResultTextFilePrinter(String aPathName, Class)
-     * or user own Writer and text files.
+     * or user own Writer and text files. This method call is optional, the folder can also be created by the user.
      *
      * @see de.unijena.cheminf.clustering.art2a.util.FileUtil#setUpClusteringResultTextFilePrinters(String, Class)
-     * But this method call is optional, the folder can also be created by the user.
+     *
      * @param aClusteringProcessWriter clustering result (process) writer
      * @param aClusteringResultWriter clustering result writer
      * @throws NullPointerException is thrown, if the Writers are null.
      *
      */
-    void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter) throws NullPointerException;
+    void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter)
+            throws NullPointerException;
     //
     /**
      * Calculates the angle between two clusters.

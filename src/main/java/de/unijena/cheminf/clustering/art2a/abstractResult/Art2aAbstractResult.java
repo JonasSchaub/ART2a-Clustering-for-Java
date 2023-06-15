@@ -139,7 +139,8 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     @Override
     public int[] getClusterIndices(int aClusterNumber) throws IllegalArgumentException {
         if (aClusterNumber >= this.numberOfDetectedClusters) {
-            throw new IllegalArgumentException("The specified cluster number does not exist and exceeds the maximum number of clusters.");
+            throw new IllegalArgumentException("The specified cluster number does not exist and exceeds " +
+                    "the maximum number of clusters.");
         } else {
             int[] tmpIndicesInCluster = new int[this.clusterNumberToClusterMemberMap.get(aClusterNumber)];
             int tmpInputIndices = 0;
@@ -162,13 +163,15 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      * {@inheritDoc}
      */
     @Override
-    public void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter) throws NullPointerException {
+    public void exportClusteringResultsToTextFiles(Writer aClusteringResultWriter, Writer aClusteringProcessWriter)
+            throws NullPointerException {
         if(aClusteringResultWriter == null || aClusteringProcessWriter == null) {
             throw new NullPointerException("At least one of the writers is null.");
         }
         if (this.clusteringProcess == null || this.clusteringResult == null) {
-            throw new NullPointerException("The associated argument to allow writing of the clustering results to text files is set to false.\n" +
-                    "Please set the argument to true.");
+            throw new NullPointerException("The associated argument that enables the export of clustering results is " +
+                    "is set to false.\n" +
+                    "Please set the argument for export to true.");
         }
         try {
             for (String tmpClusteringResult : this.clusteringResult) {
@@ -179,7 +182,7 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
             }
         }
         catch(IOException anException) {
-            Art2aAbstractResult.LOGGER.log(Level.SEVERE, "Texts could not written in the files");
+            Art2aAbstractResult.LOGGER.log(Level.SEVERE, "Export to text files failed.");
         }
     }
     //</editor-fold>
@@ -192,7 +195,8 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      * @return HashMap<Integer, Integer> maps the cluster number to the number of inputs in the cluster.
      */
     private HashMap<Integer, Integer> getClusterSize(int[] aClusterView) {
-        HashMap<Integer, Integer> tmpClusterToMembersMap = new HashMap<>((int) (this.getNumberOfDetectedClusters() * this.INITIAL_CAPACITY_VALUE));
+        HashMap<Integer, Integer> tmpClusterToMembersMap =
+                new HashMap<>((int) (this.getNumberOfDetectedClusters() * this.INITIAL_CAPACITY_VALUE));
         for(int tmpClusterMembers : aClusterView) {
             if (tmpClusterMembers == -1) {
                 continue;

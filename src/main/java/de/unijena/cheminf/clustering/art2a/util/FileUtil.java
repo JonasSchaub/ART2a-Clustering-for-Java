@@ -79,7 +79,7 @@ public final class FileUtil {
      * @param aPathName path to the export folder where the text files are to be saved.
      * @param aWriterClass Writer ytp to be created. The user can choose one of the supported classes.
      * @param <T> generic typ of the Writer. This will be determined, based on the specified aWriterClass parameter.
-     * @return PrintWriter[] an array of a Writer objects,
+     * @return Writer[] an array of a Writer objects,
      * where index 0 corresponds to the clustering result Writer,
      * and index 1 corresponds to the clustering process Writer.
      */
@@ -105,7 +105,7 @@ public final class FileUtil {
             } else if (aWriterClass.equals(CharArrayWriter.class)) {
                 tmpClusteringResultWriter = (T) new CharArrayWriter();
             }
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME); // TODO optimize the method, if possible!!!
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME);
             new File(tmpWorkingPath + CLUSTERING_PROCESS_FILE_NAME).mkdirs();
             File tmpClusteringProcessFile = new File(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME +
                     File.separator + CLUSTERING_PROCESS_FILE_NAME + "_" + tmpProcessingTime + ".txt");
@@ -120,7 +120,7 @@ public final class FileUtil {
             } else if (aWriterClass.equals(CharArrayWriter.class)) {
                 tmpClusteringProcessWriter = (T) new CharArrayWriter();
             }
-            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME); // TODO optimize the method, if possible !!!
+            FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME);
         } catch (IOException e) {
             FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
         }
@@ -131,13 +131,13 @@ public final class FileUtil {
     }
     //
     /**
-     * The text file contains fingerprints that are read in to prepare them for float clustering.
-     * Each line of the text file represents one fingerprint. Each component of the fingerprint is
+     * The text file contains input vectors/fingerprints that are read in to prepare them for float clustering.
+     * Each line of the text file represents one input vector/fingerprint. Each component of the vector is
      * separated by a separator. The file has no header line.
      *
      * @param aFilePath path of the text file
-     * @param aSeparator separator of the text file to separate the fingerprint components from each other.
-     * @return float matrix is returned that contains the fingerprints that were read in.
+     * @param aSeparator separator of the text file to separate the input vector/fingerprint components from each other.
+     * @return float matrix is returned that contains the input vectors/fingerprints that were read in.
      * Each row of the matrix represents one fingerprint.
      * @throws IllegalArgumentException is thrown if the given file path is invalid.
      */
@@ -165,13 +165,15 @@ public final class FileUtil {
                 tmpFingerprintList.add(tmpFingerprintFloatArray);
             }
         } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file. At least one line is not readable.");
+            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file." +
+                    " At least one line is not readable.");
         } finally {
             if (tmpFingerprintFileReader != null) {
                 try {
                     tmpFingerprintFileReader.close();
                 } catch (IOException anException) {
-                   FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader could not be closed." );
+                   FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader could not " +
+                           "be closed." );
                 }
             }
         }
@@ -182,13 +184,13 @@ public final class FileUtil {
         return aDataMatrix;
     }
     /**
-     * The text file contains fingerprints that are read in to prepare them for double clustering.
-     * Each line of the text file represents one fingerprint. Each component of the fingerprint is
+     * The text file contains input vectors/fingerprints that are read in to prepare them for double clustering.
+     * Each line of the text file represents one input vector/fingerprint. Each component of the vector is
      * separated by a separator. The file has no header line.
      *
      * @param aFilePath path of the text file
-     * @param aSeparator separator of the text file to separate the fingerprint components from each other.
-     * @return double matrix is returned that contains the fingerprints that were read in.
+     * @param aSeparator separator of the text file to separate the input vector/fingerprint components from each other.
+     * @return double matrix is returned that contains the input vectors/fingerprints that were read in.
      * Each row of the matrix represents one fingerprint.
      * @throws IllegalArgumentException is thrown if the given file path is invalid.
      */
@@ -216,13 +218,15 @@ public final class FileUtil {
                 tmpFingerprintList.add(tmpFingerprintDoubleArray);
             }
         } catch (IOException anException) {
-            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file. At least one line is not readable.");
+            FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + " invalid fingerprint file." +
+                    " At least one line is not readable.");
         } finally {
             if (tmpFingerprintFileReader != null) {
                 try {
                     tmpFingerprintFileReader.close();
                 } catch (IOException anException) {
-                    FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader could not be closed." );
+                    FileUtil.LOGGER.log(Level.SEVERE, anException.toString(), anException + "The reader " +
+                            "could not be closed." );
                 }
             }
         }

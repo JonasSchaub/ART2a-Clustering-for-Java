@@ -84,11 +84,13 @@ public class Art2aFloatClusteringTest {
      */
     @BeforeAll
     public static void startArt2aClusteringTest() throws Exception {
-        float[][] tmpTestDataMatrix = FileUtil.importFloatDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Bit_Fingerprints.txt", ',');
+        float[][] tmpTestDataMatrix = FileUtil.importFloatDataMatrixFromTextFile(
+                "src/test/resources/de/unijena/cheminf/clustering/art2a/Bit_Fingerprints.txt", ',');
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (float tmpVigilanceParameter = 0.1f; tmpVigilanceParameter < 1.0f; tmpVigilanceParameter += 0.1f) {
-            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100,true);
+            Art2aClusteringTask tmpART2aFloatClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter,
+                    tmpTestDataMatrix, 100,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
         BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder", BufferedWriter.class);
@@ -591,7 +593,7 @@ public class Art2aFloatClusteringTest {
     }
     //</editor-fold>
     //
-    // <editor-fold defaultstate="collapsed" desc="test private some methods">
+    // <editor-fold defaultstate="collapsed" desc="test for importing float data matrix methods">
     /**
      * Method tests whether the import of a data matrix from a text file works correctly.
      *
@@ -676,17 +678,20 @@ public class Art2aFloatClusteringTest {
      * Method tests whether the checks and possible scaling in the data matrix work successfully.
      *
      * @throws NoSuchMethodException is thrown, if the private method is not found.
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
+     * @throws InvocationTargetException is thrown when an exception occurs during the invocation of the private method.
+     * It wraps the underlying exception that was thrown by the invoked method.
+     * @throws IllegalAccessException is thrown when the private method is inaccessible and cannot be invoked.
      */
     @Test
     public void testCheckAndScaleDataMatrix() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        float[][] tmpImportFloatDataMatrix = FileUtil.importFloatDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints.txt", ',');
-        Art2aFloatClustering tmpFloatClustering = new Art2aFloatClustering(tmpImportFloatDataMatrix, 10, 0.1f, 0.99f, 0.1f);
-        Method tmpCheckAndScaleDataMatrix = Art2aFloatClustering.class.getDeclaredMethod("checkAndScaleDataMatrix", float[][].class);
+        float[][] tmpImportFloatDataMatrix = FileUtil.importFloatDataMatrixFromTextFile(
+                "src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints.txt", ',');
+        Art2aFloatClustering tmpFloatClustering = new Art2aFloatClustering(tmpImportFloatDataMatrix, 10,
+                0.1f, 0.99f, 0.1f);
+        Method tmpCheckAndScaleDataMatrix = Art2aFloatClustering.class.getDeclaredMethod(
+                "getCheckedAndScaledDataMatrix", float[][].class);
         tmpCheckAndScaleDataMatrix.setAccessible(true);
         tmpCheckAndScaleDataMatrix.invoke(tmpFloatClustering, (Object) tmpImportFloatDataMatrix);
-
 
         float[][] tmpTestDataMatrix = new float[6][10];
 

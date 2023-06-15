@@ -47,7 +47,7 @@ public interface IArt2aClustering {
      *
      * @return an array with vector indices in a random order
      */
-    int[] randomizeVectorIndices();
+    int[] getRandomizeVectorIndices();
     //
     /**
      * Starts an Art-2A clustering algorithm.
@@ -57,14 +57,12 @@ public interface IArt2aClustering {
      * existing cluster, they are assigned to that cluster. Otherwise, a new cluster is formed, and the
      * input is added to it. Null vectors are not clustered.
      *
-     * @param aExportClusteringResultsToTextFiles If the parameter == true, all information about the
-     *                                            clustering is exported to 2 text files.
-     *                                            The first exported text file is a detailed log of the clustering
-     *                                            process and the intermediate results and the second file is a
-     *                                            rough overview of the final result.
+     * @param anIsClusteringResultExported If the parameter == true, all information about the
+     * clustering is exported to 2 text files.The first exported text file is a detailed log of the clustering process
+     * and the intermediate results and the second file is a rough overview of the final result.
      * @return IArt2aClusteringResult
      * @throws ConvergenceFailedException is thrown, when convergence fails.
      */
-    IArt2aClusteringResult startClustering(boolean aExportClusteringResultsToTextFiles) throws ConvergenceFailedException;
+    IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported) throws ConvergenceFailedException;
     // </editor-fold>
 }

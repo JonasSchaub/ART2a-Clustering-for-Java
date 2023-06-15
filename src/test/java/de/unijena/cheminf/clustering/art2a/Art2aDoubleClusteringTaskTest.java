@@ -75,21 +75,24 @@ public class Art2aDoubleClusteringTaskTest {
     //
     //<editor-fold desc="Before all" defaultstate="collapsed">
     /**
-     * Starts float clustering and stores the results in arrays to check for correctness.
+     * Starts double clustering and stores the results in arrays to check for correctness.
      * Clustering is performed for vigilance parameters from 0.1 to 0.9 in 0.1 steps.
      * The clustering process for the different vigilance parameters is performed in parallel.
      *
      */
     @BeforeAll
     public static void startArt2aClusteringTest() throws Exception {
-        double[][] tmpTestDataMatrix = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Bit_Fingerprints.txt", ',');
+        double[][] tmpTestDataMatrix = FileUtil.importDoubleDataMatrixFromTextFile(
+                "src/test/resources/de/unijena/cheminf/clustering/art2a/Bit_Fingerprints.txt", ',');
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(9); // number of tasks
         List<Art2aClusteringTask> tmpClusteringTask = new LinkedList<>();
         for (double tmpVigilanceParameter = 0.1; tmpVigilanceParameter < 0.9; tmpVigilanceParameter += 0.1) { //to 0.9 in order to leave the number of vigilance parameters at 9.
-            Art2aClusteringTask tmpART2aDoubleClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter, tmpTestDataMatrix, 100, true);
+            Art2aClusteringTask tmpART2aDoubleClusteringTask = new Art2aClusteringTask(tmpVigilanceParameter,
+                    tmpTestDataMatrix, 100, true);
             tmpClusteringTask.add(tmpART2aDoubleClusteringTask);
         }
-        BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder", BufferedWriter.class);
+        BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder",
+                BufferedWriter.class);
         List<Future<IArt2aClusteringResult>> tmpFuturesList;
         Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter = new int[9];
         Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
@@ -586,6 +589,9 @@ public class Art2aDoubleClusteringTaskTest {
         double tmpAngleBetweenCluster8And9For09 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[8];
         Assertions.assertEquals(tmpTestAngleBetweenCluster8And9For09, tmpAngleBetweenCluster8And9For09, 1e-8);
     }
+    //</editor-fold>
+    //
+    // <editor-fold defaultstate="collapsed" desc="test for importing float data matrix method">
     /**
      * Method tests whether the import of a data matrix from a text file works correctly.
      *
@@ -667,19 +673,23 @@ public class Art2aDoubleClusteringTaskTest {
     }
     //</editor-fold>
     //
-    // <editor-fold defaultstate="collapsed" desc="test private some methods">
+    // <editor-fold defaultstate="collapsed" desc="test private method">
     /**
      * Method tests whether the checks and possible scaling in the data matrix work successfully.
      *
      * @throws NoSuchMethodException is thrown, if the private method is not found.
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
+     * @throws InvocationTargetException is thrown when an exception occurs during the invocation of the private method.
+     * It wraps the underlying exception that was thrown by the invoked method.
+     * @throws IllegalAccessException is thrown when the private method is inaccessible and cannot be invoked.
      */
     @Test
     public void testCheckAndScaleDataMatrix() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        double[][] tmpImportDoubleDataMatrix = FileUtil.importDoubleDataMatrixFromTextFile("src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints.txt", ',');
-        Art2aDoubleClustering tmpDoubleClustering = new Art2aDoubleClustering(tmpImportDoubleDataMatrix, 10, 0.1, 0.99, 0.1);
-        Method tmpCheckAndScaleDataMatrix = Art2aDoubleClustering.class.getDeclaredMethod("checkAndScaleDataMatrix", double[][].class);
+        double[][] tmpImportDoubleDataMatrix = FileUtil.importDoubleDataMatrixFromTextFile(
+                "src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints.txt", ',');
+        Art2aDoubleClustering tmpDoubleClustering = new Art2aDoubleClustering(tmpImportDoubleDataMatrix,
+                10, 0.1, 0.99, 0.1);
+        Method tmpCheckAndScaleDataMatrix = Art2aDoubleClustering.class.getDeclaredMethod(
+                "getCheckedAndScaledDataMatrix", double[][].class);
         tmpCheckAndScaleDataMatrix.setAccessible(true);
         tmpCheckAndScaleDataMatrix.invoke(tmpDoubleClustering, (Object) tmpImportDoubleDataMatrix);
         double[][] tmpTestDataMatrix = new double[6][10];

@@ -82,26 +82,27 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusteringProcessQueue clustering result (process) queue of typ String.
-     *                                The queue is required to be able to export
-     *                                the cluster results. If it is not specified, they are set to null and
-     *                                export is not possible.
+     * The queue is required to be able to export the cluster results. If it is not specified, they are set to null and
+     * export is not possible.
      * @param aClusteringResultQueue clustering result queue of typ String. See {@code #aClusteringProcessQueue}
      * @param aClusterView array for cluster assignment of each input vector.
      * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float ART-2a clustering are
-     *                       stored in this matrix.
+     * stored in this matrix.
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
-     *                    Each row in the matrix corresponds to an input vector.
+     * Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
      * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      *
      */
-    public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView,
-                                      float[][] aClusterMatrix, float[][] aDataMatrix,ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                      ConcurrentLinkedQueue<String> aClusteringResultQueue) throws NullPointerException, IllegalArgumentException {
+    public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
+                                      int[] aClusterView, float[][] aClusterMatrix, float[][] aDataMatrix,
+                                      ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                      ConcurrentLinkedQueue<String> aClusteringResultQueue)
+            throws NullPointerException, IllegalArgumentException {
         super(aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aClusteringProcessQueue, aClusteringResultQueue);
         Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
         Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
-        if (aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+        if (aVigilanceParameter <= 0.0f || aVigilanceParameter >= 1.0f) {
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
         }
         this.vigilanceParameter = aVigilanceParameter;
@@ -119,15 +120,16 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusterView array for cluster assignment of each input vector.
-     * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float ART-2a clustering are
-     *                       stored in this matrix.
+     * @param aClusterMatrix float cluster vector matrix. All cluster vectors created after float Art-2a clustering are
+     * stored in this matrix.
      * @param aDataMatrix float matrix with all input vectors/fingerprints.
-     *                    Each row in the matrix corresponds to an input vector.
+     * Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
      * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      * <br><br>
      *
-     *  @see de.unijena.cheminf.clustering.art2a.results.Art2aFloatClusteringResult#Art2aFloatClusteringResult(float, int, int, int[], float[][], float[][],ConcurrentLinkedQueue, ConcurrentLinkedQueue)
+     *  @see de.unijena.cheminf.clustering.art2a.results.Art2aFloatClusteringResult#Art2aFloatClusteringResult(float,
+     *  int, int, int[], float[][], float[][],ConcurrentLinkedQueue, ConcurrentLinkedQueue)
      */
     public Art2aFloatClusteringResult(float aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,
                                       int[] aClusterView, float[][] aClusterMatrix, float[][] aDataMatrix) throws NullPointerException {
@@ -201,7 +203,7 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
             if(this.cacheAngleBetweenClusters[aFirstCluster] [aSecondCluster] == 0) {
                 float[] tmpFirstCluster = this.floatClusterMatrix[aFirstCluster];
                 float[] tmpSecondCluster = this.floatClusterMatrix[aSecondCluster];
-                float tmpFactor = (float) (180 / Math.PI);
+                float tmpFactor = (float) (180.0 / Math.PI);
                 float tmpProduct = 0.0f;
                 for (int i = 0; i < tmpFirstCluster.length; i++) {
                     tmpProduct += tmpFirstCluster[i] * tmpSecondCluster[i];

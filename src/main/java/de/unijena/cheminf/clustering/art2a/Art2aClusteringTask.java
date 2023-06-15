@@ -47,10 +47,10 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      */
     private IArt2aClustering art2aClustering;
     /**
-     * If addClusteringResultInTextFile = true the cluster results are exported to text files.
-     * If addClusteringResultInTextFile = false the clustering results are not exported to text files.
+     * If isClusteringResultExported = true the cluster results are exported to text files.
+     * If isClusteringResultExported = false the clustering results are not exported to text files.
      */
-    private boolean exportClusteringResults;
+    private boolean isClusteringResultExported;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class constants" defaultstate="collapsed>
@@ -86,29 +86,30 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      *
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aDataMatrix matrix contains all inputs for clustering. Each row of the matrix contains one input.
-     *                    In addition, all inputs must have the same length.
-     *                    Each column of the matrix contains one component of the input.
+     * In addition, all inputs must have the same length. Each column of the matrix contains one component of the input.
      * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
-     * @param aExportClusteringResults if the parameter is set to true, the cluster results
-     *                                         are exported to text files.
+     * @param anIsClusteringResultExported if the parameter is set to true, the cluster results
+     * are exported to text files.
      * @param aRequiredSimilarity parameter indicating the minimum similarity between the current
-     *                            cluster vectors and the previous cluster vectors. The parameter is crucial
-     *                            for the convergence of the system. If the parameter is set too high, a much
-     *                            more accurate similarity is expected and the convergence may take longer,
-     *                            while a small parameter expects a lower similarity between the cluster
-     *                            vectors and thus the system may converge faster.
-     * @param aLearningParameter parameter to define the intensity of keeping the old class vector in mind
-     *                           before the system adapts it to the new sample vector.
+     * cluster vectors and the previous cluster vectors. The parameter is crucial
+     * for the convergence of the system. If the parameter is set too high, a much
+     * more accurate similarity is expected and the convergence may take longer,
+     * while a small parameter expects a lower similarity between the cluster
+     * vectors and thus the system may converge faster.
+     * @param aLearningParameter parameter to define the intensity of keeping the old cluster vector in mind
+     * before the system adapts it to the new sample vector.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid. The checking of the arguments
-     *                                  is done in the constructor of Art2aFloatClustering.
+     * is done in the constructor of Art2aFloatClustering.
      * @throws NullPointerException is thrown, if the given aDataMatrix is null. The checking of the data matrix is
-     *                              done in the constructor of the ArtaFloatClustering.
+     * done in the constructor of the ArtaFloatClustering.
      *
      */
-    public Art2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
-                               float aRequiredSimilarity, float aLearningParameter) throws IllegalArgumentException, NullPointerException {
-        this.exportClusteringResults = aExportClusteringResults;
-        this.art2aClustering = new Art2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
+    public Art2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber,
+                               boolean anIsClusteringResultExported, float aRequiredSimilarity, float aLearningParameter)
+            throws IllegalArgumentException, NullPointerException {
+        this.isClusteringResultExported = anIsClusteringResultExported;
+        this.art2aClustering = new Art2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter,
+                aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
@@ -121,17 +122,21 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      *                    In addition, all inputs must have the same length.
      *                    Each column of the matrix contains one component of the input.
      * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
-     * @param aExportClusteringResults if the parameter is set to true, the cluster results
+     * @param anIsClusteringResultExported if the parameter is set to true, the cluster results
      *                                         are exported to text files.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid. The checking of the arguments
      *                                  is done in the constructor of Art2aFloatClustering.
      * @throws NullPointerException is thrown, if the given aDataMatrix is null. The checking of the data matrix is
      *                              done in the constructor of the ArtaFloatClustering.
      *
-     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(float, float[][], int, boolean, float, float)
+     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(float, float[][], int,
+     * boolean, float, float)
      */
-    public Art2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults) throws IllegalArgumentException, NullPointerException {
-        this(aVigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aExportClusteringResults, Art2aClusteringTask.REQUIRED_SIMILARITY_FLOAT, Art2aClusteringTask.DEFAULT_LEARNING_PARAMETER_FLOAT);
+    public Art2aClusteringTask(float aVigilanceParameter, float[][] aDataMatrix, int aMaximumEpochsNumber,
+                               boolean anIsClusteringResultExported)
+            throws IllegalArgumentException, NullPointerException {
+        this(aVigilanceParameter, aDataMatrix, aMaximumEpochsNumber, anIsClusteringResultExported,
+                Art2aClusteringTask.REQUIRED_SIMILARITY_FLOAT, Art2aClusteringTask.DEFAULT_LEARNING_PARAMETER_FLOAT);
     }
     //
     /**
@@ -140,24 +145,26 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      *
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aDataMatrix matrix contains all inputs for clustering. Each row of the matrix contains one input.
-     *                    In addition, all inputs must have the same length.
-     *                    Each column of the matrix contains one component of the input.
+     * In addition, all inputs must have the same length.
+     * Each column of the matrix contains one component of the input.
      * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
-     * @param aExportClusteringResults if the parameter is set to true, the cluster results are
-     *                                    exported to text files.
+     * @param anIsClusteringResultExported if the parameter is set to true, the cluster results are
+     * exported to text files.
      * @param aRequiredSimilarity parameter indicating the minimum similarity between the current
-     *                            cluster vectors and the previous cluster vectors.
-     * @param aLearningParameter parameter to define the intensity of keeping the old class vector in mind
-     *                           before the system adapts it to the new sample vector.
+     * cluster vectors and the previous cluster vectors.
+     * @param aLearningParameter parameter to define the intensity of keeping the old cluster vector in mind
+     * before the system adapts it to the new sample vector.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid. The checking of the arguments
-     *                                  is done in the constructor of Art2aFloatClustering.
+     * is done in the constructor of Art2aFloatClustering.
      * @throws NullPointerException is thrown, if the given aDataMatrix is null. The checking of the data matrix is
-     *                              done in the constructor of the ArtaFloatClustering.
+     * done in the constructor of the ArtaFloatClustering.
      */
-    public Art2aClusteringTask(double aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber, boolean aExportClusteringResults,
-                               double aRequiredSimilarity, double aLearningParameter) throws IllegalArgumentException, NullPointerException {
-        this.exportClusteringResults = aExportClusteringResults;
-        this.art2aClustering = new Art2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter, aRequiredSimilarity, aLearningParameter);
+    public Art2aClusteringTask(double aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber,
+                               boolean anIsClusteringResultExported, double aRequiredSimilarity, double aLearningParameter)
+            throws IllegalArgumentException, NullPointerException {
+        this.isClusteringResultExported = anIsClusteringResultExported;
+        this.art2aClustering = new Art2aDoubleClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter,
+                aRequiredSimilarity, aLearningParameter);
     }
     //
     /**
@@ -167,22 +174,23 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      *
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aDataMatrix matrix contains all inputs for clustering. Each row of the matrix contains one input.
-     *                    In addition, all inputs must have the same length.
-     *                    Each column of the matrix contains one component of the input.
+     * In addition, all inputs must have the same length. Each column of the matrix contains one component of the input.
      * @param aMaximumEpochsNumber maximum number of epochs that the system may use for convergence.
-     * @param aExportClusteringResults if the parameter is set to true, the cluster results are
-     *                                    exported to text files.
+     * @param anIsClusteringResultExported if the parameter is set to true, the cluster results are
+     * exported to text files.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid. The checking of the arguments
-     *                                  is done in the constructor of Art2aFloatClustering.
+     * is done in the constructor of Art2aFloatClustering.
      * @throws NullPointerException is thrown, if the given aDataMatrix is null. The checking of the data matrix is
-     *                              done in the constructor of the ArtaFloatClustering.
+     * done in the constructor of the ArtaFloatClustering.
      *
-     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(double, double[][], int, boolean, double, double)
+     * @see de.unijena.cheminf.clustering.art2a.Art2aClusteringTask#Art2aClusteringTask(double, double[][], int,
+     * boolean, double, double)
      *
      */
     public Art2aClusteringTask(double aVigilanceParameter, double[][] aDataMatrix, int aMaximumEpochsNumber,
-                               boolean aExportClusteringResults) throws IllegalArgumentException, NullPointerException {
-        this(aVigilanceParameter, aDataMatrix, aMaximumEpochsNumber, aExportClusteringResults, Art2aClusteringTask.REQUIRED_SIMILARITY_DOUBLE, Art2aClusteringTask.DEFAULT_LEARNING_PARAMETER_DOUBLE);
+                               boolean anIsClusteringResultExported) throws IllegalArgumentException, NullPointerException {
+        this(aVigilanceParameter, aDataMatrix, aMaximumEpochsNumber, anIsClusteringResultExported,
+                Art2aClusteringTask.REQUIRED_SIMILARITY_DOUBLE, Art2aClusteringTask.DEFAULT_LEARNING_PARAMETER_DOUBLE);
     }
     //</editor-fold>
     //
@@ -195,7 +203,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
     @Override
     public IArt2aClusteringResult call() {
         try {
-            return this.art2aClustering.startClustering(this.exportClusteringResults);
+            return this.art2aClustering.getClusterResult(this.isClusteringResultExported);
         } catch (ConvergenceFailedException anException) {
             Art2aClusteringTask.LOGGER.log(Level.SEVERE, anException.toString(), anException);
             return null;

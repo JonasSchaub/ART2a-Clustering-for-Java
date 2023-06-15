@@ -82,25 +82,29 @@ public class Art2aDoubleClusteringResult extends Art2aAbstractResult {
      * @param aVigilanceParameter parameter to influence the number of clusters.
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue of ty String. The queue is required to be able to export
-     *                                the cluster results. If it is not specified, they are set to null and
-     *                                export is not possible.
+     * @param aClusteringProcessQueue clustering result (process) queue of ty String.
+     * The queue is required to be able to export the cluster results. If it is not specified, they are set to null and
+     * export is not possible.
      * @param aClusteringResultQueue clustering result queue of typ String. See {@code #aClusteringProcessQueue}
      * @param aClusterView array for cluster assignment of each input vector.
      * @param aClusterMatrix cluster vector matrix. All cluster vectors created after double ART-2a clustering are
-     *                       stored in this matrix.
+     * stored in this matrix.
      * @param aDataMatrix matrix with all input vectors/fingerprints.
-     *                    Each row in the matrix corresponds to an input vector.
+     * Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
      * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      *
      */
-    public Art2aDoubleClusteringResult(double aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters,int[] aClusterView, double[][] aClusterMatrix, double[][] aDataMatrix, ConcurrentLinkedQueue<String> aClusteringProcessQueue,
-                                       ConcurrentLinkedQueue<String> aClusteringResultQueue) throws NullPointerException, IllegalArgumentException {
+    public Art2aDoubleClusteringResult(double aVigilanceParameter, int aNumberOfEpochs,
+                                       int aNumberOfDetectedClusters,int[] aClusterView,
+                                       double[][] aClusterMatrix, double[][] aDataMatrix,
+                                       ConcurrentLinkedQueue<String> aClusteringProcessQueue,
+                                       ConcurrentLinkedQueue<String> aClusteringResultQueue)
+            throws NullPointerException, IllegalArgumentException {
         super(aNumberOfEpochs, aNumberOfDetectedClusters, aClusterView, aClusteringProcessQueue, aClusteringResultQueue);
         Objects.requireNonNull(aClusterMatrix, "aClusterMatrix is null.");
         Objects.requireNonNull(aDataMatrix, "aDataMatrix is null.");
-        if (aVigilanceParameter <= 0 || aVigilanceParameter >= 1) {
+        if (aVigilanceParameter <= 0.0 || aVigilanceParameter >= 1.0) {
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0 and smaller than 1.");
         }
         this.vigilanceParameter = aVigilanceParameter;
@@ -119,14 +123,15 @@ public class Art2aDoubleClusteringResult extends Art2aAbstractResult {
      * @param aNumberOfDetectedClusters final number of detected clusters.
      * @param aClusterView array for cluster assignment of each input vector.
      * @param aClusterMatrix double cluster vector matrix. All cluster vectors created after double ART-2a clustering are
-     *                       stored in this matrix.
+     * stored in this matrix.
      * @param aDataMatrix double matrix with all input vectors/fingerprints.
-     *                    Each row in the matrix corresponds to an input vector.
+     * Each row in the matrix corresponds to an input vector.
      * @throws NullPointerException is thrown, if the specified matrices are null.
      * @throws IllegalArgumentException is thrown, if the specified vigilance parameter is invalid.
      * <br><br>
      *
-     * @see de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult#Art2aDoubleClusteringResult(double, int, int, int[], double[][], double[][], ConcurrentLinkedQueue, ConcurrentLinkedQueue)
+     * @see de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult#Art2aDoubleClusteringResult(double,
+     * int, int, int[], double[][], double[][], ConcurrentLinkedQueue, ConcurrentLinkedQueue)
      *
      */
     public Art2aDoubleClusteringResult(double aVigilanceParameter, int aNumberOfEpochs, int aNumberOfDetectedClusters, int[] aClusterView,
