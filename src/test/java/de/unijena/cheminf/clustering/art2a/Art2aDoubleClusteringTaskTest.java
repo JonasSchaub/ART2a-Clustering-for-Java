@@ -678,9 +678,8 @@ public class Art2aDoubleClusteringTaskTest {
      * Method tests whether the checks and possible scaling in the data matrix work successfully.
      *
      * @throws NoSuchMethodException is thrown, if the private method is not found.
-     * @throws InvocationTargetException is thrown when an exception occurs during the invocation of the private method.
-     * It wraps the underlying exception that was thrown by the invoked method.
-     * @throws IllegalAccessException is thrown when the private method is inaccessible and cannot be invoked.
+     * @throws InvocationTargetException is thrown if an exception occurs during the call of the private method.
+     * @throws IllegalAccessException is thrown if the private method is inaccessible and cannot be called.
      */
     @Test
     public void testCheckAndScaleDataMatrix() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
