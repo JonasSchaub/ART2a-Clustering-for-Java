@@ -26,7 +26,7 @@ contains two text files. The text file named "Bit_Fingerprints.txt" contains 10 
 one bit fingerprint. And the file named "Count_Fingerprints.txt" contains 6 count fingerprints, where each line represents
 one count fingerprint.
 
-## Example initialization and usage of the FragmentFingerprinter
+## Example initialization and usage of ART2a-Clustering-for-Java
 see in <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">"wiki"</a>
 
 ## Installation
