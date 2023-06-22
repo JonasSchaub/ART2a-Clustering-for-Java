@@ -129,7 +129,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
     private static final Logger LOGGER = Logger.getLogger(Art2aFloatClustering.class.getName());
     //</editor-fold>
     //
-    // <editor-fold defaultstate="collapsed" desc="Constructor">
+    // <editor-fold defaultstate="collapsed" desc="constructor">
     /**
      * Constructor.
      * The data matrix with the input vectors/fingerprints is checked for correctness. Each row of the matrix
@@ -330,7 +330,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                 }
             }
         } else {
-            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: " + this.vigilanceParameter);
+            throw new ConvergenceFailedException(String.format("Convergence failed for vigilance parameter: %2f",this.vigilanceParameter));
         }
         return tmpIsConverged;
     }
@@ -359,14 +359,13 @@ public class Art2aFloatClustering implements IArt2aClustering {
         }
         Random tmpRnd = new Random(this.seed);
         this.seed++;
-        int tmpNumberOfIterations = (this.numberOfFingerprints / 2) + 1;
+        int tmpNumberOfIterations = (this.numberOfFingerprints >> 1) + 1;
         int tmpRandomIndex1;
         int tmpRandomIndex2;
         int tmpBuffer;
         for(int j = 0; j < tmpNumberOfIterations; j++) {
             tmpRandomIndex1 = (int) (this.numberOfFingerprints * tmpRnd.nextDouble());
             tmpRandomIndex2 = (int) (this.numberOfFingerprints * tmpRnd.nextDouble());
-
             tmpBuffer = tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex1];
             tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex1] = tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex2];
             tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex2] = tmpBuffer;
@@ -379,7 +378,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
      *
      */
     @Override
-    public IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported) throws ConvergenceFailedException {
+    public IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported, int aSeedValue) throws ConvergenceFailedException {
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
         this.clusteringProcess = null;
         this.clusteringResult = null;
@@ -390,7 +389,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
         //</editor-fold>
         //<editor-fold desc="Initialization and declaration of some important variables" defaultstate="collapsed">
         this.initializeMatrices();
-        this.seed = 1;
+        this.seed = aSeedValue;
         float[] tmpClusterMatrixRow;
         float[] tmpClusterMatrixRowOld;
         float tmpInitialClusterVectorWeightValue = (float) (1.0 / Math.sqrt(this.numberOfComponents));
@@ -418,15 +417,15 @@ public class Art2aFloatClustering implements IArt2aClustering {
         //<editor-fold desc="Clustering results in text file set up." defaultstate="collapsed">
         int tmpCurrentNumberOfEpochs = 0;
         if(anIsClusteringResultExported) {
-            this.clusteringResult.add("Vigilance parameter: " + this.vigilanceParameter);
+            this.clusteringResult.add(String.format("Vigilance parameter: %2f", this.vigilanceParameter));
         }
         //</editor-fold>
         //<editor-fold desc="Start clustering process." defaultstate="collapsed">
         while(!tmpIsSystemConverged && tmpCurrentNumberOfEpochs <= this.maximumNumberOfEpochs) {
             //<editor-fold desc="Randomization input vectors and start saving the clustering results to text files if desired." defaultstate="collapsed">
             if(anIsClusteringResultExported) {
-                this.clusteringProcess.add("Art-2a clustering result for vigilance parameter:" + this.vigilanceParameter);
-                this.clusteringProcess.add("Number of epochs: " + tmpCurrentNumberOfEpochs);
+                this.clusteringProcess.add(String.format("Art-2a clustering result for vigilance parameter: %2f",this.vigilanceParameter));
+                this.clusteringProcess.add(String.format("Number of epochs: %d",tmpCurrentNumberOfEpochs));
                 this.clusteringProcess.add("");
             }
             int[] tmpSampleVectorIndicesInRandomOrder = this.getRandomizeVectorIndices();
@@ -444,8 +443,8 @@ public class Art2aFloatClustering implements IArt2aClustering {
                     }
                 }
                 if(anIsClusteringResultExported) {
-                    this.clusteringProcess.add("Input: " + tmpCurrentInput + " / Vector " +
-                            tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
+                    this.clusteringProcess.add(String.format("Input: %d / Vector %d", tmpCurrentInput,
+                            tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]));
                 }
                 //<editor-fold desc="If the input vector is a null vector, it will not be clustered." defaultstate="collapsed">
                 if(tmpIsNullVector) {
@@ -483,7 +482,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
                         tmpNumberOfDetectedClusters++;
                         if(anIsClusteringResultExported) {
                             this.clusteringProcess.add("Cluster number: 0");
-                            this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                            this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
                         }
                     }
                     //</editor-fold>
@@ -525,8 +524,8 @@ public class Art2aFloatClustering implements IArt2aClustering {
                                     tmpNumberOfDetectedClusters - 1;
                             this.clusterMatrix[tmpNumberOfDetectedClusters - 1] = tmpInputVector;
                             if(anIsClusteringResultExported) {
-                                this.clusteringProcess.add("Cluster number: " + (tmpNumberOfDetectedClusters - 1));
-                                this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                                this.clusteringProcess.add(String.format("Cluster number: %d",(tmpNumberOfDetectedClusters - 1)));
+                                this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
                             }
                         }
                         //</editor-fold>
@@ -554,8 +553,8 @@ public class Art2aFloatClustering implements IArt2aClustering {
                             this.clusterMatrix[tmpWinnerClusterIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = tmpWinnerClusterIndex;
                             if(anIsClusteringResultExported) {
-                                this.clusteringProcess.add("Cluster number: " + tmpWinnerClusterIndex);
-                                this.clusteringProcess.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+                                this.clusteringProcess.add(String.format("Cluster number: %d",tmpWinnerClusterIndex));
+                                this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
                             }
                             //</editor-fold>
                         }
@@ -571,8 +570,7 @@ public class Art2aFloatClustering implements IArt2aClustering {
             //</editor-fold>
             //<editor-fold desc="Last clustering process input."
             if(anIsClusteringResultExported) {
-                this.clusteringProcess.add("Convergence status: " + tmpIsSystemConverged);
-                this.clusteringProcess.add("Cluster view:" + java.util.Arrays.toString(tmpClusterOccupation)); // TODO delete
+                this.clusteringProcess.add(String.format("Convergence status: %b",tmpIsSystemConverged));
                 this.clusteringProcess.add("---------------------------------------");
             }
             //</editor-fold>
@@ -580,8 +578,8 @@ public class Art2aFloatClustering implements IArt2aClustering {
         //</editor-fold>
         //<editor-fold desc="Last clustering result input."
         if(anIsClusteringResultExported) {
-            this.clusteringResult.add("Number of epochs: " + (tmpCurrentNumberOfEpochs));
-            this.clusteringResult.add("Number of detected clusters: " + tmpNumberOfDetectedClusters);
+            this.clusteringResult.add(String.format("Number of epochs: %d",tmpCurrentNumberOfEpochs));
+            this.clusteringResult.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
             this.clusteringResult.add("Convergence status: " + tmpIsSystemConverged);
             this.clusteringResult.add("---------------------------------------");
         }

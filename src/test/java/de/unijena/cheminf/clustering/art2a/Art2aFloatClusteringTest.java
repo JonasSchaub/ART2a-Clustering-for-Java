@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
@@ -93,7 +95,7 @@ public class Art2aFloatClusteringTest {
                     tmpTestDataMatrix, 100,true);
             tmpClusteringTask.add(tmpART2aFloatClusteringTask);
         }
-        BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder", BufferedWriter.class);
+        PrintWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder", PrintWriter.class);
         List<Future<IArt2aClusteringResult>> tmpFuturesList;
         Art2aFloatClusteringTest.numberOfEpochsForAllVigilanceParameter = new int[9];
         Art2aFloatClusteringTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
@@ -117,7 +119,7 @@ public class Art2aFloatClusteringTest {
                 Art2aFloatClusteringTest.numberOfEpochsForAllVigilanceParameter[tmpIterator] = Art2aFloatClusteringTest.clusteringResult.getNumberOfEpochs();
                 Art2aFloatClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[tmpIterator] = Art2aFloatClusteringTest.clusteringResult.getNumberOfDetectedClusters();
                 Art2aFloatClusteringTest.clusterIndicesForAllVigilanceParameter[tmpIterator] = Art2aFloatClusteringTest.clusteringResult.getClusterIndices(tmpIterator);
-                Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (float) Art2aFloatClusteringTest.clusteringResult.calculateAngleBetweenClusters(tmpIterator, tmpIterator + 1);
+                Art2aFloatClusteringTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (float) Art2aFloatClusteringTest.clusteringResult.getAngleBetweenClusters(tmpIterator, tmpIterator + 1);
                 Art2aFloatClusteringTest.clusterRepresentativesForAllVigilanceParameter[tmpIterator] = Art2aFloatClusteringTest.clusteringResult.getClusterRepresentatives(tmpIterator);
                 Art2aFloatClusteringTest.clusteringResult.exportClusteringResultsToTextFiles(tmpWriter[0], tmpWriter[1]);
                 tmpIterator++;

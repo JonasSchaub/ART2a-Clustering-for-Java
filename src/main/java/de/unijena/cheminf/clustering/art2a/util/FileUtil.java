@@ -100,10 +100,6 @@ public final class FileUtil {
                 tmpClusteringResultWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringResultFile));
             } else if (aWriterClass.equals(FileWriter.class)) {
                 tmpClusteringResultWriter = (T) new FileWriter(tmpClusteringResultFile);
-            } else if (aWriterClass.equals(StringWriter.class)) {
-                tmpClusteringResultWriter = (T) new StringWriter();
-            } else if (aWriterClass.equals(CharArrayWriter.class)) {
-                tmpClusteringResultWriter = (T) new CharArrayWriter();
             }
             FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_RESULT_FILE_NAME);
             new File(tmpWorkingPath + CLUSTERING_PROCESS_FILE_NAME).mkdirs();
@@ -115,10 +111,6 @@ public final class FileUtil {
                 tmpClusteringProcessWriter = (T) new BufferedWriter(new FileWriter(tmpClusteringProcessFile));
             } else if (aWriterClass.equals(FileWriter.class)) {
                 tmpClusteringProcessWriter = (T) new FileWriter(tmpClusteringProcessFile);
-            } else if (aWriterClass.equals(StringWriter.class)) {
-                tmpClusteringProcessWriter = (T) new StringWriter();
-            } else if (aWriterClass.equals(CharArrayWriter.class)) {
-                tmpClusteringProcessWriter = (T) new CharArrayWriter();
             }
             FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME);
         } catch (IOException e) {

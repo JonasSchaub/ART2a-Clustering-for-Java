@@ -186,7 +186,7 @@ public class Art2aFloatClusteringResult extends Art2aAbstractResult {
      * {@inheritDoc}
      */
     @Override
-    public Float calculateAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException {
+    public Float getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException {
         if(aFirstCluster < 0 || aSecondCluster < 0) {
             throw new IllegalArgumentException("The given cluster number is negative/invalid.");
         }

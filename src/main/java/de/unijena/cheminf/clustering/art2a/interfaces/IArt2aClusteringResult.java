@@ -30,7 +30,7 @@ import java.io.Writer;
  * Interface for implementing clustering result classes.
  *
  * @param <T> generic parameter. This parameter is either a Double or a Float.
- *           The type of teh method @code {@link #calculateAngleBetweenClusters(int, int)}
+ *           The type of teh method @code {@link #getAngleBetweenClusters(int, int)}
  *           is calculated either as a float or as a double, depending on the clustering precision option.
  *
  * @author Betuel Sevindik
@@ -111,6 +111,6 @@ public interface IArt2aClusteringResult<T> {
      * @return generic angle double or float.
      * @throws IllegalArgumentException if the given parameters are invalid.
      */
-     T calculateAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException;
+     T getAngleBetweenClusters(int aFirstCluster, int aSecondCluster) throws IllegalArgumentException;
     // </editor-fold>
 }

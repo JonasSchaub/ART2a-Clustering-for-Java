@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
-public class Art2aDoubleClusteringTaskTest {
+public class Art2aDoubleClusteringTest {
     //<editor-fold desc="Private static class variables" defaultstate="collapsed">
     /**
      * Clustering result instance
@@ -94,31 +94,31 @@ public class Art2aDoubleClusteringTaskTest {
         BufferedWriter[] tmpWriter = FileUtil.setUpClusteringResultTextFilePrinters("Clustering_Result_Folder",
                 BufferedWriter.class);
         List<Future<IArt2aClusteringResult>> tmpFuturesList;
-        Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter = new int[9];
-        Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter = new int[9][];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[0] = new int[4];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[1] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[2] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[3] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[4] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[5] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[6] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[7] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[8] = new int[1];
-        Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter = new int[9];
-        Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter = new double[9];
+        Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter = new int[9];
+        Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter = new int[9];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter = new int[9][];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[0] = new int[4];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[1] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[2] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[3] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[4] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[5] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[6] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[7] = new int[1];
+        Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[8] = new int[1];
+        Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter = new int[9];
+        Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter = new double[9];
         tmpFuturesList = tmpExecutorService.invokeAll(tmpClusteringTask);
         int tmpIterator = 0;
         for (Future<IArt2aClusteringResult> tmpFuture : tmpFuturesList) {
             try {
-                Art2aDoubleClusteringTaskTest.clusteringResult = tmpFuture.get();
-                Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTaskTest.clusteringResult.getNumberOfEpochs();
-                Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTaskTest.clusteringResult.getNumberOfDetectedClusters();
-                Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTaskTest.clusteringResult.getClusterIndices(tmpIterator);
-                Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (double) Art2aDoubleClusteringTaskTest.clusteringResult.calculateAngleBetweenClusters(tmpIterator, tmpIterator + 1);
-                Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTaskTest.clusteringResult.getClusterRepresentatives(tmpIterator);
-                Art2aDoubleClusteringTaskTest.clusteringResult.exportClusteringResultsToTextFiles(tmpWriter[0], tmpWriter[1]);
+                Art2aDoubleClusteringTest.clusteringResult = tmpFuture.get();
+                Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTest.clusteringResult.getNumberOfEpochs();
+                Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTest.clusteringResult.getNumberOfDetectedClusters();
+                Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTest.clusteringResult.getClusterIndices(tmpIterator);
+                Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[tmpIterator] = (double) Art2aDoubleClusteringTest.clusteringResult.getAngleBetweenClusters(tmpIterator, tmpIterator + 1);
+                Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[tmpIterator] = Art2aDoubleClusteringTest.clusteringResult.getClusterRepresentatives(tmpIterator);
+                Art2aDoubleClusteringTest.clusteringResult.exportClusteringResultsToTextFiles(tmpWriter[0], tmpWriter[1]);
                 tmpIterator++;
             } catch (RuntimeException anException) {
                 throw anException;
@@ -137,7 +137,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor01f() {
         int tmpTestNumberOfEpochsFor01f = 2;
-        int tmpNumberOfEpochs01f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[0];
+        int tmpNumberOfEpochs01f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[0];
         Assertions.assertEquals(tmpTestNumberOfEpochsFor01f, tmpNumberOfEpochs01f);
     }
     //
@@ -147,7 +147,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor02f() {
         int tmpTestNumberOfEpochs02f = 2;
-        int tmpNumberOfEpochs02f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[1];
+        int tmpNumberOfEpochs02f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[1];
         Assertions.assertEquals(tmpTestNumberOfEpochs02f, tmpNumberOfEpochs02f);
     }
     //
@@ -157,7 +157,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor03() {
         int tmpTestNumberOfEpochs03f = 2;
-        int tmpNumberOfEpochs03f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[2];
+        int tmpNumberOfEpochs03f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[2];
         Assertions.assertEquals(tmpTestNumberOfEpochs03f, tmpNumberOfEpochs03f);
     }
     //
@@ -167,7 +167,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor04() {
         int tmpTestNumberOfEpochs04f = 2;
-        int tmpNumberOfEpochs04f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[3];
+        int tmpNumberOfEpochs04f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[3];
         Assertions.assertEquals(tmpTestNumberOfEpochs04f, tmpNumberOfEpochs04f);
     }
     //
@@ -177,7 +177,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor05() {
         int tmpTestNumberOfEpochs05f = 2;
-        int tmpNumberOfEpochs05f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[4];
+        int tmpNumberOfEpochs05f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[4];
         Assertions.assertEquals(tmpTestNumberOfEpochs05f, tmpNumberOfEpochs05f);
     }
     //
@@ -187,7 +187,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor06() {
         int tmpTestNumberOfEpochs06f = 2;
-        int tmpNumberOfEpochs06f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[5];
+        int tmpNumberOfEpochs06f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[5];
         Assertions.assertEquals(tmpTestNumberOfEpochs06f, tmpNumberOfEpochs06f);
     }
     //
@@ -197,7 +197,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor07() {
         int tmpTestNumberOfEpochs07f = 2;
-        int tmpNumberOfEpochs07f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[6];
+        int tmpNumberOfEpochs07f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[6];
         Assertions.assertEquals(tmpTestNumberOfEpochs07f, tmpNumberOfEpochs07f);
     }
     //
@@ -207,7 +207,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor08() {
         int tmpTestNumberOfEpochs08f = 2;
-        int tmpNumberOfEpochs08f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[7];
+        int tmpNumberOfEpochs08f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[7];
         Assertions.assertEquals(tmpTestNumberOfEpochs08f, tmpNumberOfEpochs08f);
     }
     //
@@ -217,7 +217,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfEpochsFor09() {
         int tmpTestNumberOfEpochs09f = 2;
-        int tmpNumberOfEpochs09f = Art2aDoubleClusteringTaskTest.numberOfEpochsForAllVigilanceParameter[8];
+        int tmpNumberOfEpochs09f = Art2aDoubleClusteringTest.numberOfEpochsForAllVigilanceParameter[8];
         Assertions.assertEquals(tmpTestNumberOfEpochs09f, tmpNumberOfEpochs09f);
     }
     //</editor-fold>
@@ -229,7 +229,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor01() {
         int tmpTestNumberOfDetectedClusters01 = 6;
-        int tmpNumberOfDetectedClusters01 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[0];
+        int tmpNumberOfDetectedClusters01 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[0];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters01, tmpNumberOfDetectedClusters01);
     }
     //
@@ -239,7 +239,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor02() {
         int tmpTestNumberOfDetectedClusters02 = 6;
-        int tmpNumberOfDetectedClusters02 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[1];
+        int tmpNumberOfDetectedClusters02 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[1];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters02, tmpNumberOfDetectedClusters02);
     }
     //
@@ -249,7 +249,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor03() {
         int tmpTestNumberOfDetectedClusters03 = 6;
-        int tmpNumberOfDetectedClusters03 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[2];
+        int tmpNumberOfDetectedClusters03 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[2];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters03, tmpNumberOfDetectedClusters03);
     }
     //
@@ -259,7 +259,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor04() {
         int tmpTestNumberOfDetectedClusters04 = 8;
-        int tmpNumberOfDetectedClusters04 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[3];
+        int tmpNumberOfDetectedClusters04 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[3];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters04, tmpNumberOfDetectedClusters04);
     }
     //
@@ -269,7 +269,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor05() {
         int tmpTestNumberOfDetectedClusters05 = 9;
-        int tmpNumberOfDetectedClusters05 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[4];
+        int tmpNumberOfDetectedClusters05 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[4];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters05, tmpNumberOfDetectedClusters05);
     }
     //
@@ -279,7 +279,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor06() {
         int tmpTestNumberOfDetectedClusters06 = 10;
-        int tmpNumberOfDetectedClusters06 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[5];
+        int tmpNumberOfDetectedClusters06 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[5];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters06, tmpNumberOfDetectedClusters06);
     }
     //
@@ -289,7 +289,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor07() {
         int tmpTestNumberOfDetectedClusters07 = 10;
-        int tmpNumberOfDetectedClusters07 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[6];
+        int tmpNumberOfDetectedClusters07 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[6];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters07, tmpNumberOfDetectedClusters07);
     }
     //
@@ -299,7 +299,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor08() {
         int tmpTestNumberOfDetectedClusters08 = 10;
-        int tmpNumberOfDetectedClusters08 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[7];
+        int tmpNumberOfDetectedClusters08 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[7];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters08, tmpNumberOfDetectedClusters08);
     }
     //
@@ -309,7 +309,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testNumberOfDetectedClustersFor09() {
         int tmpTestNumberOfDetectedClusters09 = 10;
-        int tmpNumberOfDetectedClusters09 = Art2aDoubleClusteringTaskTest.numberOfDetectedClustersForAllVigilanceParameter[8];
+        int tmpNumberOfDetectedClusters09 = Art2aDoubleClusteringTest.numberOfDetectedClustersForAllVigilanceParameter[8];
         Assertions.assertEquals(tmpTestNumberOfDetectedClusters09, tmpNumberOfDetectedClusters09);
     }
     //</editor-fold>
@@ -321,7 +321,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCluster0ForVigilanceParameter01() {
         int[] tmpTestClusterIndicesInCluster0For01 = {4,6,7,9};
-        int[] tmpClusterIndicesInClusterFor0For01 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[0];
+        int[] tmpClusterIndicesInClusterFor0For01 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[0];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster0For01, tmpClusterIndicesInClusterFor0For01);
     }
     //
@@ -331,7 +331,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster1ForVigilanceParameter02() {
         int[] tmpTestClusterIndicesInCluster1For02 = {1,2};
-        int[] tmpClusterIndicesInClusterFor1For02 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[1];
+        int[] tmpClusterIndicesInClusterFor1For02 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[1];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster1For02, tmpClusterIndicesInClusterFor1For02);
     }
     //
@@ -341,7 +341,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster2ForVigilanceParameter03() {
         int[] tmpTestClusterIndicesInCluster2For03 = {3};
-        int[] tmpClusterIndicesInClusterFor2For03 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[2];
+        int[] tmpClusterIndicesInClusterFor2For03 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[2];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster2For03, tmpClusterIndicesInClusterFor2For03);
     }
     //
@@ -351,7 +351,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster3ForVigilanceParameter04() {
         int[] tmpTestClusterIndicesInCluster3For04 = {2};
-        int[] tmpClusterIndicesInClusterFor3For04 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[3];
+        int[] tmpClusterIndicesInClusterFor3For04 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[3];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster3For04, tmpClusterIndicesInClusterFor3For04);
     }
     //
@@ -361,7 +361,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster4ForVigilanceParameter05() {
         int[] tmpTestClusterIndicesInCluster4For05 = {5};
-        int[] tmpClusterIndicesInCluster4For05 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[4];
+        int[] tmpClusterIndicesInCluster4For05 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[4];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster4For05, tmpClusterIndicesInCluster4For05);
     }
     //
@@ -371,7 +371,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster5ForVigilanceParameter06() {
         int[] tmpTestClusterIndicesInCluster5For06 = {5};
-        int[] tmpClusterIndicesInCluster5For06 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[5];
+        int[] tmpClusterIndicesInCluster5For06 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[5];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster5For06, tmpClusterIndicesInCluster5For06);
     }
     //
@@ -381,7 +381,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster6ForVigilanceParameter07() {
         int[] tmpTestClusterIndicesInCluster6For07 = {6};
-        int[] tmpClusterIndicesInClusterFor6For07 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[6];
+        int[] tmpClusterIndicesInClusterFor6For07 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[6];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster6For07, tmpClusterIndicesInClusterFor6For07);
     }
     //
@@ -391,7 +391,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster7ForVigilanceParameter08() {
         int[] tmpTestClusterIndicesInCluster7For08 = {4};
-        int[] tmpClusterIndicesInCluster7For08 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[7];
+        int[] tmpClusterIndicesInCluster7For08 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[7];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster7For08, tmpClusterIndicesInCluster7For08);
     }
     //
@@ -401,7 +401,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterIndicesInCLuster8ForVigilanceParameter09() {
         int[] tmpTestClusterIndicesInCluster8For09 = {8};
-        int[] tmpClusterIndicesInCluster8For09 = Art2aDoubleClusteringTaskTest.clusterIndicesForAllVigilanceParameter[8];
+        int[] tmpClusterIndicesInCluster8For09 = Art2aDoubleClusteringTest.clusterIndicesForAllVigilanceParameter[8];
         Assertions.assertArrayEquals(tmpTestClusterIndicesInCluster8For09, tmpClusterIndicesInCluster8For09);
     }
     //</editor-fold>
@@ -413,7 +413,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster0ForVigilanceParameter01() {
         int tmpTestClusterRepresentativesIndexInCluster0For01 = 9;
-        int tmpClusterRepresentativesIndexInCluster0For01 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[0];
+        int tmpClusterRepresentativesIndexInCluster0For01 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[0];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster0For01, tmpClusterRepresentativesIndexInCluster0For01);
     }
     //
@@ -423,7 +423,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster1ForVigilanceParameter02() {
         int tmpTestClusterRepresentativesIndexInCluster1For02 = 1;
-        int tmpClusterRepresentativesIndexInCluster1For02 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[1];
+        int tmpClusterRepresentativesIndexInCluster1For02 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[1];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster1For02, tmpClusterRepresentativesIndexInCluster1For02);
     }
     //
@@ -433,7 +433,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster2ForVigilanceParameter03() {
         int tmpTestClusterRepresentativesIndexInCluster2For03 = 3;
-        int tmpClusterRepresentativesIndexInCluster2For03 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[2];
+        int tmpClusterRepresentativesIndexInCluster2For03 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[2];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster2For03, tmpClusterRepresentativesIndexInCluster2For03);
     }
     //
@@ -443,7 +443,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster3ForVigilanceParameter04() {
         int tmpTestClusterRepresentativesIndexInCluster3For04 = 2;
-        int tmpClusterRepresentativesIndexInCluster3For04 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[3];
+        int tmpClusterRepresentativesIndexInCluster3For04 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[3];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster3For04, tmpClusterRepresentativesIndexInCluster3For04);
     }
     //
@@ -453,7 +453,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster4ForVigilanceParameter05() {
         int tmpTestClusterRepresentativesIndexInCluster4For05 = 5;
-        int tmpClusterRepresentativesIndexInCluster4For05 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[4];
+        int tmpClusterRepresentativesIndexInCluster4For05 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[4];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster4For05, tmpClusterRepresentativesIndexInCluster4For05);
     }
     //
@@ -463,7 +463,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster5ForVigilanceParameter06() {
         int tmpTestClusterRepresentativesIndexInCluster5For06 = 5;
-        int tmpClusterRepresentativesIndexInCluster5For06 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[5];
+        int tmpClusterRepresentativesIndexInCluster5For06 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[5];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster5For06, tmpClusterRepresentativesIndexInCluster5For06);
     }
     //
@@ -473,7 +473,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster6ForVigilanceParameter07() {
         int tmpTestClusterRepresentativesIndexInCluster6For07 = 6;
-        int tmpClusterRepresentativesIndexInCluster6For07 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[6];
+        int tmpClusterRepresentativesIndexInCluster6For07 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[6];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster6For07, tmpClusterRepresentativesIndexInCluster6For07);
     }
     //
@@ -483,7 +483,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster7ForVigilanceParameter08() {
         int tmpTestClusterRepresentativesIndexInCluster7For08 = 4;
-        int tmpClusterRepresentativesIndexInCluster7For08 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[7];
+        int tmpClusterRepresentativesIndexInCluster7For08 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[7];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster7For08, tmpClusterRepresentativesIndexInCluster7For08);
     }
     //
@@ -493,7 +493,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testClusterRepresentativesInCluster8ForVigilanceParameter09() {
         int tmpTestClusterRepresentativesIndexInCluster8For09 = 8;
-        int tmpClusterRepresentativesIndexInCluster8For09 = Art2aDoubleClusteringTaskTest.clusterRepresentativesForAllVigilanceParameter[8];
+        int tmpClusterRepresentativesIndexInCluster8For09 = Art2aDoubleClusteringTest.clusterRepresentativesForAllVigilanceParameter[8];
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster8For09, tmpClusterRepresentativesIndexInCluster8For09);
     }
     //</editor-fold>
@@ -506,7 +506,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster0And1For01() {
         double tmpTestAngleBetweenCluster0And1For01 = 64.71956849036344;
-        double tmpAngleBetweenCluster0And1For01 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[0];
+        double tmpAngleBetweenCluster0And1For01 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[0];
         Assertions.assertEquals(tmpTestAngleBetweenCluster0And1For01, tmpAngleBetweenCluster0And1For01, 1e-8f);
     }
     //
@@ -516,7 +516,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster1And2For02() {
         double tmpTestAngleBetweenCluster1And2For02 = 80.98592593273575;
-        double tmpAngleBetweenCluster1And2For02 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[1];
+        double tmpAngleBetweenCluster1And2For02 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[1];
         Assertions.assertEquals(tmpTestAngleBetweenCluster1And2For02, tmpAngleBetweenCluster1And2For02, 1e-8);
     }
     //
@@ -526,7 +526,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster2And3For03() {
         double tmpTestAngleBetweenCluster2And3For03 = 90.0000;
-        double tmpAngleBetweenCluster2And3For03 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[2];
+        double tmpAngleBetweenCluster2And3For03 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[2];
         Assertions.assertEquals(tmpTestAngleBetweenCluster2And3For03, tmpAngleBetweenCluster2And3For03, 1e-8);
     }
     //
@@ -536,7 +536,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster3And4For04() {
         double tmpTestAngleBetweenCluster3And4For04 = 90.0000;
-        double tmpAngleBetweenCluster3And4For04 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[3];
+        double tmpAngleBetweenCluster3And4For04 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[3];
         Assertions.assertEquals(tmpTestAngleBetweenCluster3And4For04, tmpAngleBetweenCluster3And4For04, 1e-8);
     }
     //
@@ -546,7 +546,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster4And5For05() {
         double tmpTestAngleBetweenCluster4And5For05 = 71.56505117707799;
-        double tmpAngleBetweenCluster4And5For05 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[4];
+        double tmpAngleBetweenCluster4And5For05 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[4];
         Assertions.assertEquals(tmpTestAngleBetweenCluster4And5For05, tmpAngleBetweenCluster4And5For05, 1e-8);
     }
     //
@@ -556,7 +556,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster5And6For06() {
         double tmpTestAngleBetweenCluster5And6For06 = 71.56505117707799;
-        double tmpAngleBetweenCluster5And6For06 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[5];
+        double tmpAngleBetweenCluster5And6For06 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[5];
         Assertions.assertEquals(tmpTestAngleBetweenCluster5And6For06, tmpAngleBetweenCluster5And6For06, 1e-8);
     }
     //
@@ -566,7 +566,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster6And7For07() {
         double tmpTestAngleBetweenCluster6And7For07 = 75.03678256669288;
-        double tmpAngleBetweenCluster6And7For07 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[6];
+        double tmpAngleBetweenCluster6And7For07 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[6];
         Assertions.assertEquals(tmpTestAngleBetweenCluster6And7For07, tmpAngleBetweenCluster6And7For07, 1e-8);
     }
     //
@@ -576,7 +576,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster7And8For08() {
         double tmpTestAngleBetweenCluster7And8For08 = 90.000;
-        double tmpAngleBetweenCluster7And8For08 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[7];
+        double tmpAngleBetweenCluster7And8For08 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[7];
         Assertions.assertEquals(tmpTestAngleBetweenCluster7And8For08, tmpAngleBetweenCluster7And8For08, 1e-8);
     }
     //
@@ -586,7 +586,7 @@ public class Art2aDoubleClusteringTaskTest {
     @Test
     public void testAngleBetweenCluster8And9For09() {
         double tmpTestAngleBetweenCluster8And9For09 = 90.000;
-        double tmpAngleBetweenCluster8And9For09 = Art2aDoubleClusteringTaskTest.clusterAnglesForAllVigilanceParameter[8];
+        double tmpAngleBetweenCluster8And9For09 = Art2aDoubleClusteringTest.clusterAnglesForAllVigilanceParameter[8];
         Assertions.assertEquals(tmpTestAngleBetweenCluster8And9For09, tmpAngleBetweenCluster8And9For09, 1e-8);
     }
     //</editor-fold>

@@ -60,9 +60,10 @@ public interface IArt2aClustering {
      * @param anIsClusteringResultExported If the parameter == true, all information about the
      * clustering is exported to 2 text files.The first exported text file is a detailed log of the clustering process
      * and the intermediate results and the second file is a rough overview of the final result.
+     * @param aSeedValue user-defined seed value to randomize input vectors.
      * @return IArt2aClusteringResult
      * @throws ConvergenceFailedException is thrown, when convergence fails.
      */
-    IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported) throws ConvergenceFailedException;
+    IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported, int aSeedValue) throws ConvergenceFailedException;
     // </editor-fold>
 }

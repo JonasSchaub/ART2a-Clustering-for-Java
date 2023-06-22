@@ -51,6 +51,19 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      * If isClusteringResultExported = false the clustering results are not exported to text files.
      */
     private boolean isClusteringResultExported;
+    private int seed;
+    /**
+     * If the seed is setting by the user isSeedSet == true, otherwise false.
+     * Is needed to determine whether the default value or the seed specified by the user should be used.
+     */
+    private boolean isSeedSet;
+    //</editor-fold>
+    //
+    //<editor-fold desc="private final class constants" defaultstate="collapsed>
+    /**
+     * Seed value for randomising the input vectors before starting clustering.
+     */
+    private final int DEFAULT_SEED_VALUE_TO_RANDOMIZE_INPUT_VECTORS = 1;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class constants" defaultstate="collapsed>
@@ -108,6 +121,7 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
                                boolean anIsClusteringResultExported, float aRequiredSimilarity, float aLearningParameter)
             throws IllegalArgumentException, NullPointerException {
         this.isClusteringResultExported = anIsClusteringResultExported;
+        this.isSeedSet = false;
         this.art2aClustering = new Art2aFloatClustering(aDataMatrix, aMaximumEpochsNumber, aVigilanceParameter,
                 aRequiredSimilarity, aLearningParameter);
     }
@@ -203,11 +217,32 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
     @Override
     public IArt2aClusteringResult call() {
         try {
-            return this.art2aClustering.getClusterResult(this.isClusteringResultExported);
+            if(this.isSeedSet) {
+                return this.art2aClustering.getClusterResult(this.isClusteringResultExported, this.seed);
+            } else {
+                return this.art2aClustering.getClusterResult(this.isClusteringResultExported,
+                        this.DEFAULT_SEED_VALUE_TO_RANDOMIZE_INPUT_VECTORS);
+            }
         } catch (ConvergenceFailedException anException) {
             Art2aClusteringTask.LOGGER.log(Level.SEVERE, anException.toString(), anException);
             return null;
         }
+    }
+    //</editor-fold>
+    //
+    // <editor-fold defaultstate="collapsed" desc="Public method">
+    /**
+     *
+     * User-defined seed value to randomize input vectors.
+     * Different seed values can lead to different clustering results.
+     *
+     * @param aSeed seed value
+     * @return user-defined seed value.
+     */
+    public int setSeed(int aSeed) {
+        this.seed = aSeed;
+        this.isSeedSet = true;
+        return this.seed;
     }
     //</editor-fold>
 }

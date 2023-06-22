@@ -4,7 +4,11 @@ Implementation of the ART 2-A fingerprint clustering algorithm in Java.
 ## Description
 Implementation of the ART 2-A count and bit fingerprint clustering algorithm 
 in Java for fast, stable unsupervised clustering for open categorical problems 
-in double or single machine precision.  
+in double or single machine precision. ART stands for adaptive resonance theory and 
+represents a family of neural models. ART 2-A is a special form of ART that enables 
+rapid convergence in clustering. ART is able to adapt to changing environments. 
+For clustering, this means that after each assignment of an input to a cluster, 
+the model adapts the cluster to the new input.
 
 ## Contents of this repository
 ### Sources
@@ -49,8 +53,7 @@ be pre-installed.
 
 **An adaptive resonance theory based artificial neural network (ART-2a) for rapid identification of airborne 
 particle shapes from their scanning electron microscopy images**
-* [ An adaptive resonance theory based artificial neural network (ART-2a) for rapid identification 
-of airborne particle shapes from their scanning electron microscopy images](https://www.sciencedirect.com/science/article/abs/pii/0169743994850542)
+* [D. Wienke et al., Chemoinformatics and Intelligent Laboratory Systems (1994) 367-387](https://www.sciencedirect.com/science/article/abs/pii/0169743994850542)
 
 
 

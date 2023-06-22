@@ -63,7 +63,7 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
     //<editor-fold desc="Private final class variables" defaultstate="collapsed">
     /**
      * Represents the cluster assignment of each input vector. For example clusterView[4] = 0 means that
-     * input vector 5 cluster 0 has been assigned.
+     * input vector with index 4 cluster 0 has been assigned.
      */
     private final int[] clusterView;
     /**
@@ -93,8 +93,10 @@ public abstract class Art2aAbstractResult implements IArt2aClusteringResult {
      *
      * @param aNumberOfEpochs final epoch number.
      * @param aNumberOfDetectedClusters final number of detected clusters.
-     * @param aClusteringProcessQueue clustering result (process) queue of typ string.
-     * @param aClusteringResultQueue clustering result queue of typ string.
+     * @param aClusteringProcessQueue clustering result (process) queue of typ string. Queues are used or
+     * thread security but these here should not be used by more than one thread.
+     * @param aClusteringResultQueue clustering result queue of typ string. Queues are used or thread security
+     * but these here should not be used by more than one thread.
      * @param aClusterView array for cluster assignment of each input vector.
      * @throws IllegalArgumentException is thrown, if the given arguments are invalid.
      */
