@@ -29,6 +29,9 @@ package de.unijena.cheminf.clustering.art2a.exceptions;
  * convergent state or meet the desired convergence criteria.The ConvergenceFailedException is a special type of
  * Exception and inherits from this class.
  * It can be used to handle convergence failures in order to take appropriate action.
+ *
+ * @author Betuel Sevindik
+ * @version 1.0.0.0
  */
 public class ConvergenceFailedException extends Exception {
     // <editor-fold defaultstate="collapsed" desc="Constructors">
