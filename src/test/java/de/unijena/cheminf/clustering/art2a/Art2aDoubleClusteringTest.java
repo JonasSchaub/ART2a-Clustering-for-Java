@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
  * @version 1.0.0.0
  */
 public class Art2aDoubleClusteringTest {
-    //<editor-fold desc="Private static class variables" defaultstate="collapsed">
+    //<editor-fold desc="private static class variables" defaultstate="collapsed">
     /**
      * Clustering result instance
      */
@@ -73,7 +73,7 @@ public class Art2aDoubleClusteringTest {
     private static double[] clusterAnglesForAllVigilanceParameter;
     //</editor-fold>
     //
-    //<editor-fold desc="Before all" defaultstate="collapsed">
+    //<editor-fold desc="before all" defaultstate="collapsed">
     /**
      * Starts double clustering and stores the results in arrays to check for correctness.
      * Clustering is performed for vigilance parameters from 0.1 to 0.9 in 0.1 steps.
@@ -130,6 +130,8 @@ public class Art2aDoubleClusteringTest {
         tmpWriter[1].close();
         tmpExecutorService.shutdown();
     }
+    //</editor-fold>
+    //
     // <editor-fold defaultstate="collapsed" desc="tests the number of epochs for all vigilance parameter">
     /**
      * Tests number of epoch for vigilance parameter 0.1
@@ -497,7 +499,6 @@ public class Art2aDoubleClusteringTest {
         Assertions.assertEquals(tmpTestClusterRepresentativesIndexInCluster8For09, tmpClusterRepresentativesIndexInCluster8For09);
     }
     //</editor-fold>
-    //
     //
     // <editor-fold defaultstate="collapsed" desc="tests angle between cluster for all vigilance parameter">
     /**

@@ -26,13 +26,11 @@ package de.unijena.cheminf.clustering.art2a.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -113,7 +111,7 @@ public final class FileUtil {
                 tmpClusteringProcessWriter = (T) new FileWriter(tmpClusteringProcessFile);
             }
             FileUtil.deleteOldestFileIfNecessary(tmpWorkingPath + File.separator + CLUSTERING_PROCESS_FILE_NAME);
-        } catch (IOException e) {
+        } catch (IOException anException) {
             FileUtil.LOGGER.log(Level.SEVERE, "The files could not be created.");
         }
         T[] tmpWriterArray = (T[]) Array.newInstance(aWriterClass, 2);
@@ -242,9 +240,7 @@ public final class FileUtil {
         if (tmpClusteringFiles != null && tmpClusteringFiles.length > 10) { // magic number
             Arrays.sort(tmpClusteringFiles, Comparator.comparingLong(File::lastModified));
             if (tmpClusteringFiles[0].delete()) {
-                FileUtil.LOGGER.log(Level.INFO,"Deleted file: " + tmpClusteringFiles[0].getName());
-            } else {
-                FileUtil.LOGGER.log(Level.INFO,"Deleted file: " + tmpClusteringFiles[0].getName());
+                FileUtil.LOGGER.log(Level.INFO, "Deleted file: " + tmpClusteringFiles[0].getName());
             }
         }
     }

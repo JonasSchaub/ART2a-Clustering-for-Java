@@ -334,8 +334,8 @@ public class Art2aDoubleClustering implements IArt2aClustering {
                 }
             }
         } else {
-            throw new ConvergenceFailedException("Convergence failed for vigilance parameter: "
-                    + this.vigilanceParameter);
+            throw new ConvergenceFailedException(String.format("Convergence failed for vigilance parameter: %2f"
+                     ,this.vigilanceParameter));
         }
         return tmpIsConverged;
     }

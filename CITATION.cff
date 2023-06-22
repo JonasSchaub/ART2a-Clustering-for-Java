@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: ART2a Clustering for Java
-version: 0.0.0.1
+title: ART2a-Clustering-for-Java
+version: 1.0.0.0
 message: "If you use this software, please cite it as below."
 type: software
 authors:
@@ -19,5 +19,7 @@ authors:
   - family-names: "Zielesny"
     given-names: "Achim"    
     orcid: "https://orcid.org/0000-0003-0722-4229"
+doi: "10.5281/zenodo.7998215"
+date-released: 2023-06-02
 url: "https://github.com/JonasSchaub/ART2a-Clustering-for-Java"
-license: GPL 3.0
+license: GNU General Public License v3.0

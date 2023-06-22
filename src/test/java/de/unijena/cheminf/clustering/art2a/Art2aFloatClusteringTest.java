@@ -31,8 +31,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,7 +47,7 @@ import java.util.concurrent.Future;
  * @version 1.0.0.0
  */
 public class Art2aFloatClusteringTest {
-    //<editor-fold desc="Private static class variables" defaultstate="collapsed">
+    //<editor-fold desc="private static class variables" defaultstate="collapsed">
     /**
      * Clustering result instance
      */
@@ -77,7 +75,7 @@ public class Art2aFloatClusteringTest {
     private static float[][] tmpTestDatamatrix;
     //</editor-fold>
     //
-    //<editor-fold desc="Before all" defaultstate="collapsed">
+    //<editor-fold desc="before all" defaultstate="collapsed">
     /**
      * Starts float clustering and stores the results in arrays to check for correctness.
      * Clustering is performed for vigilance parameters from 0.1 to 0.9 in 0.1 steps.
