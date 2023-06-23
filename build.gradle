@@ -21,9 +21,6 @@
 plugins {
     id 'application'
 }
-application {
-    mainClassName = 'de.unijena.cheminf.clustering.art2a.main.Main'
-}
 
 group 'de.unijena.cheminf.clustering.art2a'
 version '1.0.0.0'
