@@ -62,7 +62,7 @@ spotless {
         indentWithSpaces(4) // doesn't really seem to work...
         trimTrailingWhitespace()
         endWithNewline()
-        licenseHeaderFile('License-header.txt')
+        licenseHeaderFile('License-header/License-header.txt')
         //eclipse() //not optimal, because indents with tabs..
         //googleJavaFormat() //not optimal, because indents with two spaces...
         //palantirJavaFormat() //not optimal, because unnecessary line breaks in head of for loop and corrupts editor folds
