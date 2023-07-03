@@ -27,6 +27,7 @@ package de.unijena.cheminf.clustering.art2a;
 import de.unijena.cheminf.clustering.art2a.clustering.Art2aFloatClustering;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
 import de.unijena.cheminf.clustering.art2a.util.FileUtil;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

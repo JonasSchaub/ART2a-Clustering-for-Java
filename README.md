@@ -46,6 +46,9 @@ be pre-installed.
 * JUnit Jupiter version 5.9.1
     * [JUnit ](https://junit.org/junit5/)
     * License: Eclipse Public License - v 2.0
+* Spotless version 6.19
+    * [Spotless GitHub repository](https://github.com/diffplug/spotless)
+    * License: Apache-2.0 license
 
 ## References and useful links
 **ART 2-A: An adaptive resonance algorithm for rapid category learning and recognition**

@@ -51,6 +51,9 @@ public class Art2aClusteringTask implements Callable<IArt2aClusteringResult> {
      * If isClusteringResultExported = false the clustering results are not exported to text files.
      */
     private boolean isClusteringResultExported;
+    /**
+     * Seed value to randomize input vectors.
+     */
     private int seed;
     /**
      * If the seed is setting by the user isSeedSet == true, otherwise false.

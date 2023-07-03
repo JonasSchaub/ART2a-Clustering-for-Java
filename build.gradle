@@ -20,6 +20,7 @@
 
 plugins {
     id 'application'
+    id("com.diffplug.spotless") version "6.19.0"
 }
 
 group 'de.unijena.cheminf.clustering.art2a'
@@ -49,5 +50,23 @@ tasks.withType(Test).configureEach {
 
     testLogging {
         showStandardStreams = true
+    }
+}
+
+spotless {
+    java {
+        encoding 'UTF-8'
+        cleanthat()
+        importOrder('de', 'org', 'com', 'java', 'javax')
+        removeUnusedImports()
+        indentWithSpaces(4) // doesn't really seem to work...
+        trimTrailingWhitespace()
+        endWithNewline()
+        licenseHeaderFile('License-header.txt')
+        //eclipse() //not optimal, because indents with tabs..
+        //googleJavaFormat() //not optimal, because indents with two spaces...
+        //palantirJavaFormat() //not optimal, because unnecessary line breaks in head of for loop and corrupts editor folds
+        //prettier() //needs npm installed, unsuitable...
+        //clangFormat() //also needs an installation...
     }
 }
