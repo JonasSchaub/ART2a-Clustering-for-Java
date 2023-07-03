@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/580826376.svg)](https://zenodo.org/badge/latestdoi/580826376)
+[![DOI](https://zenodo.org/badge/580826376.svg)](https://zenodo.org/badge/latestdoi/580826376) [![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/)
 # ART2a-Clustering-for-Java
 Implementation of the ART 2-A fingerprint clustering algorithm in Java.
 
@@ -28,7 +28,10 @@ one bit fingerprint. And the file named "Count_Fingerprints.txt" contains 6 coun
 one count fingerprint.
 
 ## Example initialization and usage of ART2a-Clustering-for-Java
-see in <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">"wiki"</a>
+See the <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">wiki</a> of this repository.
+
+## JavaDoc
+The JavaDoc of this library can be found <a href="https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/">here</a>.
 
 ## Installation
 This is a Gradle project. In order to use the source code for your own software, download or clone the repository and
@@ -49,6 +52,9 @@ be pre-installed.
     * License: Eclipse Public License - v 2.0
 * Spotless version 6.19
     * [Spotless GitHub repository](https://github.com/diffplug/spotless)
+    * License: Apache-2.0 license
+* Javadoc-publisher version 2.4
+    * [Javadoc-publisher GitHub repository](https://github.com/MathieuSoysal/Javadoc-publisher.yml)
     * License: Apache-2.0 license
 
 ## References and useful links
