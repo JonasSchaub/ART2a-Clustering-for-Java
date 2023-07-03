@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/580826376.svg)](https://zenodo.org/badge/latestdoi/580826376)
 # ART2a-Clustering-for-Java
 Implementation of the ART 2-A fingerprint clustering algorithm in Java.
 
