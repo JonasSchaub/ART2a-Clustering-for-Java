@@ -20,22 +20,37 @@
 
 plugins {
     id 'application'
+    id 'org.gradle.java'
+    id 'java-library'
     id("com.diffplug.spotless") version "6.19.0"
+    id 'org.gradle.maven-publish'
+    id 'signing'
 }
 
-group 'de.unijena.cheminf.clustering.art2a'
-version '1.0.0.0'
+group = 'io.github.jonasschaub'
+archivesBaseName = 'ART2a-Clustering-for-Java'
+version = '1.0.1.0-SNAPSHOT'
 
 //sourceCompatibility = 1.17
 
 //Creates javadoc and sources jars
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
     withJavadocJar()
     withSourcesJar()
 }
 
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -43,6 +58,7 @@ dependencies {
     testImplementation(platform('org.junit:junit-bom:5.9.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
 }
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
@@ -69,4 +85,94 @@ spotless {
         //prettier() //needs npm installed, unsuitable...
         //clangFormat() //also needs an installation...
     }
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'io.github.jonasschaub'
+            artifactId = 'ART2a-Clustering-for-Java'
+            version = '1.0.1.0-SNAPSHOT'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'ART2a-Clustering-for-Java'
+                description = 'Implementation of the ART 2-A fingerprint clustering algorithm in Java.'
+                url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java'
+                //properties = [
+                        //myProp: "value", //TODO
+                        //"prop.with.dots": "anotherValue" //TODO
+                //]
+                licenses {
+                    license {
+                        name = 'GNU General Public License v3.0'
+                        url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'B-s123'
+                        name = 'Betuel Sevindik'
+                        email = 'betuel.sevindik@studmail.w-hs.de'
+                        url = 'https://github.com/B-s123'
+                    }
+                    developer {
+                        id = 'FelixBaensch'
+                        name = 'Felix Baensch'
+                        email = 'felix.baensch@w-hs.de'
+                        url = 'https://github.com/FelixBaensch'
+                    }
+                    developer {
+                        id = 'JonasSchaub'
+                        name = 'Jonas Schaub'
+                        email = 'jonas.schaub@uni-jena.de'
+                        url = 'https://github.com/JonasSchaub'
+                    }
+                    developer {
+                        name = 'Christoph Steinbeck'
+                        email = 'christoph.steinbeck@uni-jena.de'
+                        url = 'https://cheminf.uni-jena.de/members/steinbeck/'
+                    }
+                    developer {
+                        name = 'Achim Zielesny'
+                        email = 'achim.zielesny@w-hs.de'
+                        url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
+                    developerConnection = 'scm:git:ssh://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
+                    url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java/'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
+            //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
+            def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = property("ossrhUsername") as String
+                password = property("ossrhPassword") as String
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.maven
 }
