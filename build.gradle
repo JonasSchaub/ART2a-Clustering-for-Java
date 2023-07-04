@@ -22,6 +22,7 @@ plugins {
     id 'application'
     id 'org.gradle.java'
     id 'java-library'
+    id 'java'
     id("com.diffplug.spotless") version "6.19.0"
     id 'org.gradle.maven-publish'
     id 'signing'
@@ -29,7 +30,8 @@ plugins {
 
 group = 'io.github.jonasschaub'
 archivesBaseName = 'ART2a-Clustering-for-Java'
-version = '1.0.1.0-SNAPSHOT'
+//see also version for publishing below!
+version = '1.0.1.0'
 
 //sourceCompatibility = 1.17
 
@@ -50,7 +52,6 @@ javadoc {
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -93,11 +94,15 @@ artifacts {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
+
             groupId = 'io.github.jonasschaub'
             artifactId = 'ART2a-Clustering-for-Java'
-            version = '1.0.1.0-SNAPSHOT'
+            //note: this version has been published, do not try to publish it again! version 1.0.1.1 was also already used for publishing!
+            version = '1.0.1.0'
+
             from components.java
+
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -106,20 +111,26 @@ publishing {
                     fromResolutionResult()
                 }
             }
+
             pom {
+
                 name = 'ART2a-Clustering-for-Java'
                 description = 'Implementation of the ART 2-A fingerprint clustering algorithm in Java.'
                 url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java'
+
+                //this way, properties can be added:
                 //properties = [
-                        //myProp: "value", //TODO
-                        //"prop.with.dots": "anotherValue" //TODO
+                        //myProp: "value",
+                        //"prop.with.dots": "anotherValue"
                 //]
+
                 licenses {
                     license {
                         name = 'GNU General Public License v3.0'
                         url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
                     }
                 }
+
                 developers {
                     developer {
                         id = 'B-s123'
@@ -150,6 +161,7 @@ publishing {
                         url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'
                     }
                 }
+
                 scm {
                     connection = 'scm:git:git://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
                     developerConnection = 'scm:git:ssh://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
@@ -160,12 +172,19 @@ publishing {
     }
     repositories {
         maven {
+            //these two lines did not work because dir() apparently asks for a local path
             //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
             //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-            def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
-            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            //TODO: is this actually the way to fully automatically do it?
+            //def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            //def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            //url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            //after publishing, go to https://s01.oss.sonatype.org, log in, close the staged repo, and release it if everything worked out
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
+                //uses keys and passwords declared in userhome/.gradle/gradle.properties
                 username = property("ossrhUsername") as String
                 password = property("ossrhPassword") as String
             }
@@ -174,5 +193,6 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.maven
+    //uses keys and passwords declared in userhome/.gradle/gradle.properties
+    sign publishing.publications.mavenJava
 }
