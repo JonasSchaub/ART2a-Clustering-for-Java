@@ -23,8 +23,8 @@ jobs:
         with:
           java-version:  '17' #'11'
           distribution:  'temurin' #'adopt'
-      #- name: Change wrapper permissions
-        #run: chmod +x ./gradlew
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
       - name: Publish package
