@@ -188,14 +188,20 @@ publishing {
                 //username = property("ossrhUsername") as String
                 //password = property("ossrhPassword") as String
                 //uses environment variables declared in yml file which passes GitHub secrets to it
-                username = System.getenv("MAVEN_USERNAME") as String
-                password = System.getenv("MAVEN_PASSWORD") as String
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
             }
         }
     }
 }
 
 signing {
-    //uses keys and passwords declared in userhome/.gradle/gradle.properties
+    //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
+    //sign publishing.publications.mavenJava
+
+    //uses environment variables declared in yml file which passes GitHub secrets to it
+    def signingKey = System.getenv("signingKey")
+    def signingPassword = System.getenv("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }
