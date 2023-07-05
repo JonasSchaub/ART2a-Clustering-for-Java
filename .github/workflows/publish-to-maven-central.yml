@@ -38,8 +38,8 @@ jobs:
           #MAVEN_PASSWORD: ${{ secrets.OSSRHPASSWORD }}
       - name: Publish with Gradle
         env:
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRHPASSWORD }}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRHUSERNAME }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PGP_SECRET }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PGP_PASSPHRASE }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRHPASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.OSSRHUSERNAME }}
+          signingKey: ${{ secrets.PGP_SECRET }}
+          signingPassword: ${{ secrets.PGP_PASSPHRASE }}
         run: ./gradlew publish --no-daemon
