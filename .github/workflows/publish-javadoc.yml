@@ -5,11 +5,11 @@ name: Deploy Javadoc
 # And these need to be merged into the javadoc branch.
 
 on:
-  #release: # to trigger this only at new releases, comment this in and the next three lines out
-    #types: [created, published, released]
-  push:
-    branches:
-      - main
+  release:
+    types: [published] #alternatives: released, published, created
+  #push:
+    #branches:
+      #- main
 
 jobs:
   publish:
