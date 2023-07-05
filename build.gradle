@@ -185,8 +185,18 @@ publishing {
             url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
                 //uses keys and passwords declared in userhome/.gradle/gradle.properties
-                username = (System.getenv("ossrhUsername") ?: property("ossrhUsername")) as String
-                password = (System.getenv("ossrhPassword") ?: property("ossrhPassword")) as String
+                if (System.getenv("ossrhUsername") != null) {
+                    username = System.getenv("ossrhUsername") as String
+                } else {
+                    username = property("ossrhUsername") as String
+                }
+                //username = (System.getenv("ossrhUsername") ?: property("ossrhUsername")) as String
+                if (System.getenv("ossrhPassword") != null) {
+                    password = System.getenv("ossrhPassword") as String
+                } else {
+                    password = property("ossrhPassword") as String
+                }
+                //password = (System.getenv("ossrhPassword") ?: property("ossrhPassword")) as String
             }
         }
     }
