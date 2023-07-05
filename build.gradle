@@ -24,7 +24,7 @@ plugins {
     id 'java-library'
     id 'java'
     id("com.diffplug.spotless") version "6.19.0"
-    id 'org.gradle.maven-publish'
+    id 'maven-publish'
     //id 'signing'
 }
 
@@ -94,8 +94,8 @@ artifacts {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-
+        //mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             groupId = 'io.github.jonasschaub'
             artifactId = 'ART2a-Clustering-for-Java'
             //note: this version has been published, do not try to publish it again! version 1.0.1.1 was also already used for publishing!
@@ -172,6 +172,7 @@ publishing {
     }
     repositories {
         maven {
+            name = "OSSRH"
             //these two lines did not work because dir() apparently asks for a local path
             //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
             //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
