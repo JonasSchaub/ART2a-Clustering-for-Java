@@ -188,8 +188,8 @@ publishing {
                 //username = property("ossrhUsername") as String
                 //password = property("ossrhPassword") as String
                 //uses environment variables declared in yml file which passes GitHub secrets to it
-                username = System.getenv("MAVEN_USERNAME") as String
-                password = System.getenv("MAVEN_PASSWORD") as String
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
             }
         }
     }
