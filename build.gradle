@@ -24,8 +24,8 @@ plugins {
     id 'java-library'
     id 'java'
     id("com.diffplug.spotless") version "6.19.0"
-    id 'maven-publish'
-    //id 'signing'
+    id 'org.gradle.maven-publish'
+    id 'signing'
 }
 
 group = 'io.github.jonasschaub'
@@ -94,8 +94,8 @@ artifacts {
 
 publishing {
     publications {
-        //mavenJava(MavenPublication) {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
+
             groupId = 'io.github.jonasschaub'
             artifactId = 'ART2a-Clustering-for-Java'
             //note: this version has been published, do not try to publish it again! version 1.0.1.1 was also already used for publishing!
@@ -172,7 +172,7 @@ publishing {
     }
     repositories {
         maven {
-            name = "OSSRH"
+            //name = "OSSRH"
             //these two lines did not work because dir() apparently asks for a local path
             //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
             //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
@@ -186,17 +186,17 @@ publishing {
             url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
                 //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
-                //username = property("ossrhUsername") as String
-                //password = property("ossrhPassword") as String
+                username = property("ossrhUsername") as String
+                password = property("ossrhPassword") as String
                 //uses environment variables declared in yml file which passes GitHub secrets to it
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                //username = System.getenv("MAVEN_USERNAME") as String
+                //password = System.getenv("MAVEN_PASSWORD") as String
             }
         }
     }
 }
 
-//signing {
+signing {
     //uses keys and passwords declared in userhome/.gradle/gradle.properties
-    //sign publishing.publications.mavenJava
-//}
+    sign publishing.publications.mavenJava
+}
