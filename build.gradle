@@ -30,7 +30,7 @@ plugins {
 
 group = 'io.github.jonasschaub'
 archivesBaseName = 'ART2a-Clustering-for-Java'
-//see also version for publishing below!
+//see also version for publishing below! And do not forget to update CITATION.cff version as well!!!
 version = '1.0.2.1'
 
 //sourceCompatibility = 1.17
@@ -98,7 +98,7 @@ publishing {
 
             groupId = 'io.github.jonasschaub'
             artifactId = 'ART2a-Clustering-for-Java'
-            //note: this version has been published, do not try to publish it again! versions 1.0.1.0 and 1.0.1.1 were also already used for publishing!
+            //note: this version has been published, do not try to publish it again! versions 1.0.1.0, 1.0.1.1, and 1.0.2.0 were also already used for publishing!
             version = '1.0.2.1'
 
             from components.java
