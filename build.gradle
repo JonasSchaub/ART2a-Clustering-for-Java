@@ -199,8 +199,10 @@ signing {
     //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
     //sign publishing.publications.mavenJava
 
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
+    //def signingKey = findProperty("signingKey")
+    def signingKey = System.getenv("signingKey")
+    //def signingPassword = findProperty("signingPassword")
+    def signingPassword = System.getenv("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }
