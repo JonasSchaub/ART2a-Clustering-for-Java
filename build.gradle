@@ -172,7 +172,6 @@ publishing {
     }
     repositories {
         maven {
-            //name = "OSSRH"
             //these two lines did not work because dir() apparently asks for a local path
             //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
             //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
@@ -185,12 +184,12 @@ publishing {
             //after publishing, go to https://s01.oss.sonatype.org, log in, close the staged repo, and release it if everything worked out
             url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
-                username = property("ossrhUsername") as String
-                password = property("ossrhPassword") as String
+                //uses keys and passwords declared in userhome/.gradle/gradle.properties
+                //username = property("ossrhUsername") as String
+                //password = property("ossrhPassword") as String
                 //uses environment variables declared in yml file which passes GitHub secrets to it
-                //username = System.getenv("MAVEN_USERNAME") as String
-                //password = System.getenv("MAVEN_PASSWORD") as String
+                username = System.getenv("MAVEN_USERNAME") as String
+                password = System.getenv("MAVEN_PASSWORD") as String
             }
         }
     }
