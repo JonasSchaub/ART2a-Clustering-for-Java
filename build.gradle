@@ -25,7 +25,7 @@ plugins {
     id 'java'
     id("com.diffplug.spotless") version "6.19.0"
     id 'org.gradle.maven-publish'
-    id 'signing'
+    //id 'signing'
 }
 
 group = 'io.github.jonasschaub'
@@ -195,7 +195,7 @@ publishing {
     }
 }
 
-signing {
+//signing {
     //uses keys and passwords declared in userhome/.gradle/gradle.properties
-    sign publishing.publications.mavenJava
-}
+    //sign publishing.publications.mavenJava
+//}
