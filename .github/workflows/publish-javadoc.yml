@@ -6,7 +6,7 @@ name: Deploy Javadoc
 
 on:
   release:
-    types: [created] #alternatives: released, published,
+    types: [published] #alternatives: released, published, created
   #push:
     #branches:
       #- main
