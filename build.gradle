@@ -199,9 +199,8 @@ signing {
     //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
     //sign publishing.publications.mavenJava
 
-    //def signingKey = findProperty("signingKey")
+    //uses environment variables declared in yml file which passes GitHub secrets to it
     def signingKey = System.getenv("signingKey")
-    //def signingPassword = findProperty("signingPassword")
     def signingPassword = System.getenv("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
