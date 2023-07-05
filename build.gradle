@@ -118,7 +118,7 @@ publishing {
                 description = 'Implementation of the ART 2-A fingerprint clustering algorithm in Java.'
                 url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java'
 
-                //this way, properties can be added: 
+                //this way, properties can be added:
                 //properties = [
                         //myProp: "value",
                         //"prop.with.dots": "anotherValue"
@@ -185,8 +185,8 @@ publishing {
             url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
                 //uses keys and passwords declared in userhome/.gradle/gradle.properties
-                username = property("ossrhUsername") as String
-                password = property("ossrhPassword") as String
+                username = System.getenv("ossrhUsername") as String
+                password = System.getenv("ossrhPassword") as String
             }
         }
     }
