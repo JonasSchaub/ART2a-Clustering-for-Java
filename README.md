@@ -11,27 +11,11 @@ Implementation of the ART 2-A fingerprint clustering algorithm in Java.
 ## Description
 Implementation of the ART 2-A count and bit fingerprint clustering algorithm 
 in Java for fast, stable unsupervised clustering for open categorical problems 
-in double or single machine precision. ART stands for adaptive resonance theory and 
+in double or single machine precision. ART stands for "Adaptive Resonance Theory" and 
 represents a family of neural models. ART 2-A is a special form of ART that enables 
 rapid convergence in clustering. ART is able to adapt to changing environments. 
 For clustering, this means that after each assignment of an input to a cluster, 
 the model adapts the cluster to the new input.
-
-## Contents of this repository
-### Sources
-The <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/src">"src"</a> subfolder contains
-all source code packages including JUnit tests.
-
-### Tests
-The test class <i>Art2aDoubleClusteringTaskTest</i> tests the functionalities of Art-2a in double machine precision
-and the test class <i>Art2aFloatClusteringTaskTest</i> in single machine precision.
-Methods for the clustering results are also tested.
-
-### Test resources
-The test <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/src/test/resources/de/unijena/cheminf/clustering/art2a">"resources"</a> subfolder
-contains two text files. The text file named "Bit_Fingerprints.txt" contains 10 bit fingerprints, where each line represents 
-one bit fingerprint. And the file named "Count_Fingerprints.txt" contains 6 count fingerprints, where each line represents
-one count fingerprint.
 
 ## Example initialization and usage of ART2a-Clustering-for-Java
 See the <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">wiki</a> of this repository.
@@ -40,12 +24,41 @@ See the <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">
 The JavaDoc of this library can be found <a href="https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/">here</a>.
 
 ## Installation
-This is a Gradle project. In order to use the source code for your own software, download or clone the repository and
+ART2a-Clustering-for-Java is hosted as a package/artifact on the sonatype maven central repository. See the 
+<a href="https://central.sonatype.com/artifact/io.github.jonasschaub/ART2a-Clustering-for-Java/">artifact page</a> for installation
+guidelines using build tools like maven or gradle.
+<br>
+To install ART2a-Clustering-for-Java via its JAR archive, you can get it from the 
+<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/releases">releases</a>. Note that other dependencies 
+will need to be installed via JAR archives as well this way.
+<br>
+In order to open the project locally, e.g. to extend it, download or clone the repository and
 open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file.
 Gradle will then take care of installing all dependencies. A Java Development Kit (JDK) of version 17 or higher must also
 be pre-installed.
 
-## Dependencies
+## Contents of this repository
+### Sources
+The <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/src">"src"</a> subfolder contains
+all source code files including JUnit tests.
+
+### Tests
+The test class 
+<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aDoubleClusteringTest.java">
+<i>Art2aDoubleClusteringTest</i></a> tests the functionalities of Art-2a in double machine precision
+and the test class 
+<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aFloatClusteringTest.java">
+<i>Art2aFloatClusteringTest</i></a> in single machine precision.
+Methods for the clustering results are also tested.
+
+### Test resources
+The test 
+<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/src/test/resources/de/unijena/cheminf/clustering/art2a">"resources"</a> subfolder
+contains two text files. The text file named "Bit_Fingerprints.txt" contains 10 bit fingerprints, where each line represents 
+one bit fingerprint. And the file named "Count_Fingerprints.txt" contains 6 count fingerprints, where each line represents
+one count fingerprint.
+
+## Dependencies for local installation
 **Needs to be pre-installed:**
 * Java Development Kit (JDK) version 17
     * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
