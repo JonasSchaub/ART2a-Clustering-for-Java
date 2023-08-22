@@ -26,6 +26,7 @@ plugins {
     id("com.diffplug.spotless") version "6.19.0"
     id 'org.gradle.maven-publish'
     id 'signing'
+    id("org.sonarqube") version "4.2.1.3168"
 }
 
 group = 'io.github.jonasschaub'
@@ -85,6 +86,14 @@ spotless {
         //palantirJavaFormat() //not optimal, because unnecessary line breaks in head of for loop and corrupts editor folds
         //prettier() //needs npm installed, unsuitable...
         //clangFormat() //also needs an installation...
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "JonasSchaub_ART2a-Clustering-for-Java")
+        property("sonar.organization", "jonasschaub")
+        property("sonar.host.url", "https://sonarcloud.io")
     }
 }
 
