@@ -2,9 +2,12 @@
 [![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/graphs/commit-activity)
+[![build](https://github.com/JonasSchaub/ART2a-Clustering-for-Java/actions/workflows/gradle.yml/badge.svg)](https://github.com/JonasSchaub/ART2a-Clustering-for-Java/actions/workflows/gradle.yml)
 [![GitHub issues](https://img.shields.io/github/issues/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/issues/)
 [![GitHub contributors](https://img.shields.io/github/contributors/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/graphs/contributors/)
 [![GitHub release](https://img.shields.io/github/release/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://github.com/JonasSchaub/ART2a-Clustering-for-Java/releases/)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JonasSchaub_ART2a-Clustering-for-Java&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonasSchaub_ART2a-Clustering-for-Java)
 # ART2a-Clustering-for-Java
 Implementation of the ART 2-A fingerprint clustering algorithm in Java.
 
