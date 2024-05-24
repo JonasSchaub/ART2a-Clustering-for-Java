@@ -65,7 +65,7 @@ one count fingerprint.
 **Needs to be pre-installed:**
 * Java Development Kit (JDK) version 17
     * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
-* Gradle version 7.3
+* Gradle version 8.7
     * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**

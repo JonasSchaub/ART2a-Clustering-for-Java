@@ -23,7 +23,6 @@
  * SOFTWARE.
  */
 
-
 plugins {
     id 'application'
     id 'org.gradle.java'
