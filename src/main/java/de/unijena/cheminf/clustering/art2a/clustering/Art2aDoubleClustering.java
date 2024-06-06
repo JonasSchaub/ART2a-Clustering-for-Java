@@ -496,7 +496,7 @@ public class Art2aDoubleClustering implements IArt2aClustering {
                     }
                     //</editor-fold>
                     else {
-                        //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
+                        //<editor-fold desc="C  luster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
                         double tmpSumOfComponents = 0.0;
                         for(double tmpVectorComponentsOfNormalizeVector : tmpInputVector) {
                             tmpSumOfComponents += tmpVectorComponentsOfNormalizeVector;
