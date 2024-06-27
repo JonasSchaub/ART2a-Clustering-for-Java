@@ -95,7 +95,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     /**
      * Number of fingerprints to be clustered.
      */
-    private final int numberOfInputVectors;
+    public int numberOfInputVectors;
     /**
      * Dimensionality of the fingerprint.
      */
@@ -205,91 +205,35 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         int tmpNumberOfNullComponentsInDataMatrix = 0;
         int tmpNumberOfElementsInDataMatrix = aDataMatrix.length * aDataMatrix[0].length;
         int tmpNumberOfVectorComponents = aDataMatrix[0].length;
-        //double tmpMaxValueInDataMatrix = aDataMatrix[0][0];
-        //double tmpMinValueInDatamatrix = aDataMatrix[0][0];
-        //double tmpCurrentVectorComponent;
         double[] tmpSingleFingerprint;
-        //boolean tmpIsDataMatrixInCorrectRangeOfValues = false;
         for(int i = 0; i < aDataMatrix.length; i++) {
             tmpSingleFingerprint = aDataMatrix[i];
             if(tmpNumberOfVectorComponents != tmpSingleFingerprint.length) {
                 throw new IllegalArgumentException("All input vectors must have the same dimension!");
             }
-            // content of the vectors
-            /**for(int j = 0; j < tmpSingleFingerprint.length; j++) {
-                tmpCurrentVectorComponent = tmpSingleFingerprint[j];
-                if(tmpCurrentVectorComponent > tmpMaxValueInDataMatrix) {
-                    tmpMaxValueInDataMatrix = tmpCurrentVectorComponent;
-                }
-                if(tmpCurrentVectorComponent < tmpMinValueInDatamatrix) {
-                    tmpMinValueInDatamatrix = tmpCurrentVectorComponent;
-                }
-                if(tmpCurrentVectorComponent > 1.0) {
-                    tmpIsDataMatrixInCorrectRangeOfValues = true;
-                }
-                if(tmpCurrentVectorComponent < 0.0) {
-                    throw new IllegalArgumentException("Only positive values allowed.");
-                }
-                if(tmpCurrentVectorComponent == 0.0) {
-                    tmpNumberOfNullComponentsInDataMatrix++;
-                }
-            }**/
             if(tmpNumberOfNullComponentsInDataMatrix == tmpNumberOfElementsInDataMatrix) {
                 throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible.");
             }
         }
-        /**if(tmpIsDataMatrixInCorrectRangeOfValues) {
-            this.getScaledDataMatrix(aDataMatrix, tmpMinValueInDatamatrix, tmpMaxValueInDataMatrix);
-        }**/
         return aDataMatrix;
     }
     //
     /**
-     * Calculates the length of a vector. The length is needed for the normalisation of the vector.
-     *
-     * @param anInputVector vector whose length is calculated.
-     * @return double vector length.
-     * @throws ArithmeticException is thrown if the addition of the vector components results in zero.
+     * Method that calculates the distance of the second rho value by iterating the components of the vectors with a
+     * for loop. Then each component is subtracted and squared. Finally, the square root is taken.
      */
-    // might be able to skip this part since scaling to unit length is not needed for Euclidean distance
-    /**private double getVectorLength (double[] anInputVector) throws ArithmeticException {
-        double tmpVectorComponentsSqrtSum = 0.0;
-        double tmpVectorLength;
-        for (int i = 0; i < anInputVector.length; i++) {
-            tmpVectorComponentsSqrtSum += anInputVector[i] * anInputVector[i];
+    private int getSecondRhoCompetition(double[] tmpInputVector, double[] tmpRow) {
+        if (tmpInputVector != tmpRow) {
+            throw new IllegalArgumentException("The vectors need to have the same dimension!");
         }
-        if (tmpVectorComponentsSqrtSum == 0.0) {
-            throw new ArithmeticException("Addition of the vector components results in zero!");
-        } else {
-            tmpVectorLength = Math.sqrt(tmpVectorComponentsSqrtSum);
+        double tmpSumOfRhoForExistingClusters = 0.0;
+        for (int i = 0; i < this.numberOfComponents; i++) {
+            double tmpRhoForExistingClusters = tmpRow[i] - tmpInputVector[i];
+            tmpSumOfRhoForExistingClusters += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
         }
-        return tmpVectorLength;++/
+        //square root of the sum of Rho for existing clusters.
+        return (int) Math.sqrt(tmpSumOfRhoForExistingClusters);
     }
-    //
-    /**
-     * Method for scaling the input vectors/fingerprints if they  are not between 0 and 1. //also not needed?
-     * Thus serves for the scaling of count fingerprints.
-     *
-     * @param aDataMatrixToScale the matrix contains input vectors and at least one component
-     * of an input vector is not in the specified range, i.e. between 0 and 1.
-     * @param aMaxValue is the highest value in the matrix.
-     * @param aMinValue is the lowest value in the matrix.
-     *
-     */
-    /**private void getScaledDataMatrix(double[][] aDataMatrixToScale, double aMinValue, double aMaxValue) {
-        double[] tmpSingleFingerprint;
-        double tmpScaledVectorComponent;
-        double tmpCurrentVectorComponent;
-        for(int i = 0; i < aDataMatrixToScale.length; i++) {
-            tmpSingleFingerprint = aDataMatrixToScale[i];
-            for (int j = 0; j < tmpSingleFingerprint.length; j++) {
-                tmpCurrentVectorComponent = tmpSingleFingerprint[j];
-                tmpScaledVectorComponent = (tmpCurrentVectorComponent-aMinValue)/(aMaxValue-aMinValue);
-                tmpSingleFingerprint[j] = tmpScaledVectorComponent;
-                aDataMatrixToScale[i] = tmpSingleFingerprint;
-            }
-        }
-    }**/
     //
     /**
      * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
@@ -402,10 +346,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         double tmpInitialClusterVectorWeightValue = 1.0 / Math.sqrt(this.numberOfComponents);
         int tmpNumberOfDetectedClusters = 0;
         int[] tmpClusterOccupation = new int[this.numberOfInputVectors];
-        //double tmpVectorLengthForFirstNormalizationStep;
-        //double tmpVectorLengthAfterContrastEnhancement;
         double tmpRho;
-        //double tmpVectorLengthForModificationWinnerCluster;
         int tmpWinnerClusterIndex;
         boolean tmpIsSystemConverged = false;
         // </editor-fold>
@@ -454,34 +395,16 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                     this.clusteringProcess.add(String.format("Input: %d / Vector %d", tmpCurrentInput,
                             tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]));
                 }
-                //<editor-fold desc="If the input vector is a null vector, it will not be clustered." defaultstate="collapsed">
-               /** if(tmpIsNullVector) {
-                    tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = -1;
-                    if(anIsClusteringResultExported) {
-                        this.clusteringProcess.add("This input is a null vector");
-                    }
-                }**/
                 //</editor-fold>
                 else {
-                    //<editor-fold desc=" normalisation of the randomly selected input vector.
-                    //                    Subsequently, all components of the input vector are transformed
-                    //                    with a non-linear threshold function for contrast enhancement." defaultstate="collapsed">
-                   // tmpVectorLengthForFirstNormalizationStep = this.getVectorLength(tmpInputVector);
+                    //<editor-fold desc="Subsequently, all components of the input vector are transformed
+                    //with a non-linear threshold function for contrast enhancement." defaultstate="collapsed">
                     for(int tmpManipulateComponentsIndex = 0; tmpManipulateComponentsIndex < tmpInputVector.length;
                         tmpManipulateComponentsIndex++) {
-                       // tmpInputVector[tmpManipulateComponentsIndex] *= (1.0 / tmpVectorLengthForFirstNormalizationStep);
                         if(tmpInputVector[tmpManipulateComponentsIndex] <= this.thresholdForContrastEnhancement) {
                             tmpInputVector[tmpManipulateComponentsIndex] = 0.0;
                         }
                     }
-                    //</editor-fold>
-                    //<editor-fold desc="the transformed input vector is normalised again." defaultstate="collapsed">
-                    //tmpVectorLengthAfterContrastEnhancement = this.getVectorLength(tmpInputVector);
-                    //without normalized input stattdessen tmpCurrentInputComponent
-                    /**for(int tmpNumberOfNormalizedInputComponents = 0; tmpNumberOfNormalizedInputComponents < tmpInputVector.length;
-                        tmpNumberOfNormalizedInputComponents++) {
-                     //   tmpInputVector[tmpNumberOfNormalizedInputComponents] *= (1.0 / tmpVectorLengthAfterContrastEnhancement);
-                    }**/
                     //</editor-fold>
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
                     if(tmpNumberOfDetectedClusters == 0) {
@@ -547,8 +470,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                                 }
                             }
                             //<editor-fold desc="Modification of the winner cluster vector."
-                            //double tmpVectorLength = this.getVectorLength(tmpInputVector);
-                            //double tmpFactor1 = this.learningParameter / tmpVectorLength;
                             double tmpFactor2 = 1.0 - this.learningParameter;
                             for(int tmpAdaptedComponentsIndex = 0; tmpAdaptedComponentsIndex < this.numberOfComponents;
                                 tmpAdaptedComponentsIndex++) {
@@ -556,10 +477,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                                         tmpInputVector[tmpAdaptedComponentsIndex] * this.learningParameter + tmpFactor2 *
                                                 this.clusterMatrix[tmpWinnerClusterIndex][tmpAdaptedComponentsIndex];
                             }
-                            // = this.getVectorLength(tmpInputVector);
-                            /**for(int i = 0; i < tmpInputVector.length; i++) {
-                                //tmpInputVector[i] *= (1.0 / tmpVectorLengthForModificationWinnerCluster);
-                            }**/
                             this.clusterMatrix[tmpWinnerClusterIndex] = tmpInputVector;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =
                                     tmpWinnerClusterIndex;
