@@ -151,7 +151,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
      *
      */
     public Art2aEuclideanDoubleClustering(double[][] aDataMatrix, int aMaximumNumberOfEpochs, double aVigilanceParameter,
-                                 double aRequiredSimilarity, double aLearningParameter)
+                                 double aRequiredSimilarity, double aLearningParameter, double aScalingFactor)
             throws IllegalArgumentException, NullPointerException {
         // initialization of the network:
         // Step 1
@@ -178,6 +178,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.numberOfComponents = this.dataMatrix[0].length;
         this.scalingFactor = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
+        this.scalingFactor = aScalingFactor;
         this.thresholdForContrastEnhancement = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
     }
     //</editor-fold>
@@ -219,6 +220,19 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     }
     //
     /**
+     * Method that calculates the distance of the first rho value by iterating the component of the input vector and
+     * subtracting each component from the scaling factor. After that the result is squared and the square root is
+     * taken.
+     */
+    private int getFirstRhoCompetition(double [] tmpInputVector){
+         double tmpSumOfRho = 0.0;
+         for (int i = 0; i < this.numberOfComponents; i++){
+             double tmpRho = this.scalingFactor - tmpInputVector[i];
+             tmpSumOfRho += tmpRho * tmpRho;
+         }
+         return (int) Math.sqrt(tmpSumOfRho);
+    }
+    /**
      * Method that calculates the distance of the second rho value by iterating the components of the vectors with a
      * for loop. Then each component is subtracted and squared. Finally, the square root is taken.
      */
@@ -259,7 +273,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             double[] tmpCurrentRowInClusterMatrix;
             double[] tmpPreviousEpochRow;
             for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpScalarProductOfClassVector = 0.0;  // is this step 13.6??
+                tmpScalarProductOfClassVector = 0.0;
                 tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
                 tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
                 for (int j = 0; j < this.numberOfComponents; j++) {
