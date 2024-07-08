@@ -25,7 +25,6 @@
 
 package de.unijena.cheminf.clustering.art2a.clustering.euclideanClustering;
 
-import de.unijena.cheminf.clustering.art2a.clustering.Art2aDoubleClustering;
 import de.unijena.cheminf.clustering.art2a.exceptions.ConvergenceFailedException;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClustering;
 import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
@@ -139,19 +138,18 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
      * <u>WARNING</u>: If the data matrix consists only of null vectors, no clustering is possible,
      * because they do not contain any information that can be used for the evaluation of similarities.
      *
-     * @param aDataMatrix matrix contains all inputs for clustering.
+     * @param aDataMatrix            matrix contains all inputs for clustering.
      * @param aMaximumNumberOfEpochs maximum number of epochs that the system may use for convergence.
-     * @param aVigilanceParameter parameter to influence the number of clusters.
-     * @param aRequiredSimilarity parameter indicating the minimum similarity between the current
-     * cluster vectors and the previous cluster vectors.
-     * @param aLearningParameter parameter to define the intensity of keeping the old cluster vector in mind
-     * before the system adapts it to the new sample vector.
+     * @param aVigilanceParameter    parameter to influence the number of clusters.
+     * @param aRequiredSimilarity    parameter indicating the minimum similarity between the current
+     *                               cluster vectors and the previous cluster vectors.
+     * @param aLearningParameter     parameter to define the intensity of keeping the old cluster vector in mind
+     *                               before the system adapts it to the new sample vector.
      * @throws IllegalArgumentException is thrown if the given arguments are invalid.
-     * @throws NullPointerException is thrown if aDataMatrix is null.
-     *
+     * @throws NullPointerException     is thrown if aDataMatrix is null.
      */
     public Art2aEuclideanDoubleClustering(double[][] aDataMatrix, int aMaximumNumberOfEpochs, double aVigilanceParameter,
-                                 double aRequiredSimilarity, double aLearningParameter, double aScalingFactor)
+                                 double aRequiredSimilarity, double aLearningParameter)
             throws IllegalArgumentException, NullPointerException {
         // initialization of the network:
         // Step 1
@@ -178,7 +176,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.numberOfComponents = this.dataMatrix[0].length;
         this.scalingFactor = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
-        this.scalingFactor = aScalingFactor;
         this.thresholdForContrastEnhancement = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
     }
     //</editor-fold>
@@ -396,15 +393,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             //<editor-fold desc="Check current input vector for null vector." defaultstate="collapsed">
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfInputVectors; tmpCurrentInput++) {
                 double[] tmpInputVector = new double[this.numberOfComponents];
-                boolean tmpIsNullVector = true;
-                /**for(int tmpCurrentInputVectorComponentsIndex = 0; tmpCurrentInputVectorComponentsIndex < this.numberOfComponents;
-                    tmpCurrentInputVectorComponentsIndex++) {
-                    tmpInputVector[tmpCurrentInputVectorComponentsIndex] =
-                            this.dataMatrix[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]][tmpCurrentInputVectorComponentsIndex];
-                    if(tmpInputVector[tmpCurrentInputVectorComponentsIndex] !=0.0) {
-                        tmpIsNullVector = false;
-                    }
-                }**/
                 if(anIsClusteringResultExported) {
                     this.clusteringProcess.add(String.format("Input: %d / Vector %d", tmpCurrentInput,
                             tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]));
@@ -435,16 +423,17 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                     else {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
                         //sum of scaling factor and non normalized components!
-                        double tmpSumOfComponents = 0.0;
-                        for(double tmpCurrentInputComponent : tmpInputVector) {
-                            tmpSumOfComponents += tmpCurrentInputComponent;
+                        tmpRho = 0.0;
+                        for (int i = 0; i < this.numberOfComponents; i++){
+                            double tmpDifferenceOfScalingFactorAndInput = this.scalingFactor - tmpInputVector[i];
+                            tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
                         }
                         tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
                         boolean tmpIsMatchingClusterAvailable = true;
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps."
                         //</editor-fold>
                         //<editor-fold desc="Calculate first rho value."
-                        tmpRho = this.scalingFactor * tmpSumOfComponents; // sum of (scaling factor-components)^2
+                         // sum of (scaling factor-components)^2
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
                         for(int tmpCurrentClusterMatrixRowIndex = 0; tmpCurrentClusterMatrixRowIndex < tmpNumberOfDetectedClusters;
