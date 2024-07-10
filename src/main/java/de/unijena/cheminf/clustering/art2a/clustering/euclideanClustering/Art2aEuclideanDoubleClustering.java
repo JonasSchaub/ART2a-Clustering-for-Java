@@ -217,36 +217,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     }
     //
     /**
-     * Method that calculates the distance of the first rho value by iterating the component of the input vector and
-     * subtracting each component from the scaling factor. After that the result is squared and the square root is
-     * taken.
-     */
-    private int getFirstRhoCompetition(double [] tmpInputVector){
-         double tmpSumOfRho = 0.0;
-         for (int i = 0; i < this.numberOfComponents; i++){
-             double tmpRho = this.scalingFactor - tmpInputVector[i];
-             tmpSumOfRho += tmpRho * tmpRho;
-         }
-         return (int) Math.sqrt(tmpSumOfRho);
-    }
-    /**
-     * Method that calculates the distance of the second rho value by iterating the components of the vectors with a
-     * for loop. Then each component is subtracted and squared. Finally, the square root is taken.
-     */
-    private int getSecondRhoCompetition(double[] tmpInputVector, double[] tmpRow) {
-        if (tmpInputVector != tmpRow) {
-            throw new IllegalArgumentException("The vectors need to have the same dimension!");
-        }
-        double tmpSumOfRhoForExistingClusters = 0.0;
-        for (int i = 0; i < this.numberOfComponents; i++) {
-            double tmpRhoForExistingClusters = tmpRow[i] - tmpInputVector[i];
-            tmpSumOfRhoForExistingClusters += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
-        }
-        //square root of the sum of Rho for existing clusters.
-        return (int) Math.sqrt(tmpSumOfRhoForExistingClusters);
-    }
-    //
-    /**
      * At the end of each epoch, it is checked whether the system has converged or not. If the system has not
      * converged, a new epoch is performed, otherwise the clustering is completed successfully.
      * The system is considered converged if the cluster vectors of the current epoch and the previous epoch
@@ -424,28 +394,29 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
                         //sum of scaling factor and non normalized components!
                         tmpRho = 0.0;
-                        for (int i = 0; i < this.numberOfComponents; i++){
-                            double tmpDifferenceOfScalingFactorAndInput = this.scalingFactor - tmpInputVector[i];
+                        double tmpDifferenceOfScalingFactorAndInput;
+                        for (int tmpInputVectorComponent = 0; tmpInputVectorComponent < this.numberOfComponents; tmpInputVectorComponent++){
+                            tmpDifferenceOfScalingFactorAndInput = this.scalingFactor - tmpInputVector[tmpInputVectorComponent];
                             tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
                         }
                         tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
                         boolean tmpIsMatchingClusterAvailable = true;
-                        //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps."
-                        //</editor-fold>
                         //<editor-fold desc="Calculate first rho value."
-                         // sum of (scaling factor-components)^2
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
+
                         for(int tmpCurrentClusterMatrixRowIndex = 0; tmpCurrentClusterMatrixRowIndex < tmpNumberOfDetectedClusters;
                             tmpCurrentClusterMatrixRowIndex++) {
-                            double[] tmpRow; //sum of(tmpRow-tmpInputVector)^2
-                            double tmpRhoForExistingClusters = 0.0;
+                            double[] tmpRow;
+                            double tmpRhoForExistingClusters;
+                            double tmpRhoForExistingClustersSquared = 0.0;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRowIndex];
                             for(int tmpElementsInRowIndex = 0; tmpElementsInRowIndex < this.numberOfComponents; tmpElementsInRowIndex++) {
-                                tmpRhoForExistingClusters += tmpInputVector[tmpElementsInRowIndex] * tmpRow[tmpElementsInRowIndex];
+                                tmpRhoForExistingClusters = tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex];
+                                tmpRhoForExistingClustersSquared += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
                             }
-                            if(tmpRhoForExistingClusters > tmpRho) {
-                                tmpRho = tmpRhoForExistingClusters;
+                            if(tmpRhoForExistingClustersSquared > tmpRho) {
+                                tmpRho = tmpRhoForExistingClustersSquared;
                                 tmpWinnerClusterIndex = tmpCurrentClusterMatrixRowIndex;
                                 tmpIsMatchingClusterAvailable = false;
                             }
@@ -473,11 +444,11 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                                 }
                             }
                             //<editor-fold desc="Modification of the winner cluster vector."
-                            double tmpFactor2 = 1.0 - this.learningParameter;
+                            double tmpFactor = 1.0 - this.learningParameter;
                             for(int tmpAdaptedComponentsIndex = 0; tmpAdaptedComponentsIndex < this.numberOfComponents;
                                 tmpAdaptedComponentsIndex++) {
                                 tmpInputVector[tmpAdaptedComponentsIndex] =
-                                        tmpInputVector[tmpAdaptedComponentsIndex] * this.learningParameter + tmpFactor2 *
+                                        tmpInputVector[tmpAdaptedComponentsIndex] * this.learningParameter + tmpFactor *
                                                 this.clusterMatrix[tmpWinnerClusterIndex][tmpAdaptedComponentsIndex];
                             }
                             this.clusterMatrix[tmpWinnerClusterIndex] = tmpInputVector;
