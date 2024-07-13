@@ -162,7 +162,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         if(aVigilanceParameter < 0.0 ) {
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0.");
         }
-        if(aRequiredSimilarity < 0.0) { //größer null
+        if(aRequiredSimilarity < 0.0 || aRequiredSimilarity > 1.0) {
             throw new IllegalArgumentException("The required similarity parameter must be greater than 0.");
         }
         if(aLearningParameter < 0.0 || aLearningParameter > 1.0) {
@@ -236,17 +236,23 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
             // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
             tmpIsConverged = true;
-            double tmpScalarProductOfClassVector;
+            double tmpDistanceOfClassVector = 0.0;
+            double tmpMaxDistanceOfClassVector = 0.0;
+            double tmpSumOfClassVector = 0.0;
             double[] tmpCurrentRowInClusterMatrix;
             double[] tmpPreviousEpochRow;
             for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpScalarProductOfClassVector = 0.0;
                 tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
                 tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
                 for (int j = 0; j < this.numberOfComponents; j++) {
-                    tmpScalarProductOfClassVector += tmpCurrentRowInClusterMatrix[j] * tmpPreviousEpochRow[j];
+                    tmpSumOfClassVector += tmpCurrentRowInClusterMatrix[j] - tmpPreviousEpochRow[j];
+                    tmpDistanceOfClassVector += tmpSumOfClassVector * tmpSumOfClassVector;
                 }
-                if (tmpScalarProductOfClassVector < this.requiredSimilarity) {
+                if (tmpDistanceOfClassVector > tmpMaxDistanceOfClassVector) {
+                    tmpDistanceOfClassVector = tmpMaxDistanceOfClassVector;
+                }
+                // Normalization of the Maximum Distance.
+                if (tmpDistanceOfClassVector < this.requiredSimilarity) {
                     tmpIsConverged = false;
                     break;
                 }
