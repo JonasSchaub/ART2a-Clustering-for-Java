@@ -238,21 +238,36 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             tmpIsConverged = true;
             double tmpDistanceOfClassVector = 0.0;
             double tmpMaxDistanceOfClassVector = 0.0;
-            double tmpSumOfClassVector = 0.0;
+            double tmpSumOfClassVector;
             double[] tmpCurrentRowInClusterMatrix;
             double[] tmpPreviousEpochRow;
+            // Finding the Maximum Distance.
             for (int i = 0; i < aNumberOfDetectedClasses; i++) {
                 tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
                 tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
                 for (int j = 0; j < this.numberOfComponents; j++) {
-                    tmpSumOfClassVector += tmpCurrentRowInClusterMatrix[j] - tmpPreviousEpochRow[j];
+                    tmpSumOfClassVector = tmpCurrentRowInClusterMatrix[j] - tmpPreviousEpochRow[j];
                     tmpDistanceOfClassVector += tmpSumOfClassVector * tmpSumOfClassVector;
                 }
                 if (tmpDistanceOfClassVector > tmpMaxDistanceOfClassVector) {
                     tmpDistanceOfClassVector = tmpMaxDistanceOfClassVector;
                 }
-                // Normalization of the Maximum Distance.
-                if (tmpDistanceOfClassVector < this.requiredSimilarity) {
+                // Scaling of the Maximum Distance.
+                double tmpSumOfCurrentRow = 0.0;
+                double tmpSumOfPreviousEpochRow = 0.0;
+                double tmpSquaredSumOfCurrentRow = 0.0;
+                double tmpSquaredSumOfPreviousEpochRow = 0.0;
+                double tmpNormalizationFactor = 0.0;
+                double tmpNormalizedDistance = 0.0;
+                for (int j = 0; j < this.numberOfComponents; j++){
+                    tmpSumOfCurrentRow += tmpCurrentRowInClusterMatrix[j] + tmpCurrentRowInClusterMatrix[j];
+                    tmpSumOfPreviousEpochRow += tmpPreviousEpochRow[j] + tmpPreviousEpochRow[j];
+                    tmpSquaredSumOfCurrentRow += tmpSumOfCurrentRow * tmpSumOfCurrentRow;
+                    tmpSquaredSumOfPreviousEpochRow += tmpSumOfPreviousEpochRow * tmpSumOfPreviousEpochRow;
+                    tmpNormalizationFactor += tmpSquaredSumOfCurrentRow * tmpSquaredSumOfPreviousEpochRow;
+                    tmpNormalizedDistance = tmpDistanceOfClassVector / tmpNormalizationFactor;
+                }
+                if (tmpNormalizedDistance < this.requiredSimilarity) {
                     tmpIsConverged = false;
                     break;
                 }
