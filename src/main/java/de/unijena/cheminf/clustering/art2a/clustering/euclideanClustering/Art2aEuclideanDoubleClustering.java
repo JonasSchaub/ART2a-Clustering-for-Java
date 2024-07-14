@@ -264,7 +264,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                     tmpSumOfPreviousEpochRow += tmpPreviousEpochRow[j] + tmpPreviousEpochRow[j];
                     tmpSquaredSumOfCurrentRow += tmpSumOfCurrentRow * tmpSumOfCurrentRow;
                     tmpSquaredSumOfPreviousEpochRow += tmpSumOfPreviousEpochRow * tmpSumOfPreviousEpochRow;
-                    tmpNormalizationFactor += tmpSquaredSumOfCurrentRow * tmpSquaredSumOfPreviousEpochRow;
+                    tmpNormalizationFactor += tmpSquaredSumOfCurrentRow + tmpSquaredSumOfPreviousEpochRow;
                     tmpNormalizedDistance = tmpDistanceOfClassVector / tmpNormalizationFactor;
                 }
                 if (tmpNormalizedDistance < this.requiredSimilarity) {
