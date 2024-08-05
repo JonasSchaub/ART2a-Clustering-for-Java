@@ -26,10 +26,11 @@
 package de.unijena.cheminf.clustering.art2a.clustering.euclideanClustering;
 
 import de.unijena.cheminf.clustering.art2a.exceptions.ConvergenceFailedException;
-import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClustering;
-import de.unijena.cheminf.clustering.art2a.interfaces.IArt2aClusteringResult;
-import de.unijena.cheminf.clustering.art2a.results.Art2aDoubleClusteringResult;
+import de.unijena.cheminf.clustering.art2a.interfaces.euclideanClusteringInterfaces.IArt2aEuclideanClustering;
+import de.unijena.cheminf.clustering.art2a.interfaces.euclideanClusteringInterfaces.IArt2aEuclideanClusteringResult;
+import de.unijena.cheminf.clustering.art2a.results.euclideanClusteringResult.Art2aEuclideanDoubleClusteringResult;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
@@ -39,14 +40,13 @@ import java.util.logging.Logger;
  * machine precision. The clustering is done by comparing the Euclidean distances of the input vectors
  * and allows a fast, stable and unsupervised clustering for open categorical problems.
  * This class intends the clustering of fingerprints.
- *
  * Literature:
  * D. Wienke,"Neural resonance and adaption. Towards nature's principles in artificial pattern recognition",1993
  *
  * @author Zeynep Dagtekin
  * @version 1.0.0.0
  */
-public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
+public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering {
     //<editor-fold desc="Private class variables" defaultstate="collapsed">
     /**
      * Matrix with all fingerprints to be clustered.
@@ -94,7 +94,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     /**
      * Number of fingerprints to be clustered.
      */
-    public int numberOfInputVectors;
+    private final int numberOfInputVectors;
     /**
      * Dimensionality of the fingerprint.
      */
@@ -151,8 +151,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     public Art2aEuclideanDoubleClustering(double[][] aDataMatrix, int aMaximumNumberOfEpochs, double aVigilanceParameter,
                                  double aRequiredSimilarity, double aLearningParameter)
             throws IllegalArgumentException, NullPointerException {
-        // initialization of the network:
-        // Step 1
         if(aDataMatrix == null) {
             throw new NullPointerException("aDataMatrix is null.");
         }
@@ -163,7 +161,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             throw new IllegalArgumentException("The vigilance parameter must be greater than 0.");
         }
         if(aRequiredSimilarity < 0.0 || aRequiredSimilarity > 1.0) {
-            throw new IllegalArgumentException("The required similarity parameter must be greater than 0.");
+            throw new IllegalArgumentException("The required similarity parameter must be between 0 and 1.");
         }
         if(aLearningParameter < 0.0 || aLearningParameter > 1.0) {
             throw new IllegalArgumentException("The learning parameter must be greater than 0 and smaller than 1.");
@@ -177,10 +175,13 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         this.numberOfComponents = this.dataMatrix[0].length;
         this.scalingFactor = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
         this.thresholdForContrastEnhancement = 1.0 / Math.sqrt(this.numberOfComponents + 1.0);
+        System.out.println("Data matrix initialized with " + this.numberOfInputVectors + " input vectors.");
+        System.out.println("Initial cluster matrix: " + Arrays.deepToString(this.clusterMatrix));
+
     }
     //</editor-fold>
     //
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+      // <editor-fold defaultstate="collapsed" desc="Private methods">
     /**
      * The input data matrix with the input vectors/fingerprints is checked for correctness.
      * Accordingly, the input matrix must not contain any vectors that consist of components smaller than 0.
@@ -213,6 +214,9 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                 throw new IllegalArgumentException("All vectors are null vectors. Clustering not possible.");
             }
         }
+        System.out.println("Data Matrix: " + Arrays.deepToString(aDataMatrix));
+        System.out.println("Number of vectors: " + aDataMatrix.length);
+        System.out.println("Vector dimensions: " + tmpNumberOfVectorComponents);
         return aDataMatrix;
     }
     //
@@ -236,53 +240,65 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
         if(aConvergenceEpoch < this.maximumNumberOfEpochs) {
             // Check convergence by evaluating the similarity of the cluster vectors of this and the previous epoch.
             tmpIsConverged = true;
-            double tmpDistanceOfClassVector = 0.0;
-            double tmpMaxDistanceOfClassVector = 0.0;
+            double tmpDistanceOfClassVector;
+            double tmpSpacialShift;
+            double tmpSumOfRowComponents;
             double tmpSumOfClassVector;
             double[] tmpCurrentRowInClusterMatrix;
+            double[] tmpPreviousEpochOtherRow;
             double[] tmpPreviousEpochRow;
+            double[] tmpEuclideanDistanceArray = new double[aNumberOfDetectedClasses];
             // Finding the Maximum Distance.
             for (int i = 0; i < aNumberOfDetectedClasses; i++) {
-                tmpCurrentRowInClusterMatrix = this.clusterMatrix[i];
-                tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
-                for (int j = 0; j < this.numberOfComponents; j++) {
-                    tmpSumOfClassVector = tmpCurrentRowInClusterMatrix[j] - tmpPreviousEpochRow[j];
-                    tmpDistanceOfClassVector += tmpSumOfClassVector * tmpSumOfClassVector;
+                for (int j = i + 1; j < aNumberOfDetectedClasses; j++) {
+                    tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[i];
+                    tmpPreviousEpochOtherRow = this.clusterMatrixPreviousEpoch[j];
+                    tmpDistanceOfClassVector = 0.0;
+                    for (int tmpComponentsOfEpochRow = 0; tmpComponentsOfEpochRow < this.numberOfComponents; tmpComponentsOfEpochRow++) {
+                        tmpSumOfClassVector = tmpPreviousEpochRow[tmpComponentsOfEpochRow] - tmpPreviousEpochOtherRow[tmpComponentsOfEpochRow];
+                        tmpDistanceOfClassVector += tmpSumOfClassVector * tmpSumOfClassVector;
+                        //tmpEuclideanDistanceArray[tmpComponentsOfEpochRow] = tmpDistanceOfClassVector;
+                    }
+                    tmpEuclideanDistanceArray[j] = tmpDistanceOfClassVector;
                 }
-                if (tmpDistanceOfClassVector > tmpMaxDistanceOfClassVector) {
-                    tmpDistanceOfClassVector = tmpMaxDistanceOfClassVector;
+                int tmpGreatestDistanceIndex = 0;
+                for (int tmpPossibleMaxDistance = 0; tmpPossibleMaxDistance < tmpEuclideanDistanceArray.length; tmpPossibleMaxDistance++) {
+                    if (tmpEuclideanDistanceArray[tmpPossibleMaxDistance] > tmpEuclideanDistanceArray[tmpGreatestDistanceIndex]) {
+                        tmpGreatestDistanceIndex = tmpPossibleMaxDistance;//max distance 100% dissimilarity, therefore min distance 0% dissimilarity
+                    }
                 }
-                // Scaling of the Maximum Distance.
-                double tmpSumOfCurrentRow = 0.0;
-                double tmpSumOfPreviousEpochRow = 0.0;
-                double tmpSquaredSumOfCurrentRow = 0.0;
-                double tmpSquaredSumOfPreviousEpochRow = 0.0;
-                double tmpNormalizationFactor = 0.0;
-                double tmpNormalizedDistance = 0.0;
-                for (int j = 0; j < this.numberOfComponents; j++){
-                    tmpSumOfCurrentRow += tmpCurrentRowInClusterMatrix[j] + tmpCurrentRowInClusterMatrix[j];
-                    tmpSumOfPreviousEpochRow += tmpPreviousEpochRow[j] + tmpPreviousEpochRow[j];
-                    tmpSquaredSumOfCurrentRow += tmpSumOfCurrentRow * tmpSumOfCurrentRow;
-                    tmpSquaredSumOfPreviousEpochRow += tmpSumOfPreviousEpochRow * tmpSumOfPreviousEpochRow;
-                    tmpNormalizationFactor += tmpSquaredSumOfCurrentRow + tmpSquaredSumOfPreviousEpochRow;
-                    tmpNormalizedDistance = tmpDistanceOfClassVector / tmpNormalizationFactor;
-                }
-                if (tmpNormalizedDistance < this.requiredSimilarity) {
-                    tmpIsConverged = false;
-                    break;
-                }
+                    //for instance if two cars are 60% distant, they are not similar, they have to be minimum 40% far away from each other
+                //Maximum distance that is allowed in order to converge
+                for (int tmpVectorRow = 0 ; tmpVectorRow < aNumberOfDetectedClasses; tmpVectorRow++ ) {
+                    tmpCurrentRowInClusterMatrix = this.clusterMatrix[tmpVectorRow];
+                    tmpPreviousEpochRow = this.clusterMatrixPreviousEpoch[tmpVectorRow];
+                    tmpSpacialShift = 0.0;
+                    for (int tmpVectorComponent = 0; tmpVectorComponent < this.numberOfComponents; tmpVectorComponent++) {
+                        tmpSumOfRowComponents = tmpPreviousEpochRow[tmpVectorComponent] - tmpCurrentRowInClusterMatrix[tmpVectorComponent];
+                        tmpSpacialShift += tmpSumOfRowComponents * tmpSumOfRowComponents;
+                    }
+                    double tmpThresholdOfConvergence = tmpGreatestDistanceIndex * this.requiredSimilarity;
+                    if (tmpSpacialShift > tmpThresholdOfConvergence) {
+                        tmpIsConverged = false;
+                        break;
+                        }
+                    }
             }
             if(!tmpIsConverged) {
                 for(int tmpCurrentClusterMatrixVector = 0; tmpCurrentClusterMatrixVector < this.clusterMatrix.length;
                     tmpCurrentClusterMatrixVector++) {
                     tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixVector];
-                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = tmpRow;
+                    this.clusterMatrixPreviousEpoch[tmpCurrentClusterMatrixVector] = Arrays.copyOf(tmpRow, tmpRow.length);
                 }
             }
         } else {
             throw new ConvergenceFailedException(String.format("Convergence failed for vigilance parameter: %2f"
                     ,this.vigilanceParameter));
         }
+        System.out.println("Epoch: " + aConvergenceEpoch + ", Converged: " + tmpIsConverged);
+        System.out.println("Checking convergence for epoch: " + aConvergenceEpoch);
+        System.out.println("Current cluster matrix: " + Arrays.deepToString(this.clusterMatrix));
+        System.out.println("Previous epoch cluster matrix: " + Arrays.deepToString(this.clusterMatrixPreviousEpoch));
         return tmpIsConverged;
     }
     //</editor-fold>
@@ -295,6 +311,8 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
     public void initializeMatrices() {
         this.clusterMatrix = new double[this.numberOfInputVectors][this.numberOfComponents];
         this.clusterMatrixPreviousEpoch = new double[this.numberOfInputVectors][this.numberOfComponents];
+        System.out.println("Matrix initialzed.");
+        System.out.println("Initial cluster matrix: " + Arrays.deepToString(this.clusterMatrix));
     }
     //
     /**
@@ -323,6 +341,8 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                     tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex2];
             tmpSampleVectorIndicesInRandomOrder[tmpRandomIndex2] = tmpBuffer;
         }
+        System.out.println("Input vectors randomized.");
+        System.out.println("Randomized vector indices: " + Arrays.toString(tmpSampleVectorIndicesInRandomOrder));
         return tmpSampleVectorIndicesInRandomOrder;
     }
     //
@@ -331,7 +351,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
      * Starts the clustering in double machine precision.
      */
     @Override
-    public IArt2aClusteringResult getClusterResult(boolean anIsClusteringResultExported, int aSeedValue) throws ConvergenceFailedException {
+    public IArt2aEuclideanClusteringResult getClusterResult(boolean anIsClusteringResultExported, int aSeedValue) throws ConvergenceFailedException {
         //<editor-fold desc="Initialization steps for writing the clustering results in text files if aAddResultLog == true" defaultstate="collapsed">
         this.clusteringProcess = null;
         this.clusteringResult = null;
@@ -363,12 +383,14 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                 tmpClusterMatrixRow[tmpCurrentVectorComponentsInClusterMatrixIndex] = tmpInitialClusterVectorWeightValue;
                 tmpClusterMatrixRowOld[tmpCurrentVectorComponentsInClusterMatrixIndex] = tmpInitialClusterVectorWeightValue;
             }
+            System.out.println("Cluster matrix after initialization: " + Arrays.deepToString(this.clusterMatrix));
         }
         //</editor-fold>
         //<editor-fold desc="Clustering results in text files set up." defaultstate="collapsed">
         int tmpCurrentNumberOfEpochs = 0;
         if(anIsClusteringResultExported) {
             this.clusteringResult.add(String.format("Vigilance parameter: %2f",this.vigilanceParameter));
+            System.out.println("Vigilance parameter: %2f"+this.vigilanceParameter);
         }
         //</editor-fold>
         //<editor-fold desc="Start clustering process." defaultstate="collapsed">
@@ -378,15 +400,33 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                 this.clusteringProcess.add(String.format("Art-2a clustering result for vigilance parameter: %2f",this.vigilanceParameter));
                 this.clusteringProcess.add(String.format("Number of epochs: %d",tmpCurrentNumberOfEpochs));
                 this.clusteringProcess.add("");
+                System.out.println("Art-2a clustering result for vigilance parameter: %2f" + this.vigilanceParameter);
             }
             int[] tmpSampleVectorIndicesInRandomOrder = this.getRandomizeVectorIndices();
             //</editor-fold>
             //<editor-fold desc="Check current input vector for null vector." defaultstate="collapsed">
             for(int tmpCurrentInput = 0; tmpCurrentInput < this.numberOfInputVectors; tmpCurrentInput++) {
                 double[] tmpInputVector = new double[this.numberOfComponents];
+                boolean tmpIsNullVector = true;
+                for(int tmpCurrentInputVectorComponentsIndex = 0; tmpCurrentInputVectorComponentsIndex < this.numberOfComponents;
+                    tmpCurrentInputVectorComponentsIndex++ ) {
+                    tmpInputVector[tmpCurrentInputVectorComponentsIndex] =
+                            this.dataMatrix[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]][tmpCurrentInputVectorComponentsIndex];
+                    if(tmpInputVector[tmpCurrentInputVectorComponentsIndex] !=0.0) {
+                        tmpIsNullVector = false;
+                    }
+                }
                 if(anIsClusteringResultExported) {
                     this.clusteringProcess.add(String.format("Input: %d / Vector %d", tmpCurrentInput,
                             tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]));
+                    System.out.println("Input: %d / Vector %d" + tmpCurrentInput +
+                            tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]);
+                }
+                if(tmpIsNullVector) {
+                    tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] = -1;
+                    if(anIsClusteringResultExported) {
+                        this.clusteringProcess.add("This input is a null vector");
+                    }
                 }
                 //</editor-fold>
                 else {
@@ -398,6 +438,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                             tmpInputVector[tmpManipulateComponentsIndex] = 0.0;
                         }
                     }
+                    LOGGER.info("Input vector after contrast enhancement: ");
                     //</editor-fold>
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
                     if(tmpNumberOfDetectedClusters == 0) {
@@ -408,6 +449,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                         if(anIsClusteringResultExported) {
                             this.clusteringProcess.add("Cluster number: 0");
                             this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
+                            System.out.println("Cluster number: 0");
                         }
                     }
                     //</editor-fold>
@@ -415,32 +457,43 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
                         //sum of scaling factor and non normalized components!
                         tmpRho = 0.0;
-                        double tmpDifferenceOfScalingFactorAndInput;
-                        for (int tmpInputVectorComponent = 0; tmpInputVectorComponent < this.numberOfComponents; tmpInputVectorComponent++){
+                        double tmpDifferenceOfScalingFactorAndInput = 0.0;
+                        for (int tmpInputVectorComponent = 0; tmpInputVectorComponent < this.numberOfComponents; tmpInputVectorComponent++ ){
                             tmpDifferenceOfScalingFactorAndInput = this.scalingFactor - tmpInputVector[tmpInputVectorComponent];
                             tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
+                            System.out.println("Debug: Inside loop, tmpRho = " + tmpRho);
                         }
                         tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
                         boolean tmpIsMatchingClusterAvailable = true;
                         //<editor-fold desc="Calculate first rho value."
+                        //tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
+                        System.out.println("Calculated tmpRho: " + tmpRho);
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
-
-                        for(int tmpCurrentClusterMatrixRowIndex = 0; tmpCurrentClusterMatrixRowIndex < tmpNumberOfDetectedClusters;
-                            tmpCurrentClusterMatrixRowIndex++) {
+                        for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters;
+                            tmpCurrentClusterMatrixRow++) {
                             double[] tmpRow;
-                            double tmpRhoForExistingClusters;
                             double tmpRhoForExistingClustersSquared = 0.0;
-                            tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRowIndex];
+                            double tmpDistance = 0.0;
+                            tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
                             for(int tmpElementsInRowIndex = 0; tmpElementsInRowIndex < this.numberOfComponents; tmpElementsInRowIndex++) {
-                                tmpRhoForExistingClusters = tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex];
-                                tmpRhoForExistingClustersSquared += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
+                                double tmpRhoForExistingClusters = tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex];
+                                double tmpDifferenceSquared = Math.pow(tmpRhoForExistingClusters, 2);
+                                tmpRhoForExistingClustersSquared += tmpDifferenceSquared;
+                                //tmpRhoForExistingClustersSquared += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
+                                //tmpDistance += Math.pow(tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex], 2);
+                                System.out.println("index: " + tmpElementsInRowIndex + ", tmpRow[tmpElementsInRowIndex]: " + tmpRow[tmpElementsInRowIndex] + ", tmpInputVector[tmpElementsInRowIndex]: " +tmpInputVector[tmpElementsInRowIndex] + ": tmpRhoForExistingClusters = " + tmpRhoForExistingClusters +
+                                        ", tmpDifferenceSquared = " + tmpDifferenceSquared + ", tmpRhoForExistingClustersSquared = " +tmpRhoForExistingClustersSquared);
                             }
+                            System.out.println("Calculated tmpRhoForExistingClustersSquared for cluster " + tmpCurrentClusterMatrixRow + ": " + tmpRhoForExistingClustersSquared);
                             if(tmpRhoForExistingClustersSquared > tmpRho) {
                                 tmpRho = tmpRhoForExistingClustersSquared;
-                                tmpWinnerClusterIndex = tmpCurrentClusterMatrixRowIndex;
+                                tmpWinnerClusterIndex = tmpCurrentClusterMatrixRow;
                                 tmpIsMatchingClusterAvailable = false;
+                                System.out.println("Debug: Updated tmpRho = " + tmpRho + ", tmpWinnerClusterIndex = " + tmpWinnerClusterIndex);
                             }
+                            LOGGER.info("Calculated tmpRho: " + tmpRho);
+                            LOGGER.info("Calculated tmpRhoForExistingClustersSquared for cluster " + tmpCurrentClusterMatrixRow + ": " + tmpRhoForExistingClustersSquared);
                         }
                         //</editor-fold>
                         //<editor-fold desc="Deciding whether the input fits into an existing cluster or whether a new cluster must be formed."
@@ -454,6 +507,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                             if(anIsClusteringResultExported) {
                                 this.clusteringProcess.add(String.format("Cluster number: %d",(tmpNumberOfDetectedClusters - 1)));
                                 this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
+                                System.out.println("Cluster number: %d" + (tmpNumberOfDetectedClusters - 1));
                             }
                         }
                         //</editor-fold>
@@ -469,15 +523,18 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
                             for(int tmpAdaptedComponentsIndex = 0; tmpAdaptedComponentsIndex < this.numberOfComponents;
                                 tmpAdaptedComponentsIndex++) {
                                 tmpInputVector[tmpAdaptedComponentsIndex] =
-                                        tmpInputVector[tmpAdaptedComponentsIndex] * this.learningParameter + tmpFactor *
-                                                this.clusterMatrix[tmpWinnerClusterIndex][tmpAdaptedComponentsIndex];
+                                        (tmpInputVector[tmpAdaptedComponentsIndex] * this.learningParameter) + (tmpFactor *
+                                                this.clusterMatrix[tmpWinnerClusterIndex][tmpAdaptedComponentsIndex]);
                             }
                             this.clusterMatrix[tmpWinnerClusterIndex] = tmpInputVector;
+                            System.out.println("Cluster matrix after updating existing cluster: " + Arrays.deepToString(this.clusterMatrix));
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =
                                     tmpWinnerClusterIndex;
+                            System.out.println("Updated cluster occupation: " + Arrays.toString(tmpClusterOccupation));
                             if(anIsClusteringResultExported) {
                                 clusteringProcess.add(String.format("Cluster number: %d",tmpWinnerClusterIndex));
                                 clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
+                                System.out.println("Cluster number: %d" + tmpWinnerClusterIndex);
                             }
                             //</editor-fold>
                         }
@@ -495,6 +552,8 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             if(anIsClusteringResultExported) {
                 clusteringProcess.add(String.format("Convergence status: %b",tmpIsSystemConverged));
                 clusteringProcess.add("---------------------------------------");
+                System.out.println("Convergence status: %b"+tmpIsSystemConverged);
+
             }
             //</editor-fold>
         }
@@ -505,14 +564,16 @@ public class Art2aEuclideanDoubleClustering implements IArt2aClustering {
             this.clusteringResult.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
             this.clusteringResult.add(String.format("Convergence status: %b",tmpIsSystemConverged));
             this.clusteringResult.add("---------------------------------------");
+            System.out.println("Number of epochs: %d" + tmpCurrentNumberOfEpochs);
+            System.out.println("Number of detected clusters: %d"+tmpNumberOfDetectedClusters);
         }
         //</editor-fold>
         //<editor-fold desc="Return object"
         if(!anIsClusteringResultExported) {
-            return new Art2aDoubleClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs,
+            return new Art2aEuclideanDoubleClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs,
                     tmpNumberOfDetectedClusters, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix);
         } else {
-            return new Art2aDoubleClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs,
+            return new Art2aEuclideanDoubleClusteringResult(this.vigilanceParameter, tmpCurrentNumberOfEpochs,
                     tmpNumberOfDetectedClusters, tmpClusterOccupation, this.clusterMatrix, this.dataMatrix,
                     this.clusteringProcess, this.clusteringResult);
         }
