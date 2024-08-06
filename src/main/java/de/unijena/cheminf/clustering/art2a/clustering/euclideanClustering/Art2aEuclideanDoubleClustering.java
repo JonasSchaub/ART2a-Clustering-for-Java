@@ -383,7 +383,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                 tmpClusterMatrixRow[tmpCurrentVectorComponentsInClusterMatrixIndex] = tmpInitialClusterVectorWeightValue;
                 tmpClusterMatrixRowOld[tmpCurrentVectorComponentsInClusterMatrixIndex] = tmpInitialClusterVectorWeightValue;
             }
-            System.out.println("Cluster matrix after initialization: " + Arrays.deepToString(this.clusterMatrix));
         }
         //</editor-fold>
         //<editor-fold desc="Clustering results in text files set up." defaultstate="collapsed">
@@ -416,6 +415,7 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                         tmpIsNullVector = false;
                     }
                 }
+                System.out.println("test input vector: " + Arrays.toString(tmpInputVector));
                 if(anIsClusteringResultExported) {
                     this.clusteringProcess.add(String.format("Input: %d / Vector %d", tmpCurrentInput,
                             tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]));
@@ -438,7 +438,6 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                             tmpInputVector[tmpManipulateComponentsIndex] = 0.0;
                         }
                     }
-                    LOGGER.info("Input vector after contrast enhancement: ");
                     //</editor-fold>
                     //<editor-fold desc="First pass, no clusters available, so the first cluster is created." defaultstate="collapsed">
                     if(tmpNumberOfDetectedClusters == 0) {
@@ -451,49 +450,46 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                             this.clusteringProcess.add(String.format("Number of detected clusters: %d",tmpNumberOfDetectedClusters));
                             System.out.println("Cluster number: 0");
                         }
+                        System.out.println("first cluster number: " + tmpNumberOfDetectedClusters);
                     }
                     //</editor-fold>
                     else {
+                        tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
+                        boolean tmpIsMatchingClusterAvailable = true;
                         //<editor-fold desc="Cluster number is greater than or equal to 1, so a rho winner is determined as shown in the following steps." defaultstate="collapsed">
                         //sum of scaling factor and non normalized components!
                         tmpRho = 0.0;
                         double tmpDifferenceOfScalingFactorAndInput = 0.0;
-                        for (int tmpInputVectorComponent = 0; tmpInputVectorComponent < this.numberOfComponents; tmpInputVectorComponent++ ){
+                        for (int tmpInputVectorComponent = 0; tmpInputVectorComponent < this.numberOfComponents; tmpInputVectorComponent++) {
                             tmpDifferenceOfScalingFactorAndInput = this.scalingFactor - tmpInputVector[tmpInputVectorComponent];
                             tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
-                            System.out.println("Debug: Inside loop, tmpRho = " + tmpRho);
                         }
-                        tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
-                        boolean tmpIsMatchingClusterAvailable = true;
+                        //tmpWinnerClusterIndex = tmpNumberOfDetectedClusters;
+                        //boolean tmpIsMatchingClusterAvailable = true;
                         //<editor-fold desc="Calculate first rho value."
                         //tmpRho += tmpDifferenceOfScalingFactorAndInput * tmpDifferenceOfScalingFactorAndInput;
-                        System.out.println("Calculated tmpRho: " + tmpRho);
                         //</editor-fold>
                         //<editor-fold desc="Calculation of the 2nd rho value and comparison of the two rho values to determine the rho winner."
-                        for(int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters;
-                            tmpCurrentClusterMatrixRow++) {
+                        for (int tmpCurrentClusterMatrixRow = 0; tmpCurrentClusterMatrixRow < tmpNumberOfDetectedClusters;
+                             tmpCurrentClusterMatrixRow++) {
                             double[] tmpRow;
                             double tmpRhoForExistingClustersSquared = 0.0;
                             double tmpDistance = 0.0;
                             tmpRow = this.clusterMatrix[tmpCurrentClusterMatrixRow];
-                            for(int tmpElementsInRowIndex = 0; tmpElementsInRowIndex < this.numberOfComponents; tmpElementsInRowIndex++) {
+                            for (int tmpElementsInRowIndex = 0; tmpElementsInRowIndex < this.numberOfComponents; tmpElementsInRowIndex++) {
                                 double tmpRhoForExistingClusters = tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex];
                                 double tmpDifferenceSquared = Math.pow(tmpRhoForExistingClusters, 2);
                                 tmpRhoForExistingClustersSquared += tmpDifferenceSquared;
                                 //tmpRhoForExistingClustersSquared += tmpRhoForExistingClusters * tmpRhoForExistingClusters;
                                 //tmpDistance += Math.pow(tmpInputVector[tmpElementsInRowIndex] - tmpRow[tmpElementsInRowIndex], 2);
-                                System.out.println("index: " + tmpElementsInRowIndex + ", tmpRow[tmpElementsInRowIndex]: " + tmpRow[tmpElementsInRowIndex] + ", tmpInputVector[tmpElementsInRowIndex]: " +tmpInputVector[tmpElementsInRowIndex] + ": tmpRhoForExistingClusters = " + tmpRhoForExistingClusters +
-                                        ", tmpDifferenceSquared = " + tmpDifferenceSquared + ", tmpRhoForExistingClustersSquared = " +tmpRhoForExistingClustersSquared);
                             }
-                            System.out.println("Calculated tmpRhoForExistingClustersSquared for cluster " + tmpCurrentClusterMatrixRow + ": " + tmpRhoForExistingClustersSquared);
-                            if(tmpRhoForExistingClustersSquared > tmpRho) {
+                            if (tmpRhoForExistingClustersSquared > tmpRho) {
                                 tmpRho = tmpRhoForExistingClustersSquared;
                                 tmpWinnerClusterIndex = tmpCurrentClusterMatrixRow;
                                 tmpIsMatchingClusterAvailable = false;
                                 System.out.println("Debug: Updated tmpRho = " + tmpRho + ", tmpWinnerClusterIndex = " + tmpWinnerClusterIndex);
+                                System.out.println("right if loop?: ");
                             }
-                            LOGGER.info("Calculated tmpRho: " + tmpRho);
-                            LOGGER.info("Calculated tmpRhoForExistingClustersSquared for cluster " + tmpCurrentClusterMatrixRow + ": " + tmpRhoForExistingClustersSquared);
                         }
                         //</editor-fold>
                         //<editor-fold desc="Deciding whether the input fits into an existing cluster or whether a new cluster must be formed."
@@ -503,6 +499,9 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                             tmpNumberOfDetectedClusters++;
                             tmpClusterOccupation[tmpSampleVectorIndicesInRandomOrder[tmpCurrentInput]] =
                                     tmpNumberOfDetectedClusters - 1;
+                            System.out.println("cluster matrix size. " + this.clusterMatrix.length);
+                            System.out.println(" number of detected clusters: " + Arrays.toString(this.clusterMatrix[4]));
+                            System.out.println( " number of new detected clusters: " + tmpNumberOfDetectedClusters);
                             this.clusterMatrix[tmpNumberOfDetectedClusters - 1] = tmpInputVector;
                             if(anIsClusteringResultExported) {
                                 this.clusteringProcess.add(String.format("Cluster number: %d",(tmpNumberOfDetectedClusters - 1)));
