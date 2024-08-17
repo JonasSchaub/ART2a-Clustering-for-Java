@@ -272,8 +272,8 @@ public class Art2aEuclideanDoubleClustering implements IArt2aEuclideanClustering
                         tmpSpatialShift += tmpSumOfRowComponents * tmpSumOfRowComponents;
                     }
                 }
-                double tmpThresholdForConvergence = tmpGreatestDistanceIndex * this.requiredSimilarity;
-                if (tmpSpatialShift > tmpThresholdForConvergence) {
+                double tmpThresholdForConvergence = tmpEuclideanDistanceArray[tmpGreatestDistanceIndex]* this.requiredSimilarity;
+                if (tmpSpatialShift < tmpThresholdForConvergence) {
                     tmpIsConverged = false;
                     break;
                 }

@@ -88,9 +88,9 @@ class Art2aEuclideanDoubleClusteringTest {
     @Test
     void TestInstance() throws ConvergenceFailedException {
         double[][] tmpTestDataMatrix = FileUtil.importDoubleDataMatrixFromTextFile(
-                "src/test/resources/de/unijena/cheminf/clustering/art2a/Bit_Fingerprints.txt", ',');
+                "src/test/resources/de/unijena/cheminf/clustering/art2a/Count_Fingerprints.txt", ',');
         Art2aEuclideanDoubleClustering tmpInstance = new Art2aEuclideanDoubleClustering(tmpTestDataMatrix, 20,
-                5, 0.99,0.1);
+                3, 0.8,0.1);
         tmpInstance.getClusterResult(true, 2 );
 
     }
