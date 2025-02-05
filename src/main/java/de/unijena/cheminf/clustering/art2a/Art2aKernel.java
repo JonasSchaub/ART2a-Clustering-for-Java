@@ -1057,7 +1057,7 @@ public class Art2aKernel {
      * <br>
      * Note: aDataMatrix could be set to null after this operation to release  
      * its memory.
-
+     * 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
      * with Art2aKernel.isDataMatrixValid() in advance)
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
@@ -1107,7 +1107,7 @@ public class Art2aKernel {
     /**
      * Creates ART-2a data object with preprocessed data for maximum speed  
      * of the clustering process. The ART-2a data object allocates about twice 
-     * the memory of aDataMatrix. A default value of 0.5 is used for the offset 
+     * the memory of aDataMatrix. A default value of 1.0 is used for the offset 
      * for contrast enhancement.
      * <br>
      * Note: aDataMatrix could be set to null after this operation to release  

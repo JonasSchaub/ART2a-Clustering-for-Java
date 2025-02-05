@@ -613,48 +613,6 @@ public class Art2aUtils {
         }
         return true;
     }
-
-    /**
-     * Removes empty clusters from cluster matrix
-     * 
-     * @param aClusterUsageFlags Flags for cluster usage. True: Cluster is used, 
-     * false: Cluster is empty and has to be removed (IS NOT CHANGED)
-     * @param aClusterMatrix Cluster matrix (MAY BE CHANGED)
-     * @param aNumberOfDetectedClusters Number of detected clusters
-     * @param aClusterRemovalInfo Cluster removal info (is set according to the 
-     * operations performed, IS CHANGED)
-     */
-    protected static void removeEmptyClusters(
-        boolean[] aClusterUsageFlags,
-        float[][] aClusterMatrix,
-        int aNumberOfDetectedClusters,
-        ClusterRemovalInfo aClusterRemovalInfo
-    ) {
-        boolean tmpIsEmptyClusterRemoval = false;
-        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
-            if (!aClusterUsageFlags[i]) {
-                tmpIsEmptyClusterRemoval = true;
-                break;
-            }
-        }
-        if (tmpIsEmptyClusterRemoval) {
-            // Remove empty clusters from cluster matrix
-            LinkedList<float[]> tmpClusterVectorList = new LinkedList<>();
-            for (int i = 0; i < aNumberOfDetectedClusters; i++) {
-                if (aClusterUsageFlags[i]) {
-                    tmpClusterVectorList.add(aClusterMatrix[i]);
-                    aClusterMatrix[i] = null;
-                }
-            }
-            int tmpIndex = 0;
-            for (float[] tmpClusterVector : tmpClusterVectorList) {
-                aClusterMatrix[tmpIndex++] = tmpClusterVector;
-            }
-            aClusterRemovalInfo.setClusterRemovalInfo(tmpIsEmptyClusterRemoval, tmpClusterVectorList.size());
-        } else {
-            aClusterRemovalInfo.setClusterRemovalInfo(tmpIsEmptyClusterRemoval, aNumberOfDetectedClusters);
-        }
-    }
     
     /**
      * Calculates contrast enhanced vector.
@@ -807,6 +765,71 @@ public class Art2aUtils {
     }
 
     /**
+     * Removes empty clusters from cluster matrix
+     * 
+     * @param aClusterUsageFlags Flags for cluster usage. True: Cluster is used, 
+     * false: Cluster is empty and has to be removed (IS NOT CHANGED)
+     * @param aClusterMatrix Cluster matrix (MAY BE CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aClusterRemovalInfo Cluster removal info (is set according to the 
+     * operations performed, IS CHANGED)
+     */
+    protected static void removeEmptyClusters(
+        boolean[] aClusterUsageFlags,
+        float[][] aClusterMatrix,
+        int aNumberOfDetectedClusters,
+        ClusterRemovalInfo aClusterRemovalInfo
+    ) {
+        boolean tmpIsEmptyClusterRemoval = false;
+        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+            if (!aClusterUsageFlags[i]) {
+                tmpIsEmptyClusterRemoval = true;
+                break;
+            }
+        }
+        if (tmpIsEmptyClusterRemoval) {
+            // Remove empty clusters from cluster matrix
+            LinkedList<float[]> tmpClusterVectorList = new LinkedList<>();
+            for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+                if (aClusterUsageFlags[i]) {
+                    tmpClusterVectorList.add(aClusterMatrix[i]);
+                    aClusterMatrix[i] = null;
+                }
+            }
+            int tmpIndex = 0;
+            for (float[] tmpClusterVector : tmpClusterVectorList) {
+                aClusterMatrix[tmpIndex++] = tmpClusterVector;
+            }
+            aClusterRemovalInfo.setClusterRemovalInfo(tmpIsEmptyClusterRemoval, tmpClusterVectorList.size());
+        } else {
+            aClusterRemovalInfo.setClusterRemovalInfo(tmpIsEmptyClusterRemoval, aNumberOfDetectedClusters);
+        }
+    }
+    
+    /**
+     * Scales components of aVectorToBeScaled according to min-max components 
+     * to interval [0,1] (see code and method getMinMaxComponents()).
+     * 
+     * @param aVectorToBeScaled Vector to be scaled (MAY BE CHANGED)
+     * @param aMinMaxComponents Min-max components
+     */
+    protected static void scaleVector(
+        float[] aVectorToBeScaled,
+        MinMaxValue[] aMinMaxComponents
+    ) {
+        for(int i = 0; i < aVectorToBeScaled.length; i++) {
+            if (aMinMaxComponents[i].minValue() < aMinMaxComponents[i].maxValue()) {
+                // Scale component to interval [0,1]
+                aVectorToBeScaled[i] = 
+                    (aVectorToBeScaled[i] - aMinMaxComponents[i].minValue()) / (aMinMaxComponents[i].maxValue() - aMinMaxComponents[i].minValue());
+            } else {
+                // Shift component to zero
+                aVectorToBeScaled[i] -= aMinMaxComponents[i].minValue();
+            }
+        }
+    }
+
+    /**
      * Sets rho winner with the rho value and the cluster index of the winner
      * (see code). If the cluster index is negative the first scaled rho value 
      * is the winner.
@@ -895,29 +918,6 @@ public class Art2aUtils {
             }
             // False: Scaled data vector has a length different from zero
             return false;
-        }
-    }
-    
-    /**
-     * Scales components of aVectorToBeScaled according to min-max components 
-     * to interval [0,1] (see code and method getMinMaxComponents()).
-     * 
-     * @param aVectorToBeScaled Vector to be scaled (MAY BE CHANGED)
-     * @param aMinMaxComponents Min-max components
-     */
-    protected static void scaleVector(
-        float[] aVectorToBeScaled,
-        MinMaxValue[] aMinMaxComponents
-    ) {
-        for(int i = 0; i < aVectorToBeScaled.length; i++) {
-            if (aMinMaxComponents[i].minValue() < aMinMaxComponents[i].maxValue()) {
-                // Scale component to interval [0,1]
-                aVectorToBeScaled[i] = 
-                    (aVectorToBeScaled[i] - aMinMaxComponents[i].minValue()) / (aMinMaxComponents[i].maxValue() - aMinMaxComponents[i].minValue());
-            } else {
-                // Shift component to zero
-                aVectorToBeScaled[i] -= aMinMaxComponents[i].minValue();
-            }
         }
     }
 

@@ -270,7 +270,7 @@ public class Art2aData {
 
     /**
      * Min-max components of original data matrix (see method 
- Art2aUtils.getMinMaxComponents() for data structure)
+     * Art2aUtils.getMinMaxComponents() for data structure)
      * 
      * @return Min-max components of original data matrix
      */
