@@ -703,6 +703,7 @@ public class Art2aKernel {
                 tmpClusterMatrix,
                 tmpDataVectorZeroLengthFlags,
                 tmpIsClusterOverflow,
+                tmpIsConverged,
                 this.art2aData
             );
         } catch (Exception anException) {
@@ -905,6 +906,8 @@ public class Art2aKernel {
     }
     
     /**
+     * Note: This is a purely experimental nonsense method.
+     * 
      * Returns representatives whose mean distance is nearest to the mean 
      * distance of all data vectors of specified original data matrix.
      * Note: This is a O(N^2) operation, N: Number of data vectors.
@@ -1054,6 +1057,9 @@ public class Art2aKernel {
      * Creates ART-2a data object with preprocessed data for maximum speed  
      * of the clustering process. The ART-2a data object allocates about the 
      * same memory as aDataMatrix.
+     * <br>
+     * Note: There a no checks! Check aDataMatrix in advance with method
+     * Art2aKernel.isDataMatrixValid().
      * <br>
      * Note: aDataMatrix could be set to null after this operation to release  
      * its memory.

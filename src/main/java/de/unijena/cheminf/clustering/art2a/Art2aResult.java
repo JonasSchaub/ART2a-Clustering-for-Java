@@ -93,6 +93,10 @@ public class Art2aResult {
      */
     private final boolean isClusterOverflow;
     /**
+     * True: Clustering process converged, false: Otherwise
+     */
+    private final boolean isConverged;
+    /**
      * Art2aData object
      */
     private final Art2aData art2aData;
@@ -140,6 +144,7 @@ public class Art2aResult {
      * case), false: Otherwise.
      * @param anIsClusterOverflow True: Cluster overflow occurred, false: 
      * Otherwise
+     * @param anIsConverged True: Clustering process converged, false: Otherwise
      * @param anArt2aData Art2aData instance
      */
     public Art2aResult(
@@ -151,6 +156,7 @@ public class Art2aResult {
         float[][] aClusterMatrix,
         boolean[] aDataVectorZeroLengthFlags,
         boolean anIsClusterOverflow,
+        boolean anIsConverged,
         Art2aData anArt2aData
     ) {
         this.vigilance = aVigilance;
@@ -161,6 +167,7 @@ public class Art2aResult {
         this.clusterMatrix = aClusterMatrix;
         this.dataVectorZeroLengthFlags = aDataVectorZeroLengthFlags;
         this.isClusterOverflow = anIsClusterOverflow;
+        this.isConverged = anIsConverged;
         this.art2aData = anArt2aData;
     }
     //</editor-fold>
@@ -348,6 +355,15 @@ public class Art2aResult {
      */
     public boolean isClusterOverflow() {
         return this.isClusterOverflow;
+    }
+
+    /**
+     * Returns if clustering process converged.
+     * 
+     * @return True: Clustering process converged, false: Otherwise
+     */
+    public boolean isConverged() {
+        return this.isConverged;
     }
     
     /**
