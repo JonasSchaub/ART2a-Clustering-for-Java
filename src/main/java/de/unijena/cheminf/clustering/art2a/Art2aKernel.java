@@ -716,7 +716,7 @@ public class Art2aKernel {
                 anException.toString(), 
                 anException
             );
-            throw anException;
+            throw new Exception("Art2aKernel.getClusterResult: An exception occurred: This should never happen!");
         }
     }
 
@@ -1038,7 +1038,7 @@ public class Art2aKernel {
             }
 
             for (float tmpValue : tmpDataVector) {
-                if (tmpValue == Float.NaN 
+                if (!Float.isFinite(tmpValue)
                     || tmpValue == Float.MIN_VALUE 
                     || tmpValue == Float.MAX_VALUE
                 ) {

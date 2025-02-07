@@ -35,7 +35,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,7 +45,7 @@ import org.junit.jupiter.api.Test;
 public class Art2aTest {
 
     /**
-     * Test class for development purposes only
+     * Test method for development purposes only
      */
     @Test
     public void test_Development_IrisFlowerData() {
@@ -105,7 +104,7 @@ public class Art2aTest {
     }
 
     /**
-     * Test class for development purposes only
+     * Test method for development purposes only
      */
     @Test
     public void test_Development_CombinedGaussianCouldData() {
@@ -175,7 +174,7 @@ public class Art2aTest {
     }
 
     /**
-     * Test class for development purposes only
+     * Test method for development purposes only
      */
     @Test
     public void test_Development_GetRepresentatives() {
