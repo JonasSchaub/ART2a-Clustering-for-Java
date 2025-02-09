@@ -1,5 +1,5 @@
 /*
- * ART-2a Clustering for Java
+ * ART-2a-Euclid Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
  * Source code is available at 
@@ -26,6 +26,11 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import de.unijena.cheminf.clustering.art2a.Art2aEuclidKernel;
+import de.unijena.cheminf.clustering.art2a.Art2aEuclidResult;
+import de.unijena.cheminf.clustering.art2a.Art2aEuclidTask;
+import de.unijena.cheminf.clustering.art2a.Art2aEuclidData;
+import de.unijena.cheminf.clustering.art2a.Art2aEuclidUtils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,11 +43,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for ART-2a clustering.
+ * Test class for ART-2a-Euclid clustering.
  *
  * @author Achim Zielesny
  */
-public class Art2aTest {
+public class Art2aEuclidTest {
 
     /**
      * Test method for development purposes only
@@ -54,21 +59,21 @@ public class Art2aTest {
         System.out.println("---------------------------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         
-        // float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
+        // float[] tmpVigilances = new float[] {0.01f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0.99f};
         float[] tmpVigilances = new float[] {0.1f};
-
+        boolean tmpIsClusterAnalysis = true;
         int tmpMaximumNumberOfClusters = 150;
         boolean tmpIsDataPreprocessing = false;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
 
         for (float tmpVigilance : tmpVigilances) {
             System.out.println("  Vigilance parameter = " + String.valueOf(tmpVigilance));
-            Art2aKernel tmpArt2aKernel = 
-                new Art2aKernel(
+            Art2aEuclidKernel tmpArt2aEuclidKernel = 
+                new Art2aEuclidKernel(
                     tmpIrisFlowerDataMatrix, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -78,25 +83,27 @@ public class Art2aTest {
                     tmpRandomSeed,
                     tmpIsDataPreprocessing
                 );
-            Assertions.assertNotNull(tmpArt2aKernel);
-            Art2aResult tmpArt2aResult = null;
+            Assertions.assertNotNull(tmpArt2aEuclidKernel);
+            Art2aEuclidResult tmpArt2aEuclidResult = null;
             try {
-                tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance);
+                tmpArt2aEuclidResult = tmpArt2aEuclidKernel.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
-            Assertions.assertNotNull(tmpArt2aResult);
-            int tmpNumberOfDetectedClusters = tmpArt2aResult.getNumberOfDetectedClusters();
-            System.out.println("  - Number of detected clusters = " + String.valueOf(tmpArt2aResult.getNumberOfDetectedClusters()));
-            System.out.println("  - Number of epochs            = " + String.valueOf(tmpArt2aResult.getNumberOfEpochs()));
-            for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
-                System.out.println("  - Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aResult.getClusterSize(i)));
-                int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getDataVectorIndicesOfCluster(i);
-                System.out.println("    " + this.getStringFromIntArray(tmpDataVectorIndicesOfCluster));
-            }
-            for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
-                for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
-                    System.out.println("  - Angle between cluster " + String.valueOf(i) + " and cluster " + String.valueOf(j) + " = " + String.valueOf(tmpArt2aResult.getAngleBetweenClusters(i, j)));
+            Assertions.assertNotNull(tmpArt2aEuclidResult);
+            int tmpNumberOfDetectedClusters = tmpArt2aEuclidResult.getNumberOfDetectedClusters();
+            System.out.println("  - Number of detected clusters = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfDetectedClusters()));
+            System.out.println("  - Number of epochs            = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfEpochs()));
+            if (tmpIsClusterAnalysis) {
+                for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
+                    System.out.println("  - Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aEuclidResult.getClusterSize(i)));
+                    int[] tmpDataVectorIndicesOfCluster = tmpArt2aEuclidResult.getDataVectorIndicesOfCluster(i);
+                    System.out.println("    " + this.getStringFromIntArray(tmpDataVectorIndicesOfCluster));
+                }
+                for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
+                    for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
+                        System.out.println("  - Distance between cluster " + String.valueOf(i) + " and cluster " + String.valueOf(j) + " = " + String.valueOf(tmpArt2aEuclidResult.getDistanceBetweenClusters(i, j)));
+                    }
                 }
             }
             System.out.println("");
@@ -127,14 +134,14 @@ public class Art2aTest {
         int tmpMaximumNumberOfClusters = 1000;
         boolean tmpIsDataPreprocessing = false;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
 
         long tmpStart = System.currentTimeMillis();
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
+        Art2aEuclidKernel tmpArt2aEuclidKernel = 
+            new Art2aEuclidKernel(
                 tmpCombinedGaussianCloudDataMatrix, 
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
@@ -144,9 +151,9 @@ public class Art2aTest {
                 tmpRandomSeed,
                 tmpIsDataPreprocessing
             );
-        Art2aResult tmpArt2aResult = null;
+        Art2aEuclidResult tmpArt2aEuclidResult = null;
         try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance);
+            tmpArt2aEuclidResult = tmpArt2aEuclidKernel.getClusterResult(tmpVigilance);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
         }
@@ -154,79 +161,23 @@ public class Art2aTest {
 
         System.out.println("  Number of data vectors      = " + String.valueOf(tmpNumberOfDimensions * tmpNumberOfGaussianCloudVectors));
         System.out.println("  Elapsed time in ms          = " + String.valueOf(tmpEnd - tmpStart));
-        Assertions.assertNotNull(tmpArt2aKernel);
-        Assertions.assertNotNull(tmpArt2aResult);
-        int tmpNumberOfDetectedClusters = tmpArt2aResult.getNumberOfDetectedClusters();
-        System.out.println("  Number of detected clusters = " + String.valueOf(tmpArt2aResult.getNumberOfDetectedClusters()));
-        System.out.println("  Number of epochs            = " + String.valueOf(tmpArt2aResult.getNumberOfEpochs()));
+        Assertions.assertNotNull(tmpArt2aEuclidKernel);
+        Assertions.assertNotNull(tmpArt2aEuclidResult);
+        int tmpNumberOfDetectedClusters = tmpArt2aEuclidResult.getNumberOfDetectedClusters();
+        System.out.println("  Number of detected clusters = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfDetectedClusters()));
+        System.out.println("  Number of epochs            = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfEpochs()));
         for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
-            System.out.println("  Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aResult.getClusterSize(i)));
-            System.out.println("  - Representative  = " + String.valueOf(tmpArt2aResult.getClusterRepresentativeIndex(i)));
-            System.out.println("  - Representatives = " + this.getStringFromIntArray(tmpArt2aResult.getClusterRepresentativeIndices(i)));
-            int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getDataVectorIndicesOfCluster(i);
+            System.out.println("  Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aEuclidResult.getClusterSize(i)));
+            System.out.println("  - Representative  = " + String.valueOf(tmpArt2aEuclidResult.getClusterRepresentativeIndex(i)));
+            System.out.println("  - Representatives = " + this.getStringFromIntArray(tmpArt2aEuclidResult.getClusterRepresentativeIndices(i)));
+            int[] tmpDataVectorIndicesOfCluster = tmpArt2aEuclidResult.getDataVectorIndicesOfCluster(i);
             System.out.println("  " + this.getStringFromIntArray(tmpDataVectorIndicesOfCluster));
         }
         for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
             for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
-                System.out.println("  Angle between cluster " + String.valueOf(i) + " and cluster " + String.valueOf(j) + " = " + String.valueOf(tmpArt2aResult.getAngleBetweenClusters(i, j)));
+                System.out.println("  Distance between cluster " + String.valueOf(i) + " and cluster " + String.valueOf(j) + " = " + String.valueOf(tmpArt2aEuclidResult.getDistanceBetweenClusters(i, j)));
             }
         }
-    }
-
-    /**
-     * Test method for development purposes only
-     */
-    @Test
-    public void test_Development_CombinedGaussianCouldData_Performance() {
-        System.out.println("--------------------------------------------------------");
-        System.out.println("test_Development_CombinedGaussianCouldData_Performance()");
-        System.out.println("--------------------------------------------------------");
-        int tmpNumberOfDimensions = 100;
-        int tmpNumberOfGaussianCloudVectors = 1000;
-        float tmpStandardDeviation = 0.01f;
-        Random tmpRandomNumberGenerator = new Random(1L);
-        float[][] tmpCombinedGaussianCloudDataMatrix = 
-            this.getCombinedGaussianCloudMatrix(
-                tmpNumberOfDimensions, 
-                tmpNumberOfGaussianCloudVectors, 
-                tmpStandardDeviation, 
-                tmpRandomNumberGenerator
-            );
-
-        float tmpVigilance = 0.1f;
-        int tmpMaximumNumberOfClusters = 200;
-        boolean tmpIsDataPreprocessing = true;
-        int tmpMaximumNumberOfEpochs = 10;
-        float tmpConvergenceThreshold = 0.99f;
-        float tmpLearningParameter = 0.01f;
-        float tmpOffsetForContrastEnhancement = 1.0f;
-        long tmpRandomSeed = 1L;
-
-        long tmpStart = System.currentTimeMillis();
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
-                tmpCombinedGaussianCloudDataMatrix, 
-                tmpMaximumNumberOfClusters,
-                tmpMaximumNumberOfEpochs,
-                tmpConvergenceThreshold,
-                tmpLearningParameter,
-                tmpOffsetForContrastEnhancement,
-                tmpRandomSeed,
-                tmpIsDataPreprocessing
-            );
-        Art2aResult tmpArt2aResult = null;
-        try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance);
-        } catch (Exception anException) {
-            Assertions.assertTrue(false);
-        }
-        long tmpEnd = System.currentTimeMillis();
-
-        System.out.println("  Number of data vectors      = " + String.valueOf(tmpNumberOfDimensions * tmpNumberOfGaussianCloudVectors));
-        System.out.println("  Elapsed time in ms          = " + String.valueOf(tmpEnd - tmpStart));
-        int tmpNumberOfDetectedClusters = tmpArt2aResult.getNumberOfDetectedClusters();
-        System.out.println("  Number of detected clusters = " + String.valueOf(tmpArt2aResult.getNumberOfDetectedClusters()));
-        System.out.println("  Number of epochs            = " + String.valueOf(tmpArt2aResult.getNumberOfEpochs()));
     }
 
     /**
@@ -240,7 +191,7 @@ public class Art2aTest {
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
@@ -250,8 +201,8 @@ public class Art2aTest {
         float tmpVigilanceMax = 0.9999f;
         int tmpNumberOfTrialSteps = 32;
         
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
+        Art2aEuclidKernel tmpArt2aEuclidKernel = 
+            new Art2aEuclidKernel(
                 tmpIrisFlowerDataMatrix, 
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
@@ -263,7 +214,7 @@ public class Art2aTest {
             );
 
         try {
-            int[] tmpBestRepresentatives = tmpArt2aKernel.getBestRepresentatives(tmpIrisFlowerDataMatrix, 2, tmpIrisFlowerDataMatrix.length);
+            int[] tmpBestRepresentatives = tmpArt2aEuclidKernel.getBestRepresentatives(tmpIrisFlowerDataMatrix, 2, tmpIrisFlowerDataMatrix.length);
             Arrays.sort(tmpBestRepresentatives);
             System.out.println(
                 String.valueOf(tmpBestRepresentatives.length) + " best representatives = " + this.getStringFromIntArray(tmpBestRepresentatives)
@@ -276,14 +227,14 @@ public class Art2aTest {
         for (int i = 0; i < 150; i++) {
             tmpAllIndices[i] = i;
         }
-        float tmpBaseMeanDistance = Art2aUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
+        float tmpBaseMeanDistance = Art2aEuclidUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
         System.out.println(
             "Base mean distance = " + String.valueOf(tmpBaseMeanDistance)
         );
         for (int tmpNumberOfRepresentatives = 2; tmpNumberOfRepresentatives < tmpIrisFlowerDataMatrix.length; tmpNumberOfRepresentatives++) {
             try {
                 int[] tmpRepresentatives = 
-                    tmpArt2aKernel.getRepresentatives(
+                    tmpArt2aEuclidKernel.getRepresentatives(
                         tmpNumberOfRepresentatives, 
                         tmpVigilanceMin, 
                         tmpVigilanceMax, 
@@ -291,7 +242,7 @@ public class Art2aTest {
                     );
                 if (tmpNumberOfRepresentatives == tmpRepresentatives.length) {
                     Arrays.sort(tmpRepresentatives);
-                    float tmpMeanDistance = Art2aUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
+                    float tmpMeanDistance = Art2aEuclidUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
                     System.out.println(
                         String.valueOf(tmpNumberOfRepresentatives) + 
                         " Representatives (Mean distance = " +
@@ -305,9 +256,9 @@ public class Art2aTest {
             }
         }
     }
-    
+
     /**
-     * Tests Art2aKernel method getRepresentatives().
+     * Tests Art2aEuclidKernel method getRepresentatives().
      */
     @Test
     public void test_GetRepresentatives() {
@@ -317,19 +268,19 @@ public class Art2aTest {
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
-        float tmpOffsetForContrastEnhancement = 0.5f;
+        float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
         boolean tmpIsDataPreprocessing = false;
 
+        int tmpNumberOfRepresentatives = 10;
         float tmpVigilanceMin = 0.0001f;
         float tmpVigilanceMax = 0.9999f;
-        int tmpNumberOfRepresentatives = 7;
         int tmpNumberOfTrialSteps = 32;
         
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
+        Art2aEuclidKernel tmpArt2aEuclidKernel = 
+            new Art2aEuclidKernel(
                 tmpIrisFlowerDataMatrix, 
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
@@ -341,12 +292,38 @@ public class Art2aTest {
             );
         try {
             int[] tmpRepresentatives = 
-                tmpArt2aKernel.getRepresentatives(
+                tmpArt2aEuclidKernel.getRepresentatives(
                     tmpNumberOfRepresentatives, 
                     tmpVigilanceMin, 
                     tmpVigilanceMax, 
                     tmpNumberOfTrialSteps
                 );
+            System.out.println(
+                String.valueOf(tmpNumberOfRepresentatives) + 
+                " wanted Representatives, " + 
+                String.valueOf(tmpRepresentatives.length) + 
+                " generated = " + 
+                this.getStringFromIntArray(tmpRepresentatives)
+            );
+            for (int i = 0; i < tmpRepresentatives.length; i++) {
+                for (int j = i + 1; j < tmpRepresentatives.length; j++) {
+                    System.out.println(
+                        "Distance between representatives " + 
+                        String.valueOf(i) + 
+                        " and representative " + 
+                        String.valueOf(j) + 
+                        "= " + 
+                        String.valueOf(
+                            Math.sqrt(
+                                Art2aEuclidUtils.getSquaredDistance(
+                                    tmpIrisFlowerDataMatrix[tmpRepresentatives[i]], 
+                                    tmpIrisFlowerDataMatrix[tmpRepresentatives[j]]
+                                )
+                            )
+                        )
+                    );
+                }
+            }
             Assertions.assertEquals(tmpRepresentatives.length, tmpNumberOfRepresentatives);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
@@ -377,13 +354,13 @@ public class Art2aTest {
         int tmpMaximumNumberOfClusters = 100;
         boolean tmpIsDataPreprocessing = false;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
 
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
+        Art2aEuclidKernel tmpArt2aEuclidKernel = 
+            new Art2aEuclidKernel(
                 tmpCombinedGaussianCloudDataMatrix, 
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
@@ -393,32 +370,27 @@ public class Art2aTest {
                 tmpRandomSeed,
                 tmpIsDataPreprocessing
             );
-        Art2aResult tmpArt2aResult = null;
+        Art2aEuclidResult tmpArt2aEuclidResult = null;
         try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance);
+            tmpArt2aEuclidResult = tmpArt2aEuclidKernel.getClusterResult(tmpVigilance);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
         }
 
-        Assertions.assertEquals(tmpArt2aResult.getNumberOfDetectedClusters(), tmpNumberOfDimensions);
-        Assertions.assertTrue(tmpArt2aResult.getNumberOfEpochs() < tmpMaximumNumberOfEpochs);
-        for (int i = 0; i < tmpArt2aResult.getNumberOfDetectedClusters(); i++) {
-            Assertions.assertEquals(tmpArt2aResult.getClusterSize(i), tmpNumberOfGaussianCloudVectors);
-            int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getDataVectorIndicesOfCluster(i);
-            int[] tmpClusterRepresentativeIndices = tmpArt2aResult.getClusterRepresentativeIndices(i);
-            Assertions.assertEquals(tmpArt2aResult.getClusterRepresentativeIndex(i), tmpClusterRepresentativeIndices[0]);
+        Assertions.assertEquals(tmpArt2aEuclidResult.getNumberOfDetectedClusters(), tmpNumberOfDimensions);
+        Assertions.assertTrue(tmpArt2aEuclidResult.getNumberOfEpochs() < tmpMaximumNumberOfEpochs);
+        for (int i = 0; i < tmpArt2aEuclidResult.getNumberOfDetectedClusters(); i++) {
+            Assertions.assertEquals(tmpArt2aEuclidResult.getClusterSize(i), tmpNumberOfGaussianCloudVectors);
+            int[] tmpDataVectorIndicesOfCluster = tmpArt2aEuclidResult.getDataVectorIndicesOfCluster(i);
+            int[] tmpClusterRepresentativeIndices = tmpArt2aEuclidResult.getClusterRepresentativeIndices(i);
+            Assertions.assertEquals(tmpArt2aEuclidResult.getClusterRepresentativeIndex(i), tmpClusterRepresentativeIndices[0]);
             Arrays.sort(tmpDataVectorIndicesOfCluster);
             Arrays.sort(tmpClusterRepresentativeIndices);
             Assertions.assertArrayEquals(tmpDataVectorIndicesOfCluster, tmpClusterRepresentativeIndices);
         }
-        for (int i = 0; i < tmpArt2aResult.getNumberOfDetectedClusters(); i++) {
-            for (int j = i + 1; j < tmpArt2aResult.getNumberOfDetectedClusters(); j++) {
-                Assertions.assertEquals(tmpArt2aResult.getAngleBetweenClusters(i, j), 90.0, 0.001);
-            }
-        }
-        Assertions.assertFalse(tmpArt2aResult.isClusterOverflow());
-        for (int i = 0; i < tmpArt2aResult.getNumberOfDetectedClusters(); i++) {
-            Assertions.assertEquals(tmpArt2aResult.getClusterRepresentativeIndex(i), tmpArt2aResult.getClusterRepresentativeIndices(i)[0]);
+        Assertions.assertFalse(tmpArt2aEuclidResult.isClusterOverflow());
+        for (int i = 0; i < tmpArt2aEuclidResult.getNumberOfDetectedClusters(); i++) {
+            Assertions.assertEquals(tmpArt2aEuclidResult.getClusterRepresentativeIndex(i), tmpArt2aEuclidResult.getClusterRepresentativeIndices(i)[0]);
         }
     }
     
@@ -435,7 +407,7 @@ public class Art2aTest {
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
@@ -443,8 +415,8 @@ public class Art2aTest {
         for (float tmpVigilance : tmpVigilances) {
             // No preprocessing
             boolean tmpIsDataPreprocessing = false;
-            Art2aKernel tmpArt2aKernelWithoutPreprocessing = 
-                new Art2aKernel(
+            Art2aEuclidKernel tmpArt2aEuclidKernelWithoutPreprocessing = 
+                new Art2aEuclidKernel(
                     tmpIrisFlowerDataMatrix, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -454,17 +426,17 @@ public class Art2aTest {
                     tmpRandomSeed,
                     tmpIsDataPreprocessing
                 );
-            Art2aResult tmpArt2aResultWithoutPreprocessing = null;
+            Art2aEuclidResult tmpArt2aEuclidResultWithoutPreprocessing = null;
             try {
-                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
+                tmpArt2aEuclidResultWithoutPreprocessing = tmpArt2aEuclidKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
 
             // Preprocessing
             tmpIsDataPreprocessing = true;
-            Art2aKernel tmpArt2aKernelWithPreprocessing = 
-                new Art2aKernel(
+            Art2aEuclidKernel tmpArt2aEuclidKernelWithPreprocessing = 
+                new Art2aEuclidKernel(
                     tmpIrisFlowerDataMatrix, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -474,35 +446,35 @@ public class Art2aTest {
                     tmpRandomSeed,
                     tmpIsDataPreprocessing
                 );
-            Art2aResult tmpArt2aResultWithPreprocessing = null;
+            Art2aEuclidResult tmpArt2aEuclidResultWithPreprocessing = null;
             try {
-                tmpArt2aResultWithPreprocessing = tmpArt2aKernelWithPreprocessing.getClusterResult(tmpVigilance);
+                tmpArt2aEuclidResultWithPreprocessing = tmpArt2aEuclidKernelWithPreprocessing.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
             
-            // Assertions.assert that results without and with preprocessing are identical
+            // Assert that results without and with preprocessing are identical
             Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters() == 
-                    tmpArt2aResultWithPreprocessing.getNumberOfDetectedClusters()
+                tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfDetectedClusters() == 
+                    tmpArt2aEuclidResultWithPreprocessing.getNumberOfDetectedClusters()
             );
             Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs() ==  
-                    tmpArt2aResultWithPreprocessing.getNumberOfEpochs()
+                tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfEpochs() ==  
+                    tmpArt2aEuclidResultWithPreprocessing.getNumberOfEpochs()
             );
             
-            int tmpNumberOfDetectedClusters = tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters();
+            int tmpNumberOfDetectedClusters = tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfDetectedClusters();
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 Assertions.assertArrayEquals(
-                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
-                    tmpArt2aResultWithPreprocessing.getDataVectorIndicesOfCluster(i)
+                    tmpArt2aEuclidResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
+                    tmpArt2aEuclidResultWithPreprocessing.getDataVectorIndicesOfCluster(i)
                 );
             }
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
                     Assertions.assertTrue(
-                        tmpArt2aResultWithoutPreprocessing.getAngleBetweenClusters(i, j) == 
-                            tmpArt2aResultWithPreprocessing.getAngleBetweenClusters(i, j)
+                        tmpArt2aEuclidResultWithoutPreprocessing.getDistanceBetweenClusters(i, j) == 
+                            tmpArt2aEuclidResultWithPreprocessing.getDistanceBetweenClusters(i, j)
                     );
                 }
             }
@@ -510,27 +482,27 @@ public class Art2aTest {
     }
 
     /**
-     * Test that generated Art2aData object leads to identical clustering 
-     * results.
+     * Test that generated Art2aEuclidData object leads to identical clustering 
+ results.
      */
     @Test
-    public void test_Art2aData() {
+    public void test_Art2aEuclidData() {
         System.out.println("----------------");
-        System.out.println("test_Art2aData()");
+        System.out.println("test_Art2aEuclidData()");
         System.out.println("----------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
         for (float tmpVigilance : tmpVigilances) {
             // No preprocessing
             boolean tmpIsDataPreprocessing = false;
-            Art2aKernel tmpArt2aKernelWithoutPreprocessing = 
-                new Art2aKernel(
+            Art2aEuclidKernel tmpArt2aEuclidKernelWithoutPreprocessing = 
+                new Art2aEuclidKernel(
                     tmpIrisFlowerDataMatrix, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -540,54 +512,54 @@ public class Art2aTest {
                     tmpRandomSeed,
                     tmpIsDataPreprocessing
                 );
-            Art2aResult tmpArt2aResultWithoutPreprocessing = null;
+            Art2aEuclidResult tmpArt2aEuclidResultWithoutPreprocessing = null;
             try {
-                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
+                tmpArt2aEuclidResultWithoutPreprocessing = tmpArt2aEuclidKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
 
-            // Preprocessed Art2aData
-            Art2aData tmpArt2aData = Art2aKernel.getArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
-            Art2aKernel tmpArt2aKernelWithArt2aData = 
-                new Art2aKernel(
-                    tmpArt2aData, 
+            // Preprocessed Art2aEuclidData
+            Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            Art2aEuclidKernel tmpArt2aEuclidKernelWithArt2aEuclidData = 
+                new Art2aEuclidKernel(
+                    tmpArt2aEuclidData, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
                     tmpLearningParameter,
                     tmpRandomSeed
                 );
-            Art2aResult tmpArt2aResultWithArt2aData = null;
+            Art2aEuclidResult tmpArt2aEuclidResultWithArt2aEuclidData = null;
             try {
-                tmpArt2aResultWithArt2aData = tmpArt2aKernelWithArt2aData.getClusterResult(tmpVigilance);
+                tmpArt2aEuclidResultWithArt2aEuclidData = tmpArt2aEuclidKernelWithArt2aEuclidData.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
 
-            // Assertions.assert that results without preprocessing and preprocessed 
-            // Art2aData are identical
+            // Assert that results without preprocessing and preprocessed 
+            // Art2aEuclidData are identical
             Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters() == 
-                    tmpArt2aResultWithArt2aData.getNumberOfDetectedClusters()
+                tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfDetectedClusters() == 
+                    tmpArt2aEuclidResultWithArt2aEuclidData.getNumberOfDetectedClusters()
             );
             Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs() ==  
-                    tmpArt2aResultWithArt2aData.getNumberOfEpochs()
+                tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfEpochs() ==  
+                    tmpArt2aEuclidResultWithArt2aEuclidData.getNumberOfEpochs()
             );
             
-            int tmpNumberOfDetectedClusters = tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters();
+            int tmpNumberOfDetectedClusters = tmpArt2aEuclidResultWithoutPreprocessing.getNumberOfDetectedClusters();
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 Assertions.assertArrayEquals(
-                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
-                    tmpArt2aResultWithArt2aData.getDataVectorIndicesOfCluster(i)
+                    tmpArt2aEuclidResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
+                    tmpArt2aEuclidResultWithArt2aEuclidData.getDataVectorIndicesOfCluster(i)
                 );
             }
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
                     Assertions.assertTrue(
-                        tmpArt2aResultWithoutPreprocessing.getAngleBetweenClusters(i, j) == 
-                            tmpArt2aResultWithArt2aData.getAngleBetweenClusters(i, j)
+                        tmpArt2aEuclidResultWithoutPreprocessing.getDistanceBetweenClusters(i, j) == 
+                            tmpArt2aEuclidResultWithArt2aEuclidData.getDistanceBetweenClusters(i, j)
                     );
                 }
             }
@@ -607,18 +579,18 @@ public class Art2aTest {
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
         
         // Sequential clustering one after another
-        Art2aResult[] tmpSequentialResults = new Art2aResult[tmpVigilances.length];
+        Art2aEuclidResult[] tmpSequentialResults = new Art2aEuclidResult[tmpVigilances.length];
         int tmpIndex = 0;
         for (float tmpVigilance : tmpVigilances) {
             boolean tmpIsDataPreprocessing = false;
-            Art2aKernel tmpArt2aKernelWithoutPreprocessing = 
-                new Art2aKernel(
+            Art2aEuclidKernel tmpArt2aEuclidKernelWithoutPreprocessing = 
+                new Art2aEuclidKernel(
                     tmpIrisFlowerDataMatrix, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -629,19 +601,18 @@ public class Art2aTest {
                     tmpIsDataPreprocessing
                 );
             try {
-                tmpSequentialResults[tmpIndex++] = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
+                tmpSequentialResults[tmpIndex++] = tmpArt2aEuclidKernelWithoutPreprocessing.getClusterResult(tmpVigilance);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
         }
 
         // Concurrent (parallelized) clustering
-        LinkedList<Art2aTask> tmpArt2aTaskList = new LinkedList<>();
-        Art2aData tmpArt2aData = Art2aKernel.getArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        LinkedList<Art2aEuclidTask> tmpArt2aEuclidTaskList = new LinkedList<>();
+        Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
-            tmpArt2aTaskList.add(
-                new Art2aTask(
-                    tmpArt2aData, 
+            tmpArt2aEuclidTaskList.add(new Art2aEuclidTask(
+                    tmpArt2aEuclidData, 
                     tmpVigilance, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
@@ -652,16 +623,16 @@ public class Art2aTest {
             );
         }
         ExecutorService tmpExecutorService = Executors.newFixedThreadPool(tmpVigilances.length);
-        List<Future<Art2aResult>> tmpFutureList = null;
+        List<Future<Art2aEuclidResult>> tmpFutureList = null;
         try {
-            tmpFutureList = tmpExecutorService.invokeAll(tmpArt2aTaskList);
+            tmpFutureList = tmpExecutorService.invokeAll(tmpArt2aEuclidTaskList);
         } catch (InterruptedException e) {
             System.out.println("test_ParallelClustering: InterruptedException occurred.");
         }
         tmpExecutorService.shutdown();
-        Art2aResult[] tmpParallelResults = new Art2aResult[tmpVigilances.length];
+        Art2aEuclidResult[] tmpParallelResults = new Art2aEuclidResult[tmpVigilances.length];
         tmpIndex = 0;
-        for (Future<Art2aResult> tmpFuture : tmpFutureList) {
+        for (Future<Art2aEuclidResult> tmpFuture : tmpFutureList) {
             try {
                 tmpParallelResults[tmpIndex++] = tmpFuture.get();
             } catch (Exception e) {
@@ -669,8 +640,8 @@ public class Art2aTest {
             }
         }
         
-        // Assertions.assert that sequential results without preprocessing and concurrent 
-        // results with preprocessed Art2aData are identical
+        // Assert that sequential results without preprocessing and concurrent 
+        // results with preprocessed Art2aEuclidData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
             Assertions.assertTrue(
                 tmpSequentialResults[i].getNumberOfDetectedClusters() == 
@@ -693,8 +664,8 @@ public class Art2aTest {
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 for (int k = j + 1; k < tmpNumberOfDetectedClusters; k++) {
                     Assertions.assertTrue(
-                        tmpSequentialResults[i].getAngleBetweenClusters(j, k) == 
-                            tmpParallelResults[i].getAngleBetweenClusters(j, k)
+                        tmpSequentialResults[i].getDistanceBetweenClusters(j, k) == 
+                            tmpParallelResults[i].getDistanceBetweenClusters(j, k)
                     );
                 }
             }
@@ -703,7 +674,7 @@ public class Art2aTest {
 
     /**
      * Tests that sequential and parallelized clustering with 
-     * Art2aKernel.getClusterResults() leads to identical results.
+ Art2aEuclidKernel.getClusterResults() leads to identical results.
      */
     @Test
     public void test_ParallelClusteringWithGetGlusterResults() {
@@ -714,14 +685,14 @@ public class Art2aTest {
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
         int tmpMaximumNumberOfClusters = 150;
         int tmpMaximumNumberOfEpochs = 100;
-        float tmpConvergenceThreshold = 0.99f;
+        float tmpConvergenceThreshold = 0.1f;
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
         boolean tmpIsDataPreprocessing = false;
 
-        Art2aKernel tmpArt2aKernel = 
-            new Art2aKernel(
+        Art2aEuclidKernel tmpArt2aEuclidKernel = 
+            new Art2aEuclidKernel(
                 tmpIrisFlowerDataMatrix, 
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
@@ -733,24 +704,24 @@ public class Art2aTest {
             );
 
         // Sequential clustering one after another
-        Art2aResult[] tmpSequentialResults = null;
+        Art2aEuclidResult[] tmpSequentialResults = null;
         try {
-            tmpSequentialResults = tmpArt2aKernel.getClusterResults(tmpVigilances, 0);
+            tmpSequentialResults = tmpArt2aEuclidKernel.getClusterResults(tmpVigilances, 0);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
         }
 
         // Concurrent (parallel) clustering
         int tmpNumberOfParallelCalculationThreads = 2;
-        Art2aResult[] tmpParallelResults = null;
+        Art2aEuclidResult[] tmpParallelResults = null;
         try {
-            tmpParallelResults = tmpArt2aKernel.getClusterResults(tmpVigilances, tmpNumberOfParallelCalculationThreads);
+            tmpParallelResults = tmpArt2aEuclidKernel.getClusterResults(tmpVigilances, tmpNumberOfParallelCalculationThreads);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
         }
         
-        // Assertions.assert that sequential results without preprocessing and concurrent 
-        // results with preprocessed Art2aData are identical
+        // Assert that sequential results without preprocessing and concurrent 
+        // results with preprocessed Art2aEuclidData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
             Assertions.assertTrue(
                 tmpSequentialResults[i].getNumberOfDetectedClusters() == 
@@ -773,8 +744,8 @@ public class Art2aTest {
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 for (int k = j + 1; k < tmpNumberOfDetectedClusters; k++) {
                     Assertions.assertTrue(
-                        tmpSequentialResults[i].getAngleBetweenClusters(j, k) == 
-                            tmpParallelResults[i].getAngleBetweenClusters(j, k)
+                        tmpSequentialResults[i].getDistanceBetweenClusters(j, k) == 
+                            tmpParallelResults[i].getDistanceBetweenClusters(j, k)
                     );
                 }
             }

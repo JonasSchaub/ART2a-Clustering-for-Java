@@ -1,5 +1,5 @@
 /*
- * ART-2a Clustering for Java
+ * ART-2a-Euclid Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
  * Source code is available at 
@@ -32,13 +32,13 @@ import java.util.Random;
 
 /**
  * Library of helper records, static helper classes and static, thread-safe 
- * (stateless) utility methods for ART-2a clustering.
+ * (stateless) utility methods for ART-2a-Euclid clustering.
  * <br><br>
  * Note: No checks are performed.
  * 
  * @author Achim Zielesny
  */
-public class Art2aUtils {
+public class Art2aEuclidUtils {
     
     //<editor-fold desc="Private static final constants" defaultstate="collapsed">
     /**
@@ -195,9 +195,9 @@ public class Art2aUtils {
     /**
      * Constructor
      */
-    protected Art2aUtils() {}
+    protected Art2aEuclidUtils() {}
     //</editor-fold>
-
+    
     //<editor-fold desc="Protected static utility methods" defaultstate="collapsed">
     /**
      * Assigns data vectors to clusters
@@ -208,7 +208,7 @@ public class Art2aUtils {
      * equal to zero). True: Scaled data row vector has a length of zero 
      * (corresponding contrast enhanced unit vector is set to null in this 
      * case), false: Otherwise.
-     * @param anArt2aData Art2aData instance (IS NOT CHANGED)
+     * @param anArt2aEuclidData Art2aEuclidData instance (IS NOT CHANGED)
      * @param aBufferVector Buffer vector (MUST BE ALREADY INSTANTIATED)
      * @param aThresholdForContrastEnhancement Threshold for contrast 
      * enhancement
@@ -222,29 +222,30 @@ public class Art2aUtils {
     protected static void assignDataVectorsToClusters(
         int aNumberOfDetectedClusters,
         boolean[] aDataVectorZeroLengthFlags,
-        Art2aData anArt2aData,
+        Art2aEuclidData anArt2aEuclidData,
         float[] aBufferVector,
         float aThresholdForContrastEnhancement,
         float[][]aClusterMatrix,
         int[] aClusterIndexOfDataVector,
         boolean[] aClusterUsageFlags
     ) {
+        // Assign data vectors to clusters (last pass)
         Arrays.fill(aClusterUsageFlags, false);
         for (int i = 0; i < aDataVectorZeroLengthFlags.length; i++) {
             if (!aDataVectorZeroLengthFlags[i]) {
-                if (anArt2aData.hasPreprocessedData()) {
-                    aBufferVector = anArt2aData.getContrastEnhancedUnitMatrix()[i];
+                if (anArt2aEuclidData.hasPreprocessedData()) {
+                    aBufferVector = anArt2aEuclidData.getContrastEnhancedMatrix()[i];
                 } else {
                     // Check of length is NOT necessary
-                    Art2aUtils.setContrastEnhancedUnitVector(
-                        anArt2aData.getDataMatrix()[i],
+                    Art2aEuclidUtils.setContrastEnhancedVector(
+                        anArt2aEuclidData.getDataMatrix()[i],
                         aBufferVector,
-                        anArt2aData.getMinMaxComponentsOfDataMatrix(),
+                        anArt2aEuclidData.getMinMaxComponentsOfDataMatrix(),
                         aThresholdForContrastEnhancement
                     );
                 }
                 int tmpWinnerClusterIndex = 
-                    Art2aUtils.getClusterIndex(
+                    Art2aEuclidUtils.getClusterIndex(
                         aBufferVector, 
                         aNumberOfDetectedClusters,
                         aClusterMatrix
@@ -402,6 +403,31 @@ public class Art2aUtils {
     }
 
     /**
+     * Returns index of cluster for contrast enhanced vector
+     * 
+     * @param aContrastEnhancedVector Contrast enhanced vector
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aClusterMatrix Cluster matrix
+     * @return Index of cluster for contrast enhanced unit vector
+     */
+    protected static int getClusterIndex(
+        float[] aContrastEnhancedVector, 
+        int aNumberOfDetectedClusters,
+        float[][] aClusterMatrix
+    ) {
+        float tmpMinSquaredDistance = Float.MAX_VALUE;
+        int tmpWinnerClusterIndex = -1;
+        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpSquaredDistance = Art2aEuclidUtils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i]);
+            if (tmpSquaredDistance < tmpMinSquaredDistance) {
+                tmpMinSquaredDistance = tmpSquaredDistance;
+                tmpWinnerClusterIndex = i;
+            }
+        }
+        return tmpWinnerClusterIndex;
+    }
+    
+    /**
      * Returns mean distance of all specified row vectors.
      * 
      * @param aMatrix Matrix with row vectors (IS NOT CHANGED)
@@ -415,37 +441,12 @@ public class Art2aUtils {
         float tmpSum = 0.0f;
         for (int i = 0; i < anIndicesOfRowVectors.length; i++) {
             for (int j = i + 1; j < anIndicesOfRowVectors.length; j++) {
-                tmpSum += (float) Math.sqrt(Art2aUtils.getSquaredDistance(aMatrix[anIndicesOfRowVectors[i]], aMatrix[anIndicesOfRowVectors[j]]));
+                tmpSum += (float) Math.sqrt(Art2aEuclidUtils.getSquaredDistance(aMatrix[anIndicesOfRowVectors[i]], aMatrix[anIndicesOfRowVectors[j]]));
             }
         }
         return tmpSum / (float) (anIndicesOfRowVectors.length * (anIndicesOfRowVectors.length - 1) / 2);
     }
 
-    /**
-     * Returns index of cluster for contrast enhanced unit vector
-     * 
-     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector
-     * @param aNumberOfDetectedClusters Number of detected clusters
-     * @param aClusterMatrix Cluster matrix
-     * @return Index of cluster for contrast enhanced unit vector
-     */
-    protected static int getClusterIndex(
-        float[] aContrastEnhancedUnitVector, 
-        int aNumberOfDetectedClusters,
-        float[][] aClusterMatrix
-    ) {
-        float tmpMaxScalarProduct = Float.MIN_VALUE;
-        int tmpWinnerClusterIndex = -1;
-        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
-            float tmpScalarProduct = Art2aUtils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
-            if (tmpScalarProduct > tmpMaxScalarProduct) {
-                tmpMaxScalarProduct = tmpScalarProduct;
-                tmpWinnerClusterIndex = i;
-            }
-        }
-        return tmpWinnerClusterIndex;
-    }
-    
     /**
      * Returns min-max components for matrix where MinMaxValue[j] 
      * corresponds to column j of the row vectors of the matrix. The min-max 
@@ -475,20 +476,21 @@ public class Art2aUtils {
     }
     
     /**
-     * Calculates the scalar product (dot product) of aVector1 and aVector2.
+     * Calculates the squared distance between aVector1 and aVector2.
      * 
      * @param aVector1 Vector 1 (IS NOT CHANGED)
      * @param aVector2 Vector 2 (IS NOT CHANGED)
-     * @return Scalar product (dot product)
+     * @return Squared distance
      */
-    protected static float getScalarProduct(
+    protected static float getSquaredDistance(
         float[] aVector1, 
         float[] aVector2
     ) {
         float tmpSum = 0.0f;
         for (int i = 0; i < aVector1.length; i++) {
-            // tmpSum += aVector1[i] * aVector2[i];
-            tmpSum = Math.fma(aVector1[i], aVector2[i], tmpSum);
+            float tmpDelta = aVector1[i] - aVector2[i];
+            // tmpSum += (aVector1[i] - aVector2[i])^2;
+            tmpSum = Math.fma(tmpDelta, tmpDelta, tmpSum);
         }
         return tmpSum;
     }
@@ -526,39 +528,25 @@ public class Art2aUtils {
         }
         return tmpScaledVector;
     }
-    
-    /**
-     * Calculates the squared distance between aVector1 and aVector2.
-     * 
-     * @param aVector1 Vector 1 (IS NOT CHANGED)
-     * @param aVector2 Vector 2 (IS NOT CHANGED)
-     * @return Squared distance
-     */
-    protected static float getSquaredDistance(
-        float[] aVector1, 
-        float[] aVector2
-    ) {
-        float tmpSum = 0.0f;
-        for (int i = 0; i < aVector1.length; i++) {
-            float tmpDelta = aVector1[i] - aVector2[i];
-            // tmpSum += (aVector1[i] - aVector2[i])^2;
-            tmpSum = Math.fma(tmpDelta, tmpDelta, tmpSum);
-        }
-        return tmpSum;
-    }
 
     /**
-     * Calculates the sum of components of aVector.
+     * Calculates the sum of squared differences between the components of the 
+     * specified vector and a value.
      *
      * @param aVector Vector (IS NOT CHANGED)
-     * @return Sum of components
+     * @param aValue Value
+     * @return Sum of squared differences between the components of the 
+     * specified vector and a value.
      */
-    protected static float getSumOfComponents(
-        float[] aVector
+    protected static float getSumOfSquaredDifferences(
+        float[] aVector,
+        float aValue
     ) {
         float tmpSum = 0.0f;
-        for (float tmpComponent : aVector) {
-            tmpSum += tmpComponent;
+        for (int i = 0; i < aVector.length; i++) {
+            float tmpDelta = aVector[i] - aValue;
+            // tmpSum += (aVector[i] - aValue)^2;
+            tmpSum = Math.fma(tmpDelta, tmpDelta, tmpSum);
         }
         return tmpSum;
     }
@@ -577,23 +565,6 @@ public class Art2aUtils {
         // Original code:
         // return (float) (1.0 / Math.sqrt(aNumberOfComponents + 1.0));
         return (float) (1.0 / Math.sqrt(aNumberOfComponents + anOffsetForContrastEnhancement));
-    }
-    
-    /**
-     * Calculates the length of aVector.
-     *
-     * @param aVector Vector (IS NOT CHANGED)
-     * @return Length of vector
-     */
-    protected static float getVectorLength(
-        float[] aVector
-    ) {
-        float tmpSum = 0.0f;
-        for (float tmpComponent : aVector) {
-            // tmpSum += tmpComponent * tmpComponent;
-            tmpSum = Math.fma(tmpComponent, tmpComponent, tmpSum);
-        }
-        return (float) Math.sqrt(tmpSum);
     }
     
     /**
@@ -645,27 +616,6 @@ public class Art2aUtils {
         }
         return false;
     }
-    
-    /**
-     * Calculates contrast enhanced vector.
-     *
-     * @param aVector Vector to be contrast enhanced (MAY BE CHANGED)
-     * @param aThresholdForContrastEnhancement Threshold for contrast enhancement
-     * @return True if aVector is changed by contrast enhancement, false otherwise.
-     */
-    protected static boolean isContrastEnhanced(
-        float[] aVector, 
-        float aThresholdForContrastEnhancement
-    ) {
-        boolean tmpIsVectorChanged = false;
-        for(int i = 0; i < aVector.length; i++) {
-            if(aVector[i] != 0.0f && aVector[i] <= aThresholdForContrastEnhancement) {
-                aVector[i] = 0.0f;
-                tmpIsVectorChanged = true;
-            }
-        }
-        return tmpIsVectorChanged;
-    }
 
     /**
      * Determines convergence of clustering process.
@@ -691,9 +641,10 @@ public class Art2aUtils {
     ) {
         if (anEpoch == 1) {
             // Convergence check needs at least 2 epochs
-            Art2aUtils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+            Art2aEuclidUtils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
             return false;
         } else {
+            float tmpSquaredConvergenceThreshold = aConvergenceThreshold * aConvergenceThreshold;
             boolean tmpIsConverged = false;
             if(anEpoch < aMaximumNumberOfEpochs) {
                 // Check convergence by evaluating the similarity (scalar product) 
@@ -702,14 +653,17 @@ public class Art2aUtils {
                 for (int i = 0; i < aNumberOfDetectedClusters; i++) {
                     if (
                         aClusterCentroidMatrixOld[i] == null || 
-                        Art2aUtils.getScalarProduct(aClusterCentroidMatrix[i], aClusterCentroidMatrixOld[i]) < aConvergenceThreshold
+                        Art2aEuclidUtils.getSquaredDistance(
+                            aClusterCentroidMatrix[i], 
+                            aClusterCentroidMatrixOld[i]
+                        ) > tmpSquaredConvergenceThreshold
                     ) {
                         tmpIsConverged = false;
                         break;
                     }
                 }
                 if(!tmpIsConverged) {
-                    Art2aUtils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+                    Art2aEuclidUtils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
                 }
             }
             return tmpIsConverged;
@@ -744,56 +698,33 @@ public class Art2aUtils {
 
     /**
      * Modifies winner cluster (see code).
-     * Note: aContrastEnhancedUnitVector is used for modification and may be 
+     * Note: aContrastEnhancedVector is used for modification and may be 
      * changed.
      * Note: No checks are performed.
      * 
-     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector for 
+     * @param aContrastEnhancedVector Contrast enhanced unit vector for 
      * modification (MAY BE CHANGED)
      * @param aWinnerClusterVector Winner cluster centroid vector (MAY BE CHANGED)
      * @param aThresholdForContrastEnhancement Threshold for contrast enhancement
      * @param aLearningParameter  Learning parameter
      */
     protected static void modifyWinnerCluster(
-        float[] aContrastEnhancedUnitVector,
+        float[] aContrastEnhancedVector,
         float[] aWinnerClusterVector,
         float aThresholdForContrastEnhancement,
         float aLearningParameter
     ) {
-        // Note: aContrastEnhancedUnitVector is used for modification
-        boolean tmpIsChanged = false;
+        // Note: aContrastEnhancedVector is used for modification
         for(int j = 0; j < aWinnerClusterVector.length; j++) {
             if(aWinnerClusterVector[j] <= aThresholdForContrastEnhancement) {
-                aContrastEnhancedUnitVector[j] = 0.0f;
-                tmpIsChanged = true;
+                aContrastEnhancedVector[j] = 0.0f;
             }
         }
-        float tmpFactor1;
-        if (tmpIsChanged) {
-            tmpFactor1 = aLearningParameter / Art2aUtils.getVectorLength(aContrastEnhancedUnitVector);
-        } else {
-            tmpFactor1 = aLearningParameter;
-        }
-        float tmpFactor2 = ONE - aLearningParameter;
+        float tmpFactor = ONE - aLearningParameter;
         for(int j = 0; j < aWinnerClusterVector.length; j++) {
-            aContrastEnhancedUnitVector[j] = tmpFactor1 * aContrastEnhancedUnitVector[j] + tmpFactor2 * aWinnerClusterVector[j];
+            aContrastEnhancedVector[j] = aLearningParameter * aContrastEnhancedVector[j] + tmpFactor * aWinnerClusterVector[j];
         }
-        Art2aUtils.normalizeVector(aContrastEnhancedUnitVector);
-        Art2aUtils.copyVector(aContrastEnhancedUnitVector, aWinnerClusterVector);
-    }
-    
-    /**
-     * Calculates normalized (unit) vector of length 1.
-     *
-     * @param aVector Vector to be normalized (MAY BE CHANGED)
-     */
-    protected static void normalizeVector(
-        float[] aVector
-    ) {
-        float tmpInverseVectorLength = ONE / Art2aUtils.getVectorLength(aVector);
-        for(int i = 0; i < aVector.length; i++) {
-            aVector[i] *= tmpInverseVectorLength;
-        }
+        Art2aEuclidUtils.copyVector(aContrastEnhancedVector, aWinnerClusterVector);
     }
 
     /**
@@ -837,6 +768,112 @@ public class Art2aUtils {
             aClusterRemovalInfo.setClusterRemovalInfo(tmpIsEmptyClusterRemoval, aNumberOfDetectedClusters);
         }
     }
+
+    /**
+     * Calculates contrast enhanced vector.
+     *
+     * @param aVector Vector to be contrast enhanced (MAY BE CHANGED)
+     * @param aThresholdForContrastEnhancement Threshold for contrast enhancement
+     */
+    protected static void setContrastEnhancement(
+        float[] aVector, 
+        float aThresholdForContrastEnhancement
+    ) {
+        for(int i = 0; i < aVector.length; i++) {
+            if(aVector[i] != 0.0f && aVector[i] <= aThresholdForContrastEnhancement) {
+                aVector[i] = 0.0f;
+            }
+        }
+    }
+    
+    /**
+     * Transforms original data vector into corresponding contrast enhanced 
+     * unit vector (see code).
+     * Note: No checks are performed.
+     * 
+     * @param aDataVector Data vector (IS NOT CHANGED)
+     * @param aBufferVector Buffer vector for contrast enhanced unit vector 
+     * derived from data vector (MUST ALREADY BE INSTANTIATED and is set within 
+     * the method)
+     * @param aMinMaxComponents Min-max components of original data matrix
+     * @param aThresholdForContrastEnhancement Threshold for contrast 
+     * enhancement
+     * @return True: Scaled data vector has a length of zero, false: Otherwise
+     */
+    protected static boolean setContrastEnhancedVector(
+        float[] aDataVector,
+        float[] aBufferVector,
+        Art2aEuclidUtils.MinMaxValue[] aMinMaxComponents,
+        float aThresholdForContrastEnhancement
+    ) {
+        // Already allocated memory of aBufferVector is reused
+        Art2aEuclidUtils.copyVector(aDataVector, aBufferVector);
+        // Scale components of vector to interval [0,1]
+        Art2aEuclidUtils.scaleVector(aBufferVector, aMinMaxComponents);
+        // Check length
+        if (Art2aEuclidUtils.hasLengthOfZero(aBufferVector)) {
+            // True: Scaled source vector has a length of zero
+            return true;
+        } else {
+            // Enhance contrast
+            Art2aEuclidUtils.setContrastEnhancement(aBufferVector, aThresholdForContrastEnhancement);
+            // False: Scaled data vector has a length different from zero
+            return false;
+        }
+    }
+
+    /**
+     * Sets rho winner with the rho value and the cluster index of the winner
+     * (see code). If the cluster index is negative the first scaled rho value 
+     * is the winner.
+     * 
+     * @param aContrastEnhancedVector Contrast enhanced unit vector (IS NOT 
+     * CHANGED)
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aScalingFactor Scaling factor
+     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster 
+     * index of the winner. If the cluster index is negative the first scaled 
+     * rho value is the winner.
+     */
+    protected static void setRhoWinner(
+        float[] aContrastEnhancedVector,
+        float[][] aClusterMatrix,
+        int aNumberOfDetectedClusters,
+        float aScalingFactor,
+        Art2aEuclidUtils.RhoWinner aRhoWinner
+    ) {
+        // Calculate first rho value
+        float tmpRhoValue = Art2aEuclidUtils.getSumOfSquaredDifferences(aContrastEnhancedVector, aScalingFactor);
+        // Set winner index to negative value
+        int tmpIndex = -1;
+        // Calculate other rho values
+        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpRhoForCluster = Art2aEuclidUtils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i]);
+            if(tmpRhoForCluster < tmpRhoValue) {
+                tmpRhoValue = tmpRhoForCluster;
+                tmpIndex = i;
+            }
+        }
+        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
+    }
+
+    /**
+     * Sets copied (!) row vector at index in matrix.
+     * 
+     * @param aMatrix Matrix (MAY BE CHANGED)
+     * @param aRowVector Row vector (IS NOT CHANGED)
+     * @param anIndex Index of row vector in matrix
+     */
+    protected static void setRowVector(
+        float[][] aMatrix,
+        float[] aRowVector,
+        int anIndex
+    ) {
+        float[] tmpNewMatrixRowVector = new float[aRowVector.length];
+        Art2aEuclidUtils.copyVector(aRowVector, tmpNewMatrixRowVector);
+        aMatrix[anIndex] = tmpNewMatrixRowVector;
+    }
     
     /**
      * Scales components of aVectorToBeScaled according to min-max components 
@@ -858,98 +895,6 @@ public class Art2aUtils {
                 // Shift component to zero
                 aVectorToBeScaled[i] -= aMinMaxComponents[i].minValue();
             }
-        }
-    }
-
-    /**
-     * Sets rho winner with the rho value and the cluster index of the winner
-     * (see code). If the cluster index is negative the first scaled rho value 
-     * is the winner.
-     * 
-     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector (IS NOT 
-     * CHANGED)
-     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
-     * @param aNumberOfDetectedClusters Number of detected clusters
-     * @param aScalingFactor Scaling factor
-     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster 
-     * index of the winner. If the cluster index is negative the first scaled 
-     * rho value is the winner.
-     */
-    protected static void setRhoWinner(
-        float[] aContrastEnhancedUnitVector,
-        float[][] aClusterMatrix,
-        int aNumberOfDetectedClusters,
-        float aScalingFactor,
-        Art2aUtils.RhoWinner aRhoWinner
-    ) {
-        // Calculate first rho value
-        float tmpRhoValue = aScalingFactor * Art2aUtils.getSumOfComponents(aContrastEnhancedUnitVector);
-        // Set winner index to negative value
-        int tmpIndex = -1;
-        // Calculate other rho values
-        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
-            float tmpRhoForCluster = Art2aUtils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
-            if(tmpRhoForCluster > tmpRhoValue) {
-                tmpRhoValue = tmpRhoForCluster;
-                tmpIndex = i;
-            }
-        }
-        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
-    }
-
-    /**
-     * Sets copied (!) row vector at index in matrix.
-     * 
-     * @param aMatrix Matrix (MAY BE CHANGED)
-     * @param aRowVector Row vector (IS NOT CHANGED)
-     * @param anIndex Index of row vector in matrix
-     */
-    protected static void setRowVector(
-        float[][] aMatrix,
-        float[] aRowVector,
-        int anIndex
-    ) {
-        float[] tmpNewMatrixRowVector = new float[aRowVector.length];
-        Art2aUtils.copyVector(aRowVector, tmpNewMatrixRowVector);
-        aMatrix[anIndex] = tmpNewMatrixRowVector;
-    }
-    
-    /**
-     * Transforms original data vector into corresponding contrast enhanced 
-     * unit vector (see code).
-     * Note: No checks are performed.
-     * 
-     * @param aDataVector Data vector (IS NOT CHANGED)
-     * @param aBufferVector Buffer vector for contrast enhanced unit vector 
-     * derived from data vector (MUST ALREADY BE INSTANTIATED and is set within 
-     * the method)
-     * @param aMinMaxComponents Min-max components of original data matrix
-     * @param aThresholdForContrastEnhancement Threshold for contrast 
-     * enhancement
-     * @return True: Scaled data vector has a length of zero, false: Otherwise
-     */
-    protected static boolean setContrastEnhancedUnitVector(
-        float[] aDataVector,
-        float[] aBufferVector,
-        Art2aUtils.MinMaxValue[] aMinMaxComponents,
-        float aThresholdForContrastEnhancement
-    ) {
-        // Already allocated memory of aBufferVector is reused
-        Art2aUtils.copyVector(aDataVector, aBufferVector);
-        // Scale components of vector to interval [0,1]
-        Art2aUtils.scaleVector(aBufferVector, aMinMaxComponents);
-        // Check length
-        if (Art2aUtils.hasLengthOfZero(aBufferVector)) {
-            // True: Scaled source vector has a length of zero
-            return true;
-        } else {
-            Art2aUtils.normalizeVector(aBufferVector);
-            // Enhance contrast
-            if (Art2aUtils.isContrastEnhanced(aBufferVector, aThresholdForContrastEnhancement)) {
-                Art2aUtils.normalizeVector(aBufferVector);
-            }
-            // False: Scaled data vector has a length different from zero
-            return false;
         }
     }
 
