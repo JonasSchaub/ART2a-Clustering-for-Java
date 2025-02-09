@@ -27,7 +27,6 @@
 package de.unijena.cheminf.clustering.art2a;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,12 +49,6 @@ public class Art2aEuclidResult {
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aEuclidResult.class.getName());
-    //</editor-fold>
-    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
-    /**
-     * Conversion constant from radiant to degree
-     */
-    private static final float CONVERSION_TO_DEGREE = 180.0f / (float) Math.PI;
     //</editor-fold>
     //<editor-fold desc="Private final class variables" defaultstate="collapsed">
     /**
@@ -217,7 +210,7 @@ public class Art2aEuclidResult {
             throw new IllegalArgumentException("Art2aEuclidResult.getClusterVector: aClusterIndex is illegal.");
         }
         //</editor-fold>
-        return Art2aEuclidUtils.getScaledVector(this.clusterMatrix[aClusterIndex]);
+        return Utils.getScaledVector(this.clusterMatrix[aClusterIndex]);
     }
     
     /**
@@ -306,7 +299,7 @@ public class Art2aEuclidResult {
         } else {
             return 
                 (float) Math.sqrt(
-                    Art2aEuclidUtils.getSquaredDistance(
+                    Utils.getSquaredDistance(
                         this.clusterMatrix[aClusterIndex1], 
                         this.clusterMatrix[aClusterIndex2]
                     )
@@ -412,7 +405,7 @@ public class Art2aEuclidResult {
                     this.thresholdForContrastEnhancement
                 );
             }
-            float tmpSquaredDistance = Art2aEuclidUtils.getSquaredDistance(tmpContrastEnhancedVector, tmpClusterVector);
+            float tmpSquaredDistance = Utils.getSquaredDistance(tmpContrastEnhancedVector, tmpClusterVector);
             if (tmpSquaredDistance < tmpMinimumDistance) {
                 tmpBestIndex = tmpIndex;
                 tmpMinimumDistance = tmpSquaredDistance;
@@ -467,7 +460,7 @@ public class Art2aEuclidResult {
                     this.thresholdForContrastEnhancement
                 );
             }
-            tmpIndexedValues[i] = new IndexedValue(tmpIndex, Art2aEuclidUtils.getSquaredDistance(tmpContrastEnhancedVector, tmpClusterVector));
+            tmpIndexedValues[i] = new IndexedValue(tmpIndex, Utils.getSquaredDistance(tmpContrastEnhancedVector, tmpClusterVector));
         }
         // NOTE: SMALLEST squared distance FIRST!
         Arrays.sort(tmpIndexedValues);
@@ -498,7 +491,7 @@ public class Art2aEuclidResult {
      */
     public float getVigilance() {
         return this.vigilance;
-    };
+    }
 
     /**
      * Number of epochs
@@ -507,7 +500,7 @@ public class Art2aEuclidResult {
      */
     public int getNumberOfEpochs() {
         return this.numberOfEpochs;
-    };
+    }
     
     /**
      * Number of detected clusters
@@ -516,7 +509,7 @@ public class Art2aEuclidResult {
      */
     public int getNumberOfDetectedClusters() {
         return this.numberOfDetectedClusters;
-    };
+    }
     //</editor-fold>
 
 }

@@ -32,10 +32,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * ART-2a-Euclid algorithm implementation for unsupervised, open categorical 
@@ -290,7 +291,7 @@ public class Art2aEuclidKernel {
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(!Art2aEuclidKernel.isDataMatrixValid(aDataMatrix)) {
+        if(!Utils.isDataMatrixValid(aDataMatrix)) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidKernel.Constructor: aDataMatrix is not valid."
@@ -336,7 +337,7 @@ public class Art2aEuclidKernel {
 
         if(anIsDataPreprocessing) {
             this.art2aEuclidData = 
-                Art2aEuclidKernel.getArt2aEuclidData(
+                Art2aEuclidKernel.getPreprocessedArt2aEuclidData(
                     aDataMatrix,
                     anOffsetForContrastEnhancement
                 );
@@ -344,7 +345,7 @@ public class Art2aEuclidKernel {
             this.art2aEuclidData = 
                 new Art2aEuclidData(
                     aDataMatrix, 
-                    Art2aEuclidUtils.getMinMaxComponents(aDataMatrix),
+                    Utils.getMinMaxComponents(aDataMatrix),
                     anOffsetForContrastEnhancement
                 );
         }
@@ -370,10 +371,8 @@ public class Art2aEuclidKernel {
         float[][] aDataMatrix
     ) throws IllegalArgumentException {
         this(
-            aDataMatrix, 
-            (int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS) > 2 ? 
-                (int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS) : 
-                2,
+            aDataMatrix,
+            Math.max((int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -466,10 +465,8 @@ public class Art2aEuclidKernel {
         Art2aEuclidData anArt2aEuclidData
     ) throws IllegalArgumentException {
         this(
-            anArt2aEuclidData, 
-            (int) (anArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS) > 2 ?
-                (int) (anArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS) :
-                2,
+            anArt2aEuclidData,
+            Math.max((int) (anArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -514,25 +511,25 @@ public class Art2aEuclidKernel {
             int tmpNumberOfComponents = -1;
             int tmpNumberOfDataVectors = -1;
             if (this.art2aEuclidData.hasPreprocessedData()) {
-                tmpContrastEnhancedMatrix = (float[][]) this.art2aEuclidData.getContrastEnhancedMatrix();
-                tmpDataVectorZeroLengthFlags = (boolean[]) this.art2aEuclidData.getDataVectorZeroLengthFlags();
+                tmpContrastEnhancedMatrix = this.art2aEuclidData.getContrastEnhancedMatrix();
+                tmpDataVectorZeroLengthFlags = this.art2aEuclidData.getDataVectorZeroLengthFlags();
                 tmpNumberOfDataVectors = tmpContrastEnhancedMatrix.length;
                 tmpNumberOfComponents = tmpContrastEnhancedMatrix[0].length;
             } else {
                 tmpDataMatrix = this.art2aEuclidData.getDataMatrix();
                 tmpDataVectorZeroLengthFlags = new boolean[tmpDataMatrix.length];
-                Art2aEuclidUtils.fillVector(tmpDataVectorZeroLengthFlags, false);
+                Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
                 tmpNumberOfDataVectors = tmpDataMatrix.length;
                 tmpNumberOfComponents = tmpDataMatrix[0].length;
             }
-            Art2aEuclidUtils.MinMaxValue[] tmpMinMaxComponents = this.art2aEuclidData.getMinMaxComponentsOfDataMatrix();
+            Utils.MinMaxValue[] tmpMinMaxComponents = this.art2aEuclidData.getMinMaxComponentsOfDataMatrix();
             
             // Set tmpRhoStar
             float tmpRhoStar = tmpNumberOfComponents * (ONE - aVigilance);
 
             // Definitions
             float tmpThresholdForContrastEnhancement = 
-                Art2aEuclidUtils.getThresholdForContrastEnhancement(
+                Utils.getThresholdForContrastEnhancement(
                     tmpNumberOfComponents,
                     this.art2aEuclidData.getOffsetForContrastEnhancement()
                 );
@@ -550,7 +547,7 @@ public class Art2aEuclidKernel {
             // Initialize cluster indices for data row vectors with -1 to 
             // indicate missing cluster assignment
             int[] tmpClusterIndexOfDataVector = new int[tmpNumberOfDataVectors];
-            Art2aEuclidUtils.fillVector(tmpClusterIndexOfDataVector, -1);
+            Utils.fillVector(tmpClusterIndexOfDataVector, -1);
 
             // Initialize random indices
             int[] tmpRandomIndices = new int[tmpNumberOfDataVectors];
@@ -564,14 +561,14 @@ public class Art2aEuclidKernel {
             // Main clustering loop
             int tmpCurrentNumberOfEpochs = 0;
             int tmpNumberOfDetectedClusters = 0;
-            Art2aEuclidUtils.RhoWinner tmpRhoWinner = new Art2aEuclidUtils.RhoWinner();
-            Art2aEuclidUtils.ClusterRemovalInfo tmpClusterRemovalInfo = new Art2aEuclidUtils.ClusterRemovalInfo();
+            Utils.RhoWinner tmpRhoWinner = new Utils.RhoWinner();
+            Utils.ClusterRemovalInfo tmpClusterRemovalInfo = new Utils.ClusterRemovalInfo();
             boolean tmpIsConverged = false;
             while(!tmpIsConverged && tmpCurrentNumberOfEpochs < this.maximumNumberOfEpochs) {
                 tmpCurrentNumberOfEpochs++;
                 
                 // Get random sequence of indices for data row vectors
-                Art2aEuclidUtils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
+                Utils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
 
                 Arrays.fill(tmpClusterUsageFlags, false);
                 for(int i = 0; i < tmpNumberOfDataVectors; i++) {
@@ -583,7 +580,7 @@ public class Art2aEuclidKernel {
                     }
 
                     if (this.art2aEuclidData.hasPreprocessedData()) {
-                        Art2aEuclidUtils.copyVector(tmpContrastEnhancedMatrix[tmpRandomIndex], tmpBufferVector);
+                        Utils.copyVector(tmpContrastEnhancedMatrix[tmpRandomIndex], tmpBufferVector);
                     } else {
                         tmpDataVectorZeroLengthFlags[tmpRandomIndex] = 
                             Art2aEuclidUtils.setContrastEnhancedVector(
@@ -599,7 +596,7 @@ public class Art2aEuclidKernel {
 
                     if(tmpNumberOfDetectedClusters == 0) {
                         // Create first cluster
-                        Art2aEuclidUtils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
+                        Utils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
                         tmpClusterIndexOfDataVector[tmpRandomIndex] = tmpNumberOfDetectedClusters;
                         tmpClusterUsageFlags[tmpNumberOfDetectedClusters] = true;
                         tmpNumberOfDetectedClusters++;
@@ -619,7 +616,7 @@ public class Art2aEuclidKernel {
                                 tmpIsClusterOverflow = true;
                             } else {
                                 // Increment clusters
-                                Art2aEuclidUtils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
+                                Utils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
                                 tmpClusterIndexOfDataVector[tmpRandomIndex] = tmpNumberOfDetectedClusters;
                                 tmpClusterUsageFlags[tmpNumberOfDetectedClusters] = true;
                                 tmpNumberOfDetectedClusters++;
@@ -640,7 +637,7 @@ public class Art2aEuclidKernel {
                     }
                 }
                 
-                Art2aEuclidUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -675,7 +672,7 @@ public class Art2aEuclidKernel {
                     tmpClusterUsageFlags
                 );
                 // Remove possible empty clusters
-                Art2aEuclidUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -697,7 +694,7 @@ public class Art2aEuclidKernel {
                     tmpClusterIndexOfDataVector,
                     tmpClusterUsageFlags
                 );
-                Art2aEuclidUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -727,7 +724,7 @@ public class Art2aEuclidKernel {
                 anException.toString(), 
                 anException
             );
-            throw anException;
+            throw new Exception("Art2aEuclidKernel.getClusterResult: An exception occurred: This should never happen!");
         }
     }
 
@@ -780,7 +777,7 @@ public class Art2aEuclidKernel {
             for (float tmpVigilance : aVigilances) {
                 tmpSingleTaskList.add(new HelperTask(this, tmpVigilance));
             }
-            ExecutorService tmpExecutorService = Executors.newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
+            ExecutorService tmpExecutorService = newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
             List<Future<Art2aEuclidResult>> tmpFutureList = null;
             try {
                 tmpFutureList = tmpExecutorService.invokeAll(tmpSingleTaskList);
@@ -966,7 +963,7 @@ public class Art2aEuclidKernel {
             for (int i = 0; i < tmpAllIndices.length; i++) {
                 tmpAllIndices[i] = i;
             }
-            float tmpBaseMeanDistance = Art2aEuclidUtils.getMeanDistance(aDataMatrix, tmpAllIndices);
+            float tmpBaseMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpAllIndices);
 
             float tmpVigilanceMin = 0.0001f;
             float tmpVigilanceMax = 0.9999f;
@@ -982,7 +979,7 @@ public class Art2aEuclidKernel {
                         tmpVigilanceMax, 
                         tmpNumberOfTrialSteps
                     );
-                float tmpMeanDistance = Art2aEuclidUtils.getMeanDistance(aDataMatrix, tmpRepresentatives);
+                float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
                 float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
                 if (tmpDifference < tmpMinimalDifference) {
                     tmpMinimalDifference = tmpDifference;
@@ -1006,119 +1003,30 @@ public class Art2aEuclidKernel {
     //</editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Checks if aDataMatrix is valid.
-     * 
-     * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
-     * @return True if aDataMatrix is valid, false otherwise.
-     */
-    public static boolean isDataMatrixValid(
-        float[][] aDataMatrix
-    ) {
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.isDataMatrixValid: aDataMatrixis is null or empty."
-            );
-            return false;
-        }
-
-        int tmpNumberOfDataVectorComponents = aDataMatrix[0].length;
-        if(tmpNumberOfDataVectorComponents < 2) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.isDataMatrixValid: Data row vectors must have at least 2 components."
-            );
-            return false;
-        }
-        
-        for(float[] tmpDataVector : aDataMatrix) {
-            if(tmpDataVector == null || tmpDataVector.length == 0) {
-                Art2aEuclidKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aEuclidKernel.isDataMatrixValid: A data row vector of aDataMatrix is not allowed to be null or empty."
-                );
-                return false;
-            }
-
-            if(tmpNumberOfDataVectorComponents != tmpDataVector.length) {
-                Art2aEuclidKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aEuclidKernel.isDataMatrixValid: Data row vectors in aDataMatrix must have the same length."
-                );
-                return false;
-            }
-        }
-        if (Art2aEuclidUtils.hasNonFiniteComponent(aDataMatrix)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Removes columns from data matrix with non-finite components.
-     * Note: If aDataMatrix is null, empty or has an invalid structure 
-     * nothing is done and false is returned.
-     * 
-     * @param aDataMatrix Data matrix with data row vectors (MAY BE CHANGED)
-     * @return True if aDataMatrix was changed (i.e. column removal was 
-     * performed), false otherwise (i.e. data matrix is unchanged).
-     */
-    public static boolean isNonFiniteComponentRemoval(
-        float[][] aDataMatrix
-    ) {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            return false;
-        }
-
-        int tmpNumberOfDataVectorComponents = aDataMatrix[0].length;
-        if(tmpNumberOfDataVectorComponents < 2) {
-            return false;
-        }
-
-        for(float[] tmpDataVector : aDataMatrix) {
-            if(tmpDataVector == null || tmpDataVector.length == 0) {
-                return false;
-            }
-
-            if(tmpNumberOfDataVectorComponents != tmpDataVector.length) {
-                return false;
-            }
-        }
-        //</editor-fold>
-
-        boolean tmpHasNonFiniteComponent = Art2aEuclidUtils.hasNonFiniteComponent(aDataMatrix);
-        if (tmpHasNonFiniteComponent) {
-            // TODO: Remove columns with non-finite components
-        }
-        return tmpHasNonFiniteComponent;
-    }
-    
-    /**
      * Creates ART-2a-Euclid data object with preprocessed data for maximum 
      * speed  of the clustering process. The ART-2a-Euclid data object allocates 
      * about the same memory as aDataMatrix.
      * <br>
      * Note: There a no checks! Check aDataMatrix in advance with method
-     * Art2aEuclidKernel.isDataMatrixValid().
+     * Utils.isDataMatrixValid().
      * <br>
      * Note: aDataMatrix could be set to null after this operation to release  
      * its memory.
 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
-     * with Art2aEuclidKernel.isDataMatrixValid() in advance)
+     * with Utils.isDataMatrixValid() in advance)
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
      * (must be greater zero)
      * @return ART-2a-Euclid data object for maximum clustering speed but with 
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aEuclidData getArt2aEuclidData(
+    public static Art2aEuclidData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         int tmpNumberOfComponents = aDataMatrix[0].length;
         float tmpThresholdForContrastEnhancement = 
-            Art2aEuclidUtils.getThresholdForContrastEnhancement(
+            Utils.getThresholdForContrastEnhancement(
                 tmpNumberOfComponents,
                 anOffsetForContrastEnhancement
             );
@@ -1126,11 +1034,11 @@ public class Art2aEuclidKernel {
         // Initialize flags array for scaled data row vectors which have a 
         // length of zero (i.e. where all components are equal to zero)
         boolean[] tmpDataVectorZeroLengthFlags = new boolean[aDataMatrix.length];
-        Art2aEuclidUtils.fillVector(tmpDataVectorZeroLengthFlags, false);
+        Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
 
         float[][] tmpContrastEnhancedMatrix = new float[aDataMatrix.length][];
         
-        Art2aEuclidUtils.MinMaxValue[] tmpMinMaxComponents = Art2aEuclidUtils.getMinMaxComponents(aDataMatrix);
+        Utils.MinMaxValue[] tmpMinMaxComponents = Utils.getMinMaxComponents(aDataMatrix);
 
         for(int i = 0; i < aDataMatrix.length; i++) {
             float[] tmpContrastEnhancedVector = new float[tmpNumberOfComponents];
@@ -1161,14 +1069,14 @@ public class Art2aEuclidKernel {
      * its memory.
 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
-     * with Art2aEuclidKernel.isDataMatrixValid() in advance)
+     * with Utils.isDataMatrixValid() in advance)
      * @return ART-2a-Euclid data object for maximum clustering speed but with 
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aEuclidData getArt2aEuclidData(
+    public static Art2aEuclidData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix
     ) {
-        return Art2aEuclidKernel.getArt2aEuclidData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
+        return Art2aEuclidKernel.getPreprocessedArt2aEuclidData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
     }
     //</editor-fold>
 

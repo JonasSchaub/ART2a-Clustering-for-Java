@@ -217,7 +217,7 @@ public class Art2aResult {
             throw new IllegalArgumentException("Art2aResult.getClusterVector: aClusterIndex is illegal.");
         }
         //</editor-fold>
-        return Art2aUtils.getScaledVector(this.clusterMatrix[aClusterIndex]);
+        return Utils.getScaledVector(this.clusterMatrix[aClusterIndex]);
     }
     
     /**
@@ -305,7 +305,7 @@ public class Art2aResult {
         } else {
             return 
                 (float) Math.acos(
-                    Art2aUtils.getScalarProduct(
+                    Utils.getScalarProduct(
                         this.clusterMatrix[aClusterIndex1], 
                         this.clusterMatrix[aClusterIndex2]
                     )
@@ -411,7 +411,7 @@ public class Art2aResult {
                     this.thresholdForContrastEnhancement
                 );
             }
-            float tmpScalarProduct = Art2aUtils.getScalarProduct(tmpContrastEnhancedUnitVector, tmpClusterVector);
+            float tmpScalarProduct = Utils.getScalarProduct(tmpContrastEnhancedUnitVector, tmpClusterVector);
             if (tmpScalarProduct > tmpMaximumScalarProduct) {
                 tmpBestIndex = tmpIndex;
                 tmpMaximumScalarProduct = tmpScalarProduct;
@@ -466,7 +466,7 @@ public class Art2aResult {
                     this.thresholdForContrastEnhancement
                 );
             }
-            tmpIndexedValues[i] = new IndexedValue(tmpIndex, Art2aUtils.getScalarProduct(tmpContrastEnhancedUnitVector, tmpClusterVector));
+            tmpIndexedValues[i] = new IndexedValue(tmpIndex, Utils.getScalarProduct(tmpContrastEnhancedUnitVector, tmpClusterVector));
         }
         // NOTE: LARGEST scalar product FIRST!
         Arrays.sort(tmpIndexedValues, Collections.reverseOrder());
@@ -497,7 +497,7 @@ public class Art2aResult {
      */
     public float getVigilance() {
         return this.vigilance;
-    };
+    }
 
     /**
      * Number of epochs
@@ -506,7 +506,7 @@ public class Art2aResult {
      */
     public int getNumberOfEpochs() {
         return this.numberOfEpochs;
-    };
+    }
     
     /**
      * Number of detected clusters
@@ -515,7 +515,7 @@ public class Art2aResult {
      */
     public int getNumberOfDetectedClusters() {
         return this.numberOfDetectedClusters;
-    };
+    }
     //</editor-fold>
 
 }

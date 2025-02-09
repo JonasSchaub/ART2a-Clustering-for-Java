@@ -26,11 +26,6 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
-import de.unijena.cheminf.clustering.art2a.Art2aEuclidKernel;
-import de.unijena.cheminf.clustering.art2a.Art2aEuclidResult;
-import de.unijena.cheminf.clustering.art2a.Art2aEuclidTask;
-import de.unijena.cheminf.clustering.art2a.Art2aEuclidData;
-import de.unijena.cheminf.clustering.art2a.Art2aEuclidUtils;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -227,7 +222,7 @@ public class Art2aEuclidTest {
         for (int i = 0; i < 150; i++) {
             tmpAllIndices[i] = i;
         }
-        float tmpBaseMeanDistance = Art2aEuclidUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
+        float tmpBaseMeanDistance = Utils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
         System.out.println(
             "Base mean distance = " + String.valueOf(tmpBaseMeanDistance)
         );
@@ -242,7 +237,7 @@ public class Art2aEuclidTest {
                     );
                 if (tmpNumberOfRepresentatives == tmpRepresentatives.length) {
                     Arrays.sort(tmpRepresentatives);
-                    float tmpMeanDistance = Art2aEuclidUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
+                    float tmpMeanDistance = Utils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
                     System.out.println(
                         String.valueOf(tmpNumberOfRepresentatives) + 
                         " Representatives (Mean distance = " +
@@ -315,7 +310,7 @@ public class Art2aEuclidTest {
                         "= " + 
                         String.valueOf(
                             Math.sqrt(
-                                Art2aEuclidUtils.getSquaredDistance(
+                                Utils.getSquaredDistance(
                                     tmpIrisFlowerDataMatrix[tmpRepresentatives[i]], 
                                     tmpIrisFlowerDataMatrix[tmpRepresentatives[j]]
                                 )
@@ -520,7 +515,7 @@ public class Art2aEuclidTest {
             }
 
             // Preprocessed Art2aEuclidData
-            Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aEuclidKernel tmpArt2aEuclidKernelWithArt2aEuclidData = 
                 new Art2aEuclidKernel(
                     tmpArt2aEuclidData, 
@@ -609,7 +604,7 @@ public class Art2aEuclidTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aEuclidTask> tmpArt2aEuclidTaskList = new LinkedList<>();
-        Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aEuclidTaskList.add(new Art2aEuclidTask(
                     tmpArt2aEuclidData, 

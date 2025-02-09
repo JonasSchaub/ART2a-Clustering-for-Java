@@ -74,9 +74,9 @@ public class Art2aEuclidData {
     private final boolean[] dataVectorZeroLengthFlags;
     /**
      * Min-max components of original data matrix (see method 
-     * Art2aEuclidUtils.getMinMaxComponents() for data structure)
+     * Utils.getMinMaxComponents() for data structure)
      */
-    private final Art2aEuclidUtils.MinMaxValue[] minMaxComponentsOfDataMatrix;
+    private final Utils.MinMaxValue[] minMaxComponentsOfDataMatrix;
     /**
      * Offset for contrast enhancement
      */
@@ -115,7 +115,7 @@ public class Art2aEuclidData {
         float[][] aDataMatrix,        
         float[][] aContrastEnhancedMatrix,
         boolean[] aDataVectorZeroLengthFlags,
-        Art2aEuclidUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement,
         boolean aHasPreprocessedData
     ) {
@@ -141,7 +141,7 @@ public class Art2aEuclidData {
      */
     protected Art2aEuclidData (
         float[][] aDataMatrix, 
-        Art2aEuclidUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         this (
@@ -152,7 +152,7 @@ public class Art2aEuclidData {
             anOffsetForContrastEnhancement,
             false
         );
-        if (!Art2aEuclidUtils.isMatrixValid(aDataMatrix)) {
+        if (!Utils.isMatrixValid(aDataMatrix)) {
             Art2aEuclidData.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidData.Constructor: aDataMatrix is invalid."
@@ -194,7 +194,7 @@ public class Art2aEuclidData {
     protected Art2aEuclidData (
         float[][] aContrastEnhancedMatrix,
         boolean[] aDataVectorZeroLengthFlags,
-        Art2aEuclidUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         this (
@@ -205,7 +205,7 @@ public class Art2aEuclidData {
             anOffsetForContrastEnhancement,
             true
         );
-        if (!Art2aEuclidUtils.isMatrixValid(aContrastEnhancedMatrix)) {
+        if (!Utils.isMatrixValid(aContrastEnhancedMatrix)) {
             Art2aEuclidData.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidData.Constructor: aContrastEnhancedMatrix is invalid."
@@ -270,12 +270,11 @@ public class Art2aEuclidData {
     }
 
     /**
-     * Min-max components of original data matrix (see method 
- Art2aEuclidUtils.getMinMaxComponents() for data structure)
+     * Min-max components of original data matrix (see method Utils.getMinMaxComponents() for data structure)
      * 
      * @return Min-max components of original data matrix
      */
-    protected Art2aEuclidUtils.MinMaxValue[] getMinMaxComponentsOfDataMatrix() {
+    protected Utils.MinMaxValue[] getMinMaxComponentsOfDataMatrix() {
         return this.minMaxComponentsOfDataMatrix;
     }
     

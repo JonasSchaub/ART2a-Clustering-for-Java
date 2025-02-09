@@ -276,7 +276,7 @@ public class Art2aTest {
         for (int i = 0; i < 150; i++) {
             tmpAllIndices[i] = i;
         }
-        float tmpBaseMeanDistance = Art2aUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
+        float tmpBaseMeanDistance = Utils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpAllIndices);
         System.out.println(
             "Base mean distance = " + String.valueOf(tmpBaseMeanDistance)
         );
@@ -291,7 +291,7 @@ public class Art2aTest {
                     );
                 if (tmpNumberOfRepresentatives == tmpRepresentatives.length) {
                     Arrays.sort(tmpRepresentatives);
-                    float tmpMeanDistance = Art2aUtils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
+                    float tmpMeanDistance = Utils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
                     System.out.println(
                         String.valueOf(tmpNumberOfRepresentatives) + 
                         " Representatives (Mean distance = " +
@@ -548,7 +548,7 @@ public class Art2aTest {
             }
 
             // Preprocessed Art2aData
-            Art2aData tmpArt2aData = Art2aKernel.getArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            Art2aData tmpArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aKernel tmpArt2aKernelWithArt2aData = 
                 new Art2aKernel(
                     tmpArt2aData, 
@@ -637,7 +637,7 @@ public class Art2aTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aTask> tmpArt2aTaskList = new LinkedList<>();
-        Art2aData tmpArt2aData = Art2aKernel.getArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        Art2aData tmpArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aTaskList.add(
                 new Art2aTask(

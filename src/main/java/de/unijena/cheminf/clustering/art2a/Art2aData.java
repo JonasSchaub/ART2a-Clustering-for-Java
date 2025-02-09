@@ -75,7 +75,7 @@ public class Art2aData {
      * Min-max components of original data matrix (see method 
      * Art2aUtils.getMinMaxComponents() for data structure)
      */
-    private final Art2aUtils.MinMaxValue[] minMaxComponentsOfDataMatrix;
+    private final Utils.MinMaxValue[] minMaxComponentsOfDataMatrix;
     /**
      * Offset for contrast enhancement
      */
@@ -114,7 +114,7 @@ public class Art2aData {
         float[][] aDataMatrix,        
         float[][] aContrastEnhancedUnitMatrix,
         boolean[] aDataVectorZeroLengthFlags,
-        Art2aUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement,
         boolean aHasPreprocessedData
     ) {
@@ -140,7 +140,7 @@ public class Art2aData {
      */
     protected Art2aData (
         float[][] aDataMatrix, 
-        Art2aUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         this (
@@ -151,7 +151,7 @@ public class Art2aData {
             anOffsetForContrastEnhancement,
             false
         );
-        if (!Art2aUtils.isMatrixValid(aDataMatrix)) {
+        if (!Utils.isMatrixValid(aDataMatrix)) {
             Art2aData.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aData.Constructor: aDataMatrix is invalid."
@@ -193,7 +193,7 @@ public class Art2aData {
     protected Art2aData (
         float[][] aContrastEnhancedUnitMatrix,
         boolean[] aDataVectorZeroLengthFlags,
-        Art2aUtils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
+        Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         this (
@@ -204,7 +204,7 @@ public class Art2aData {
             anOffsetForContrastEnhancement,
             true
         );
-        if (!Art2aUtils.isMatrixValid(aContrastEnhancedUnitMatrix)) {
+        if (!Utils.isMatrixValid(aContrastEnhancedUnitMatrix)) {
             Art2aData.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aData.Constructor: aContrastEnhancedUnitMatrix is invalid."
@@ -269,12 +269,11 @@ public class Art2aData {
     }
 
     /**
-     * Min-max components of original data matrix (see method 
-     * Art2aUtils.getMinMaxComponents() for data structure)
+     * Min-max components of original data matrix (see method Utils.getMinMaxComponents() for data structure)
      * 
      * @return Min-max components of original data matrix
      */
-    protected Art2aUtils.MinMaxValue[] getMinMaxComponentsOfDataMatrix() {
+    protected Utils.MinMaxValue[] getMinMaxComponentsOfDataMatrix() {
         return this.minMaxComponentsOfDataMatrix;
     }
     

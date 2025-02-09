@@ -32,10 +32,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * ART-2a algorithm implementation for unsupervised, open categorical 
@@ -93,7 +94,7 @@ import java.util.logging.Logger;
  * CAUTION: Construction of several ART-2a clustering instances with the SAME 
  * data matrix PLUS preprocessing is NOT advised due to the significant memory 
  * consumption of each instance. In this case, the data matrix should be 
- * checked with static method Art2aKernel.isDataMatrixValid() and then a priori 
+ * checked with static method Utils.isDataMatrixValid() and then a priori
  * converted into a preprocessed Art2aData object with static method 
  * Art2aKernel.getArt2aData(). The generated Art2aData object does NOT change 
  * or refer to the data matrix so that the data matrix memory could be released 
@@ -283,7 +284,7 @@ public class Art2aKernel {
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(!Art2aKernel.isDataMatrixValid(aDataMatrix)) {
+        if(!Utils.isDataMatrixValid(aDataMatrix)) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aKernel.Constructor: aDataMatrix is not valid."
@@ -329,7 +330,7 @@ public class Art2aKernel {
 
         if(anIsDataPreprocessing) {
             this.art2aData = 
-                Art2aKernel.getArt2aData(
+                Art2aKernel.getPreprocessedArt2aData(
                     aDataMatrix,
                     anOffsetForContrastEnhancement
                 );
@@ -337,7 +338,7 @@ public class Art2aKernel {
             this.art2aData = 
                 new Art2aData(
                     aDataMatrix, 
-                    Art2aUtils.getMinMaxComponents(aDataMatrix),
+                    Utils.getMinMaxComponents(aDataMatrix),
                     anOffsetForContrastEnhancement
                 );
         }
@@ -363,10 +364,8 @@ public class Art2aKernel {
         float[][] aDataMatrix
     ) throws IllegalArgumentException {
         this(
-            aDataMatrix, 
-            (int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS) > 2 ? 
-                (int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS) : 
-                2,
+            aDataMatrix,
+            Math.max((int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -459,10 +458,8 @@ public class Art2aKernel {
         Art2aData anArt2aData
     ) throws IllegalArgumentException {
         this(
-            anArt2aData, 
-            (int) (anArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS) > 2 ?
-                (int) (anArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS) :
-                2,
+            anArt2aData,
+            Math.max((int) (anArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -507,22 +504,22 @@ public class Art2aKernel {
             int tmpNumberOfComponents = -1;
             int tmpNumberOfDataVectors = -1;
             if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedUnitMatrix = (float[][]) this.art2aData.getContrastEnhancedUnitMatrix();
-                tmpDataVectorZeroLengthFlags = (boolean[]) this.art2aData.getDataVectorZeroLengthFlags();
+                tmpContrastEnhancedUnitMatrix = this.art2aData.getContrastEnhancedUnitMatrix();
+                tmpDataVectorZeroLengthFlags = this.art2aData.getDataVectorZeroLengthFlags();
                 tmpNumberOfDataVectors = tmpContrastEnhancedUnitMatrix.length;
                 tmpNumberOfComponents = tmpContrastEnhancedUnitMatrix[0].length;
             } else {
                 tmpDataMatrix = this.art2aData.getDataMatrix();
                 tmpDataVectorZeroLengthFlags = new boolean[tmpDataMatrix.length];
-                Art2aUtils.fillVector(tmpDataVectorZeroLengthFlags, false);
+                Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
                 tmpNumberOfDataVectors = tmpDataMatrix.length;
                 tmpNumberOfComponents = tmpDataMatrix[0].length;
             }
-            Art2aUtils.MinMaxValue[] tmpMinMaxComponents = this.art2aData.getMinMaxComponentsOfDataMatrix();
+            Utils.MinMaxValue[] tmpMinMaxComponents = this.art2aData.getMinMaxComponentsOfDataMatrix();
 
             // Definitions
             float tmpThresholdForContrastEnhancement = 
-                Art2aUtils.getThresholdForContrastEnhancement(
+                Utils.getThresholdForContrastEnhancement(
                     tmpNumberOfComponents,
                     this.art2aData.getOffsetForContrastEnhancement()
                 );
@@ -540,7 +537,7 @@ public class Art2aKernel {
             // Initialize cluster indices for data row vectors with -1 to 
             // indicate missing cluster assignment
             int[] tmpClusterIndexOfDataVector = new int[tmpNumberOfDataVectors];
-            Art2aUtils.fillVector(tmpClusterIndexOfDataVector, -1);
+            Utils.fillVector(tmpClusterIndexOfDataVector, -1);
 
             // Initialize random indices
             int[] tmpRandomIndices = new int[tmpNumberOfDataVectors];
@@ -554,14 +551,14 @@ public class Art2aKernel {
             // Main clustering loop
             int tmpCurrentNumberOfEpochs = 0;
             int tmpNumberOfDetectedClusters = 0;
-            Art2aUtils.RhoWinner tmpRhoWinner = new Art2aUtils.RhoWinner();
-            Art2aUtils.ClusterRemovalInfo tmpClusterRemovalInfo = new Art2aUtils.ClusterRemovalInfo();
+            Utils.RhoWinner tmpRhoWinner = new Utils.RhoWinner();
+            Utils.ClusterRemovalInfo tmpClusterRemovalInfo = new Utils.ClusterRemovalInfo();
             boolean tmpIsConverged = false;
             while(!tmpIsConverged && tmpCurrentNumberOfEpochs < this.maximumNumberOfEpochs) {
                 tmpCurrentNumberOfEpochs++;
                 
                 // Get random sequence of indices for data row vectors
-                Art2aUtils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
+                Utils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
 
                 Arrays.fill(tmpClusterUsageFlags, false);
                 for(int i = 0; i < tmpNumberOfDataVectors; i++) {
@@ -573,7 +570,7 @@ public class Art2aKernel {
                     }
 
                     if (this.art2aData.hasPreprocessedData()) {
-                        Art2aUtils.copyVector(tmpContrastEnhancedUnitMatrix[tmpRandomIndex], tmpBufferVector);
+                        Utils.copyVector(tmpContrastEnhancedUnitMatrix[tmpRandomIndex], tmpBufferVector);
                     } else {
                         tmpDataVectorZeroLengthFlags[tmpRandomIndex] = 
                             Art2aUtils.setContrastEnhancedUnitVector(
@@ -589,7 +586,7 @@ public class Art2aKernel {
 
                     if(tmpNumberOfDetectedClusters == 0) {
                         // Create first cluster
-                        Art2aUtils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
+                        Utils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
                         tmpClusterIndexOfDataVector[tmpRandomIndex] = tmpNumberOfDetectedClusters;
                         tmpClusterUsageFlags[tmpNumberOfDetectedClusters] = true;
                         tmpNumberOfDetectedClusters++;
@@ -609,7 +606,7 @@ public class Art2aKernel {
                                 tmpIsClusterOverflow = true;
                             } else {
                                 // Increment clusters
-                                Art2aUtils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
+                                Utils.setRowVector(tmpClusterMatrix, tmpBufferVector, tmpNumberOfDetectedClusters);
                                 tmpClusterIndexOfDataVector[tmpRandomIndex] = tmpNumberOfDetectedClusters;
                                 tmpClusterUsageFlags[tmpNumberOfDetectedClusters] = true;
                                 tmpNumberOfDetectedClusters++;
@@ -629,7 +626,7 @@ public class Art2aKernel {
                         }
                     }
                 }
-                Art2aUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -664,7 +661,7 @@ public class Art2aKernel {
                     tmpClusterUsageFlags
                 );
                 // Remove possible empty clusters
-                Art2aUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -686,7 +683,7 @@ public class Art2aKernel {
                     tmpClusterIndexOfDataVector,
                     tmpClusterUsageFlags
                 );
-                Art2aUtils.removeEmptyClusters(
+                Utils.removeEmptyClusters(
                     tmpClusterUsageFlags, 
                     tmpClusterMatrix, 
                     tmpNumberOfDetectedClusters, 
@@ -716,7 +713,7 @@ public class Art2aKernel {
                 anException.toString(), 
                 anException
             );
-            throw anException;
+            throw new Exception("Art2aKernel.getClusterResult: An exception occurred: This should never happen!");
         }
     }
 
@@ -769,7 +766,7 @@ public class Art2aKernel {
             for (float tmpVigilance : aVigilances) {
                 tmpSingleTaskList.add(new HelperTask(this, tmpVigilance));
             }
-            ExecutorService tmpExecutorService = Executors.newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
+            ExecutorService tmpExecutorService = newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
             List<Future<Art2aResult>> tmpFutureList = null;
             try {
                 tmpFutureList = tmpExecutorService.invokeAll(tmpSingleTaskList);
@@ -955,7 +952,7 @@ public class Art2aKernel {
             for (int i = 0; i < tmpAllIndices.length; i++) {
                 tmpAllIndices[i] = i;
             }
-            float tmpBaseMeanDistance = Art2aUtils.getMeanDistance(aDataMatrix, tmpAllIndices);
+            float tmpBaseMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpAllIndices);
 
             float tmpVigilanceMin = 0.0001f;
             float tmpVigilanceMax = 0.9999f;
@@ -971,7 +968,7 @@ public class Art2aKernel {
                         tmpVigilanceMax, 
                         tmpNumberOfTrialSteps
                     );
-                float tmpMeanDistance = Art2aUtils.getMeanDistance(aDataMatrix, tmpRepresentatives);
+                float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
                 float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
                 if (tmpDifference < tmpMinimalDifference) {
                     tmpMinimalDifference = tmpDifference;
@@ -995,119 +992,30 @@ public class Art2aKernel {
     //</editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Checks if aDataMatrix is valid.
-     * 
-     * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
-     * @return True if aDataMatrix is valid, false otherwise.
-     */
-    public static boolean isDataMatrixValid(
-        float[][] aDataMatrix
-    ) {
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.isDataMatrixValid: aDataMatrixis is null or empty."
-            );
-            return false;
-        }
-
-        int tmpNumberOfDataVectorComponents = aDataMatrix[0].length;
-        if(tmpNumberOfDataVectorComponents < 2) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.isDataMatrixValid: Data row vectors must have at least 2 components."
-            );
-            return false;
-        }
-
-        for(float[] tmpDataVector : aDataMatrix) {
-            if(tmpDataVector == null || tmpDataVector.length == 0) {
-                Art2aKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aKernel.isDataMatrixValid: A data row vector of aDataMatrix is not allowed to be null or empty."
-                );
-                return false;
-            }
-
-            if(tmpNumberOfDataVectorComponents != tmpDataVector.length) {
-                Art2aKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aKernel.isDataMatrixValid: Data row vectors in aDataMatrix must have the same length."
-                );
-                return false;
-            }
-        }
-        if (Art2aUtils.hasNonFiniteComponent(aDataMatrix)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Removes columns from data matrix with non-finite components.
-     * Note: If aDataMatrix is null, empty or has an invalid structure 
-     * nothing is done and false is returned.
-     * 
-     * @param aDataMatrix Data matrix with data row vectors (MAY BE CHANGED)
-     * @return True if aDataMatrix was changed (i.e. column removal was 
-     * performed), false otherwise (i.e. data matrix is unchanged).
-     */
-    public static boolean isNonFiniteComponentRemoval(
-        float[][] aDataMatrix
-    ) {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            return false;
-        }
-
-        int tmpNumberOfDataVectorComponents = aDataMatrix[0].length;
-        if(tmpNumberOfDataVectorComponents < 2) {
-            return false;
-        }
-
-        for(float[] tmpDataVector : aDataMatrix) {
-            if(tmpDataVector == null || tmpDataVector.length == 0) {
-                return false;
-            }
-
-            if(tmpNumberOfDataVectorComponents != tmpDataVector.length) {
-                return false;
-            }
-        }
-        //</editor-fold>
-
-        boolean tmpHasNonFiniteComponent = Art2aUtils.hasNonFiniteComponent(aDataMatrix);
-        if (tmpHasNonFiniteComponent) {
-            // TODO: Remove columns with non-finite components
-        }
-        return tmpHasNonFiniteComponent;
-    }
-    
-    /**
      * Creates ART-2a data object with preprocessed data for maximum speed  
      * of the clustering process. The ART-2a data object allocates about the 
      * same memory as aDataMatrix.
      * <br>
      * Note: There a no checks! Check aDataMatrix in advance with method
-     * Art2aKernel.isDataMatrixValid().
+     * Utils.isDataMatrixValid().
      * <br>
      * Note: aDataMatrix could be set to null after this operation to release  
      * its memory.
      * 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
-     * with Art2aKernel.isDataMatrixValid() in advance)
+     * with Utils.isDataMatrixValid() in advance)
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
      * (must be greater zero)
      * @return ART-2a data object for maximum clustering speed but with 
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aData getArt2aData(
+    public static Art2aData getPreprocessedArt2aData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
         int tmpNumberOfComponents = aDataMatrix[0].length;
         float tmpThresholdForContrastEnhancement = 
-            Art2aUtils.getThresholdForContrastEnhancement(
+            Utils.getThresholdForContrastEnhancement(
                 tmpNumberOfComponents,
                 anOffsetForContrastEnhancement
             );
@@ -1115,11 +1023,11 @@ public class Art2aKernel {
         // Initialize flags array for scaled data row vectors which have a 
         // length of zero (i.e. where all components are equal to zero)
         boolean[] tmpDataVectorZeroLengthFlags = new boolean[aDataMatrix.length];
-        Art2aUtils.fillVector(tmpDataVectorZeroLengthFlags, false);
+        Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
 
         float[][] tmpContrastEnhancedUnitMatrix = new float[aDataMatrix.length][];
         
-        Art2aUtils.MinMaxValue[] tmpMinMaxComponents = Art2aUtils.getMinMaxComponents(aDataMatrix);
+        Utils.MinMaxValue[] tmpMinMaxComponents = Utils.getMinMaxComponents(aDataMatrix);
 
         for(int i = 0; i < aDataMatrix.length; i++) {
             float[] tmpContrastEnhancedUnitVector = new float[tmpNumberOfComponents];
@@ -1150,14 +1058,14 @@ public class Art2aKernel {
      * its memory.
 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
-     * with Art2aKernel.isDataMatrixValid() in advance)
+     * with Utils.isDataMatrixValid() in advance)
      * @return ART-2a data object for maximum clustering speed but with 
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aData getArt2aData(
+    public static Art2aData getPreprocessedArt2aData(
         float[][] aDataMatrix
     ) {
-        return Art2aKernel.getArt2aData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
+        return Art2aKernel.getPreprocessedArt2aData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
     }
     //</editor-fold>
 
