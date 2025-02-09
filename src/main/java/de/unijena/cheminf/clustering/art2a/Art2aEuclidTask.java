@@ -188,7 +188,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidTask(
-        PreprocessedData aPreprocessedArt2aEuclidData,
+        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
@@ -242,7 +242,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidTask(
-        PreprocessedData aPreprocessedArt2aEuclidData,
+        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
         float aVigilance
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">

@@ -399,7 +399,7 @@ public class Art2aKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aKernel(
-        PreprocessedData aPreprocessedArt2aData,
+        PreprocessedArt2aData aPreprocessedArt2aData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -413,13 +413,6 @@ public class Art2aKernel {
                 "Art2aKernel.Constructor: aPreprocessedArt2aData is null."
             );
             throw new IllegalArgumentException("Art2aKernel.Constructor: aPreprocessedArt2aData is null.");
-        }
-        if(!aPreprocessedArt2aData.hasArt2aPreprocessedData()) {
-            Art2aKernel.LOGGER.log(
-                    Level.SEVERE,
-                    "Art2aKernel.Constructor: aPreprocessedArt2aData does not have ART-2a preprocessed data."
-            );
-            throw new IllegalArgumentException("Art2aKernel.Constructor: aPreprocessedArt2aData does not have ART-2a preprocessed data.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aKernel.LOGGER.log(
@@ -469,7 +462,7 @@ public class Art2aKernel {
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aKernel(
-        PreprocessedData aPreprocessedArt2aData
+        PreprocessedArt2aData aPreprocessedArt2aData
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aData,
@@ -1023,7 +1016,7 @@ public class Art2aKernel {
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static PreprocessedData getPreprocessedArt2aData(
+    public static PreprocessedArt2aData getPreprocessedArt2aData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
@@ -1054,12 +1047,11 @@ public class Art2aKernel {
                 );
             tmpContrastEnhancedUnitMatrix[i] = tmpContrastEnhancedUnitVector;
         }
-        return new PreprocessedData(
+        return new PreprocessedArt2aData(
             tmpContrastEnhancedUnitMatrix,
             tmpDataVectorZeroLengthFlags,
             tmpMinMaxComponents,
-            anOffsetForContrastEnhancement,
-            true
+            anOffsetForContrastEnhancement
         );
     }
 
@@ -1077,7 +1069,7 @@ public class Art2aKernel {
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static PreprocessedData getPreprocessedArt2aData(
+    public static PreprocessedArt2aData getPreprocessedArt2aData(
         float[][] aDataMatrix
     ) {
         return Art2aKernel.getPreprocessedArt2aData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);

@@ -402,7 +402,7 @@ public class Art2aEuclidKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidKernel(
-        PreprocessedData aPreprocessedArt2aEuclidData,
+        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -416,13 +416,6 @@ public class Art2aEuclidKernel {
                 "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null.");
-        }
-        if(aPreprocessedArt2aEuclidData.hasArt2aPreprocessedData()) {
-            Art2aEuclidKernel.LOGGER.log(
-                    Level.SEVERE,
-                    "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData does not have ART-2a-Euclid preprocessed data."
-            );
-            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData does not have ART-2a-Euclid preprocessed data.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
@@ -472,7 +465,7 @@ public class Art2aEuclidKernel {
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidKernel(
-        PreprocessedData aPreprocessedArt2aEuclidData
+        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aEuclidData,
@@ -1030,7 +1023,7 @@ public class Art2aEuclidKernel {
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static PreprocessedData getPreprocessedArt2aEuclidData(
+    public static PreprocessedArt2aEuclidData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
@@ -1061,12 +1054,11 @@ public class Art2aEuclidKernel {
                 );
             tmpContrastEnhancedMatrix[i] = tmpContrastEnhancedVector;
         }
-        return new PreprocessedData(
+        return new PreprocessedArt2aEuclidData(
             tmpContrastEnhancedMatrix,
             tmpDataVectorZeroLengthFlags,
             tmpMinMaxComponents,
-            anOffsetForContrastEnhancement,
-            false
+            anOffsetForContrastEnhancement
         );
     }
 
@@ -1084,7 +1076,7 @@ public class Art2aEuclidKernel {
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static PreprocessedData getPreprocessedArt2aEuclidData(
+    public static PreprocessedArt2aEuclidData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix
     ) {
         return Art2aEuclidKernel.getPreprocessedArt2aEuclidData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);

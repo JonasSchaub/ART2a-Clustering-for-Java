@@ -548,7 +548,7 @@ public class Art2aTest {
             }
 
             // Preprocessed Art2aData
-            PreprocessedData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            PreprocessedArt2aData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aKernel tmpArt2aKernelWithArt2aData = 
                 new Art2aKernel(
                     tmpPreprocessedArt2aData,
@@ -637,7 +637,7 @@ public class Art2aTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aTask> tmpArt2aTaskList = new LinkedList<>();
-        PreprocessedData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        PreprocessedArt2aData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aTaskList.add(
                 new Art2aTask(

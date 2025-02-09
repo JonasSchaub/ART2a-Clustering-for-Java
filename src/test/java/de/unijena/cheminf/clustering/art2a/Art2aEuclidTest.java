@@ -515,7 +515,7 @@ public class Art2aEuclidTest {
             }
 
             // Preprocessed Art2aEuclidData
-            PreprocessedData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            PreprocessedArt2aEuclidData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aEuclidKernel tmpArt2aEuclidKernelWithArt2aEuclidData = 
                 new Art2aEuclidKernel(
                     tmpPreprocessedArt2aEuclidData,
@@ -604,7 +604,7 @@ public class Art2aEuclidTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aEuclidTask> tmpArt2aEuclidTaskList = new LinkedList<>();
-        PreprocessedData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        PreprocessedArt2aEuclidData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aEuclidTaskList.add(new Art2aEuclidTask(
                     tmpPreprocessedArt2aEuclidData,

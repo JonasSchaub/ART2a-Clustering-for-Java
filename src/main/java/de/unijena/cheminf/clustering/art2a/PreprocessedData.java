@@ -30,13 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Data class for ART-2a clustering.
+ * Class for preprocessed data.
  * <br><br>
- * Note: PreprocessedData objects are to be generated with static getPreprocessedData()
- * methods to obtain preprocessed data for faster clustering. PreprocessedData objects can
- * refer to Art2aKernel or Art2aEuclidKernel instances: An internal safeguard is
- * implemented to avoid incorrect assignments, i.e. a PreprocessedData instance knows if
- * it was created by Art2aKernel or Art2aEuclidKernel if preprocessed data are present.
+ * Note: PreprocessedData instances are to be generated with static getPreprocessedData()
+ * methods to obtain preprocessed data for faster clustering.
  * <br><br>
  * Note: PreprocessedData is also used for internal data preprocessing, i.e. it
  * may not necessarily contain preprocessed data.
@@ -88,11 +85,6 @@ public class PreprocessedData {
      * True: PreprocessedData object has preprocessed data, false: Otherwise
      */
     private final boolean hasPreprocessedData;
-    /**
-     * True: Preprocessed data were generated with Art2aKernel,
-     * false: Preprocessed data were generated with Art2aEuclidKernel
-     */
-    private final boolean hasArt2aPreprocessedData;
     //</editor-fold>
     
     
@@ -114,8 +106,6 @@ public class PreprocessedData {
      * (must be greater zero)
      * @param aHasPreprocessedData True: PreprocessedData object has preprocessed data,
      * false: Otherwise
-     * @param aHasArt2aPreprocessedData True: Preprocessed data were generated with Art2aKernel,
-     * false: Preprocessed data were generated with Art2aEuclidKernel
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     private PreprocessedData (
@@ -124,8 +114,7 @@ public class PreprocessedData {
         boolean[] aDataVectorZeroLengthFlags,
         Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement,
-        boolean aHasPreprocessedData,
-        boolean aHasArt2aPreprocessedData
+        boolean aHasPreprocessedData
     ) {
         this.dataMatrix = aDataMatrix;       
         this.preprocessedMatrix = aPreprocessedMatrix;
@@ -133,7 +122,6 @@ public class PreprocessedData {
         this.minMaxComponentsOfDataMatrix = aMinMaxComponentsOfDataMatrix;
         this.offsetForContrastEnhancement = anOffsetForContrastEnhancement;
         this.hasPreprocessedData = aHasPreprocessedData;
-        this.hasArt2aPreprocessedData = aHasArt2aPreprocessedData;
     }
     //</editor-fold>
     //<editor-fold desc="Public constructors" defaultstate="collapsed">
@@ -159,7 +147,6 @@ public class PreprocessedData {
             null,
             aMinMaxComponentsOfDataMatrix,
             anOffsetForContrastEnhancement,
-            false,
             false
         );
         if (!Utils.isMatrixValid(aDataMatrix)) {
@@ -192,22 +179,19 @@ public class PreprocessedData {
      * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled 
      * data row vectors have a length of zero (i.e. where all components are 
      * equal to zero). True: Scaled data row vector has a length of zero 
-     * (corresponding contrast enhanced unit vector is set to null in this 
+     * (corresponding preprocessed vector is set to null in this
      * case), false: Otherwise.
      * @param aMinMaxComponentsOfDataMatrix Min-max components of original data 
      * matrix
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
      * (must be greater zero)
-     * @param aHasArt2aPreprocessedData True: Preprocessed data were generated with Art2aKernel,
-     * false: Preprocessed data were generated with Art2aEuclidKernel
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     protected PreprocessedData (
         float[][] aPreprocessedMatrix,
         boolean[] aDataVectorZeroLengthFlags,
         Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
-        float anOffsetForContrastEnhancement,
-        boolean aHasArt2aPreprocessedData
+        float anOffsetForContrastEnhancement
     ) {
         this (
             null,
@@ -215,8 +199,7 @@ public class PreprocessedData {
             aDataVectorZeroLengthFlags,
             aMinMaxComponentsOfDataMatrix,
             anOffsetForContrastEnhancement,
-            true,
-             aHasArt2aPreprocessedData
+            true
         );
         if (!Utils.isMatrixValid(aPreprocessedMatrix)) {
             PreprocessedData.LOGGER.log(
@@ -299,17 +282,6 @@ public class PreprocessedData {
      */
     protected boolean hasPreprocessedData() {
         return this.hasPreprocessedData;
-    }
-
-    /**
-     * True: Preprocessed data were generated with Art2aKernel,
-     * false: Preprocessed data were generated with Art2aEuclidKernel
-     *
-     * @return True: Preprocessed data were generated with Art2aKernel,
-     * false: Preprocessed data were generated with Art2aEuclidKernel
-     */
-    protected boolean hasArt2aPreprocessedData() {
-        return this.hasArt2aPreprocessedData;
     }
 
     /**

@@ -187,7 +187,7 @@ public class Art2aTask implements Callable<Art2aResult> {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aTask(
-        PreprocessedData aPreprocessedArt2aData,
+        PreprocessedArt2aData aPreprocessedArt2aData,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
@@ -241,7 +241,7 @@ public class Art2aTask implements Callable<Art2aResult> {
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aTask(
-        PreprocessedData aPreprocessedArt2aData,
+        PreprocessedArt2aData aPreprocessedArt2aData,
         float aVigilance
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
