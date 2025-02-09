@@ -96,7 +96,8 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  * CAUTION: Construction of several ART-2a-Euclid clustering instances with the 
  * SAME data matrix PLUS preprocessing is NOT advised due to the significant 
  * memory consumption of each instance. In this case, the data matrix should be 
- * checked with static method Art2aKernel.isDataMatrixValid() and then a priori 
+ * checked with static method Art2aKernel.isDataMatrixValid() (where possible NaN
+ * values can be removed with Utils.isNonFiniteComponentRemoval()) and then a priori
  * converted into a preprocessed Art2aEuclidData object with static method 
  * Art2aEuclidKernel.getArt2aEuclidData(). The generated Art2aData object does 
  * NOT change or refer to the data matrix so that the data matrix memory could 
@@ -385,8 +386,8 @@ public class Art2aEuclidKernel {
     /**
      * Constructor.
      *
-     * @param anArt2aEuclidData ART-2a-Euclid data object created by method 
-     * Art2aEuclidKernel.getArt2aEuclidData()
+     * @param aPreprocessedArt2aEuclidData Preprocessed ART-2a-Euclid data object
+     * created by method Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
      * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
@@ -399,7 +400,7 @@ public class Art2aEuclidKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidKernel(
-        Art2aEuclidData anArt2aEuclidData, 
+        Art2aEuclidData aPreprocessedArt2aEuclidData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -407,7 +408,7 @@ public class Art2aEuclidKernel {
         long aRandomSeed
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(anArt2aEuclidData == null) {
+        if(aPreprocessedArt2aEuclidData == null) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidKernel.Constructor: anArt2aEuclidData is null."
@@ -444,7 +445,7 @@ public class Art2aEuclidKernel {
         }
         //</editor-fold>
 
-        this.art2aEuclidData = anArt2aEuclidData;
+        this.art2aEuclidData = aPreprocessedArt2aEuclidData;
         this.maximumNumberOfClusters = aMaximumNumberOfClusters;
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.convergenceThreshold = aConvergenceThreshold;
@@ -457,16 +458,16 @@ public class Art2aEuclidKernel {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param anArt2aEuclidData ART-2a-Euclid data object created by method 
-     * Art2aEuclidKernel.getArt2aEuclidData()
+     * @param aPreprocessedArt2aEuclidData Preprocessed ART-2a-Euclid data object created by method
+     * Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidKernel(
-        Art2aEuclidData anArt2aEuclidData
+        Art2aEuclidData aPreprocessedArt2aEuclidData
     ) throws IllegalArgumentException {
         this(
-            anArt2aEuclidData,
-            Math.max((int) (anArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aPreprocessedArt2aEuclidData,
+            Math.max((int) (aPreprocessedArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,

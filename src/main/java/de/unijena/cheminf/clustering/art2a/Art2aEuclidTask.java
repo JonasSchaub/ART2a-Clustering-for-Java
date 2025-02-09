@@ -173,8 +173,8 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     /**
      * Constructor.
      *
-     * @param anArt2aEuclidData ART-2a-Euclid data object created by method 
-     * Art2aEuclidKernel.getArt2aEuclidData()
+     * @param aPreprocessedArt2aEuclidData PreprocessedART-2a-Euclid data object created by method
+     * Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
@@ -188,7 +188,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidTask(
-        Art2aEuclidData anArt2aEuclidData,
+        Art2aEuclidData aPreprocessedArt2aEuclidData,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
@@ -210,7 +210,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aEuclidKernel(
-                    anArt2aEuclidData, 
+                    aPreprocessedArt2aEuclidData,
                     aMaximumNumberOfClusters,
                     aMaximumNumberOfEpochs, 
                     aConvergenceThreshold, 
@@ -236,13 +236,13 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param anArt2aEuclidData ART-2a-Euclid data object created by method 
-     *  Art2aEuclidKernel.getArt2aEuclidData()
+     * @param aPreprocessedArt2aEuclidData Preprocessed ART-2a-Euclid data object created by method
+     *  Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidTask(
-        Art2aEuclidData anArt2aEuclidData,
+        Art2aEuclidData aPreprocessedArt2aEuclidData,
         float aVigilance
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
@@ -259,7 +259,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aEuclidKernel(
-                    anArt2aEuclidData
+                    aPreprocessedArt2aEuclidData
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(

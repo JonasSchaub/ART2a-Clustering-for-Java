@@ -94,7 +94,8 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  * CAUTION: Construction of several ART-2a clustering instances with the SAME 
  * data matrix PLUS preprocessing is NOT advised due to the significant memory 
  * consumption of each instance. In this case, the data matrix should be 
- * checked with static method Utils.isDataMatrixValid() and then a priori
+ * checked with static method Utils.isDataMatrixValid() (where possible NaN
+ * values can be removed with Utils.isNonFiniteComponentRemoval()) and then a priori
  * converted into a preprocessed Art2aData object with static method 
  * Art2aKernel.getArt2aData(). The generated Art2aData object does NOT change 
  * or refer to the data matrix so that the data matrix memory could be released 
@@ -378,8 +379,8 @@ public class Art2aKernel {
     /**
      * Constructor.
      *
-     * @param anArt2aData ART-2a data object created by method 
-     * Art2aKernel.getArt2aData()
+     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
+     * Art2aKernel.getPreprocessedArt2aData()
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
      * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
@@ -392,7 +393,7 @@ public class Art2aKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aKernel(
-        Art2aData anArt2aData, 
+        Art2aData aPreprocessedArt2aData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -400,7 +401,7 @@ public class Art2aKernel {
         long aRandomSeed
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">
-        if(anArt2aData == null) {
+        if(aPreprocessedArt2aData == null) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aKernel.Constructor: anArt2aData is null."
@@ -437,7 +438,7 @@ public class Art2aKernel {
         }
         //</editor-fold>
 
-        this.art2aData = anArt2aData;
+        this.art2aData = aPreprocessedArt2aData;
         this.maximumNumberOfClusters = aMaximumNumberOfClusters;
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.convergenceThreshold = aConvergenceThreshold;
@@ -450,16 +451,16 @@ public class Art2aKernel {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param anArt2aData ART-2a data object created by method 
-     * Art2aKernel.getArt2aData()
+     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
+     * Art2aKernel.getPreprocessedArt2aData()
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aKernel(
-        Art2aData anArt2aData
+        Art2aData aPreprocessedArt2aData
     ) throws IllegalArgumentException {
         this(
-            anArt2aData,
-            Math.max((int) (anArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aPreprocessedArt2aData,
+            Math.max((int) (aPreprocessedArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,

@@ -198,6 +198,8 @@ public class Utils {
     protected Utils() {}
     //</editor-fold>
 
+    // TODO: Make tests for public methods
+
     //<editor-fold desc="Public static utility methods" defaultstate="collapsed">
     /**
      * Checks if aDataMatrix is valid.
@@ -249,8 +251,7 @@ public class Utils {
             return false;
         }
 
-        int tmpNumberOfDataVectorComponents = aDataMatrix[0].length;
-        if(tmpNumberOfDataVectorComponents < 2) {
+        if(aDataMatrix[0].length < 2) {
             return false;
         }
 
@@ -259,7 +260,7 @@ public class Utils {
                 return false;
             }
 
-            if(tmpNumberOfDataVectorComponents != tmpDataVector.length) {
+            if(aDataMatrix[0].length != tmpDataVector.length) {
                 return false;
             }
         }
@@ -267,7 +268,33 @@ public class Utils {
 
         boolean tmpHasNonFiniteComponent = Utils.hasNonFiniteComponent(aDataMatrix);
         if (tmpHasNonFiniteComponent) {
-            // TODO: Remove columns with non-finite components
+            // Remove columns with non-finite components
+            boolean[] tmpColumnsToBeRemoved = new boolean[aDataMatrix[0].length];
+            Arrays.fill(tmpColumnsToBeRemoved, false);
+            for (float[] tmpDataVector : aDataMatrix) {
+                for (int i = 0; i < tmpDataVector.length; i++) {
+                    if (!Float.isFinite(tmpDataVector[i])) {
+                        tmpColumnsToBeRemoved[i] = true;
+                    }
+                }
+            }
+            int tmpNumberOfColumnsToBeRemoved = 0;
+            for (boolean tmpColumnToBeRemoved : tmpColumnsToBeRemoved) {
+                if (tmpColumnToBeRemoved) {
+                    tmpNumberOfColumnsToBeRemoved++;
+                }
+            }
+            for (int i = 0; i < aDataMatrix.length; i++) {
+                float[] tmpOldDataVector = aDataMatrix[i];
+                float[] tmpNewDataVector = new float[tmpOldDataVector.length - tmpNumberOfColumnsToBeRemoved];
+                int tmpIndex = 0;
+                for (int j = 0; j < tmpOldDataVector.length; j++) {
+                    if (!tmpColumnsToBeRemoved[j]) {
+                        tmpNewDataVector[tmpIndex++] = tmpOldDataVector[j];
+                    }
+                }
+                aDataMatrix[i] = tmpNewDataVector;
+            }
         }
         return tmpHasNonFiniteComponent;
     }
