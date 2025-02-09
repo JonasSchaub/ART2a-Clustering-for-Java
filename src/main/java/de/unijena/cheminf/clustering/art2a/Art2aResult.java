@@ -97,9 +97,9 @@ public class Art2aResult {
      */
     private final boolean isConverged;
     /**
-     * Art2aData object
+     * PreprocessedData object
      */
-    private final Art2aData art2aData;
+    private final PreprocessedData preprocessedArt2aData;
     //</editor-fold>
     //<editor-fold desc="Private record IndexedValue" defaultstate="collapsed">
     /**
@@ -145,7 +145,7 @@ public class Art2aResult {
      * @param anIsClusterOverflow True: Cluster overflow occurred, false: 
      * Otherwise
      * @param anIsConverged True: Clustering process converged, false: Otherwise
-     * @param anArt2aData Art2aData instance
+     * @param aPreprocessedArt2aData PreprocessedData instance
      */
     public Art2aResult(
         float aVigilance,
@@ -157,7 +157,7 @@ public class Art2aResult {
         boolean[] aDataVectorZeroLengthFlags,
         boolean anIsClusterOverflow,
         boolean anIsConverged,
-        Art2aData anArt2aData
+        PreprocessedData aPreprocessedArt2aData
     ) {
         this.vigilance = aVigilance;
         this.thresholdForContrastEnhancement = aThresholdForContrastEnhancement;
@@ -168,7 +168,7 @@ public class Art2aResult {
         this.dataVectorZeroLengthFlags = aDataVectorZeroLengthFlags;
         this.isClusterOverflow = anIsClusterOverflow;
         this.isConverged = anIsConverged;
-        this.art2aData = anArt2aData;
+        this.preprocessedArt2aData = aPreprocessedArt2aData;
     }
     //</editor-fold>
 
@@ -395,19 +395,19 @@ public class Art2aResult {
         int tmpBestIndex = 0;
         float tmpMaximumScalarProduct = Float.MIN_VALUE;
         float[] tmpContrastEnhancedUnitVector = null;
-        if (!this.art2aData.hasPreprocessedData()) {
+        if (!this.preprocessedArt2aData.hasPreprocessedData()) {
             tmpContrastEnhancedUnitVector = new float[tmpClusterVector.length];
         }
         for (int i = 0; i < tmpDataVectorIndicesOfCluster.length; i++) {
             int tmpIndex = tmpDataVectorIndicesOfCluster[i];
-            if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedUnitVector = this.art2aData.getContrastEnhancedUnitMatrix()[tmpIndex];
+            if (this.preprocessedArt2aData.hasPreprocessedData()) {
+                tmpContrastEnhancedUnitVector = this.preprocessedArt2aData.getPreprocessedMatrix()[tmpIndex];
             } else {
                 // Check of length is NOT necessary
                 Art2aUtils.setContrastEnhancedUnitVector(
-                    this.art2aData.getDataMatrix()[tmpIndex],
+                    this.preprocessedArt2aData.getDataMatrix()[tmpIndex],
                     tmpContrastEnhancedUnitVector,
-                    this.art2aData.getMinMaxComponentsOfDataMatrix(),
+                    this.preprocessedArt2aData.getMinMaxComponentsOfDataMatrix(),
                     this.thresholdForContrastEnhancement
                 );
             }
@@ -450,19 +450,19 @@ public class Art2aResult {
         float[] tmpClusterVector = this.clusterMatrix[aClusterIndex];
         IndexedValue[] tmpIndexedValues = new IndexedValue[tmpDataVectorIndicesOfCluster.length];
         float[] tmpContrastEnhancedUnitVector = null;
-        if (!this.art2aData.hasPreprocessedData()) {
+        if (!this.preprocessedArt2aData.hasPreprocessedData()) {
             tmpContrastEnhancedUnitVector = new float[tmpClusterVector.length];
         }
         for (int i = 0; i < tmpDataVectorIndicesOfCluster.length; i++) {
             int tmpIndex = tmpDataVectorIndicesOfCluster[i];
-            if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedUnitVector = this.art2aData.getContrastEnhancedUnitMatrix()[tmpIndex];
+            if (this.preprocessedArt2aData.hasPreprocessedData()) {
+                tmpContrastEnhancedUnitVector = this.preprocessedArt2aData.getPreprocessedMatrix()[tmpIndex];
             } else {
                 // Check of length is NOT necessary
                 Art2aUtils.setContrastEnhancedUnitVector(
-                    this.art2aData.getDataMatrix()[tmpIndex],
+                    this.preprocessedArt2aData.getDataMatrix()[tmpIndex],
                     tmpContrastEnhancedUnitVector,
-                    this.art2aData.getMinMaxComponentsOfDataMatrix(),
+                    this.preprocessedArt2aData.getMinMaxComponentsOfDataMatrix(),
                     this.thresholdForContrastEnhancement
                 );
             }

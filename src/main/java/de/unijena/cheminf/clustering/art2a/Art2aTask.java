@@ -172,8 +172,8 @@ public class Art2aTask implements Callable<Art2aResult> {
     /**
      * Constructor.
      *
-     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
-     * Art2aKernel.getPreprocessedArt2aData()
+     * @param aPreprocessedArt2aData PreprocessedData object created by method
+     * Art2aKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
@@ -187,7 +187,7 @@ public class Art2aTask implements Callable<Art2aResult> {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aTask(
-        Art2aData aPreprocessedArt2aData,
+        PreprocessedData aPreprocessedArt2aData,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
@@ -235,13 +235,13 @@ public class Art2aTask implements Callable<Art2aResult> {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
-     * Art2aKernel.getPreprocessedArt2aData()
+     * @param aPreprocessedArt2aData PreprocessedData object created by method
+     * Art2aKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aTask(
-        Art2aData aPreprocessedArt2aData,
+        PreprocessedData aPreprocessedArt2aData,
         float aVigilance
     ) throws IllegalArgumentException {
         // <editor-fold defaultstate="collapsed" desc="Checks">

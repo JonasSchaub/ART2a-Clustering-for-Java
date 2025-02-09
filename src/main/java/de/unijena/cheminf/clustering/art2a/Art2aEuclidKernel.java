@@ -134,11 +134,13 @@ public class Art2aEuclidKernel {
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aEuclidKernel.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private static final class constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
     /**
      * Value 1.0
      */
     private static final float ONE = 1.0f;
+    //</editor-fold>
+    //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
      * Default fraction of the (maximum) number of clusters relative to 
      * number of data vectors
@@ -188,9 +190,9 @@ public class Art2aEuclidKernel {
      */
     private final long randomSeed;
     /**
-     * Art2aEuclidData data object
+     * PreprocessedData object
      */
-    private final Art2aEuclidData art2aEuclidData;
+    private final PreprocessedData preprocessedData;
     //</editor-fold>
     //<editor-fold desc="Private helper callable" defaultstate="collapsed">
     /**
@@ -337,14 +339,14 @@ public class Art2aEuclidKernel {
         //</editor-fold>
 
         if(anIsDataPreprocessing) {
-            this.art2aEuclidData = 
+            this.preprocessedData =
                 Art2aEuclidKernel.getPreprocessedArt2aEuclidData(
                     aDataMatrix,
                     anOffsetForContrastEnhancement
                 );
         } else {
-            this.art2aEuclidData = 
-                new Art2aEuclidData(
+            this.preprocessedData =
+                new PreprocessedData(
                     aDataMatrix, 
                     Utils.getMinMaxComponents(aDataMatrix),
                     anOffsetForContrastEnhancement
@@ -386,7 +388,7 @@ public class Art2aEuclidKernel {
     /**
      * Constructor.
      *
-     * @param aPreprocessedArt2aEuclidData Preprocessed ART-2a-Euclid data object
+     * @param aPreprocessedArt2aEuclidData PreprocessedData object
      * created by method Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
@@ -400,7 +402,7 @@ public class Art2aEuclidKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidKernel(
-        Art2aEuclidData aPreprocessedArt2aEuclidData,
+        PreprocessedData aPreprocessedArt2aEuclidData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -411,9 +413,16 @@ public class Art2aEuclidKernel {
         if(aPreprocessedArt2aEuclidData == null) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
-                "Art2aEuclidKernel.Constructor: anArt2aEuclidData is null."
+                "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null."
             );
-            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: anArt2aEuclidData is null.");
+            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null.");
+        }
+        if(aPreprocessedArt2aEuclidData.hasArt2aPreprocessedData()) {
+            Art2aEuclidKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData does not have ART-2a-Euclid preprocessed data."
+            );
+            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData does not have ART-2a-Euclid preprocessed data.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
@@ -445,7 +454,7 @@ public class Art2aEuclidKernel {
         }
         //</editor-fold>
 
-        this.art2aEuclidData = aPreprocessedArt2aEuclidData;
+        this.preprocessedData = aPreprocessedArt2aEuclidData;
         this.maximumNumberOfClusters = aMaximumNumberOfClusters;
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.convergenceThreshold = aConvergenceThreshold;
@@ -458,16 +467,16 @@ public class Art2aEuclidKernel {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param aPreprocessedArt2aEuclidData Preprocessed ART-2a-Euclid data object created by method
+     * @param aPreprocessedArt2aEuclidData PreprocessedData object created by method
      * Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidKernel(
-        Art2aEuclidData aPreprocessedArt2aEuclidData
+        PreprocessedData aPreprocessedArt2aEuclidData
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aEuclidData,
-            Math.max((int) (aPreprocessedArt2aEuclidData.getContrastEnhancedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            Math.max((int) (aPreprocessedArt2aEuclidData.getPreprocessedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -511,19 +520,19 @@ public class Art2aEuclidKernel {
             boolean[] tmpDataVectorZeroLengthFlags = null;
             int tmpNumberOfComponents = -1;
             int tmpNumberOfDataVectors = -1;
-            if (this.art2aEuclidData.hasPreprocessedData()) {
-                tmpContrastEnhancedMatrix = this.art2aEuclidData.getContrastEnhancedMatrix();
-                tmpDataVectorZeroLengthFlags = this.art2aEuclidData.getDataVectorZeroLengthFlags();
+            if (this.preprocessedData.hasPreprocessedData()) {
+                tmpContrastEnhancedMatrix = this.preprocessedData.getPreprocessedMatrix();
+                tmpDataVectorZeroLengthFlags = this.preprocessedData.getDataVectorZeroLengthFlags();
                 tmpNumberOfDataVectors = tmpContrastEnhancedMatrix.length;
                 tmpNumberOfComponents = tmpContrastEnhancedMatrix[0].length;
             } else {
-                tmpDataMatrix = this.art2aEuclidData.getDataMatrix();
+                tmpDataMatrix = this.preprocessedData.getDataMatrix();
                 tmpDataVectorZeroLengthFlags = new boolean[tmpDataMatrix.length];
                 Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
                 tmpNumberOfDataVectors = tmpDataMatrix.length;
                 tmpNumberOfComponents = tmpDataMatrix[0].length;
             }
-            Utils.MinMaxValue[] tmpMinMaxComponents = this.art2aEuclidData.getMinMaxComponentsOfDataMatrix();
+            Utils.MinMaxValue[] tmpMinMaxComponents = this.preprocessedData.getMinMaxComponentsOfDataMatrix();
             
             // Set tmpRhoStar
             float tmpRhoStar = tmpNumberOfComponents * (ONE - aVigilance);
@@ -532,7 +541,7 @@ public class Art2aEuclidKernel {
             float tmpThresholdForContrastEnhancement = 
                 Utils.getThresholdForContrastEnhancement(
                     tmpNumberOfComponents,
-                    this.art2aEuclidData.getOffsetForContrastEnhancement()
+                    this.preprocessedData.getOffsetForContrastEnhancement()
                 );
             // Scaling factor alpha
             float tmpScalingFactor = tmpThresholdForContrastEnhancement;
@@ -580,7 +589,7 @@ public class Art2aEuclidKernel {
                         continue;
                     }
 
-                    if (this.art2aEuclidData.hasPreprocessedData()) {
+                    if (this.preprocessedData.hasPreprocessedData()) {
                         Utils.copyVector(tmpContrastEnhancedMatrix[tmpRandomIndex], tmpBufferVector);
                     } else {
                         tmpDataVectorZeroLengthFlags[tmpRandomIndex] = 
@@ -603,7 +612,7 @@ public class Art2aEuclidKernel {
                         tmpNumberOfDetectedClusters++;
                     } else {
                         // Cluster number is greater than or equal to 1
-                        Art2aEuclidUtils.setRhoWinner(
+                        Art2aEuclidKernel.setRhoWinner(
                             tmpBufferVector, 
                             tmpClusterMatrix, 
                             tmpNumberOfDetectedClusters, 
@@ -626,7 +635,7 @@ public class Art2aEuclidKernel {
                             // Assign to existing winner cluster with modification
                             // Note: tmpBufferVector (= contrast enhanced unit vector)
                             // is used for modification
-                            Art2aEuclidUtils.modifyWinnerCluster(
+                            Art2aEuclidKernel.modifyWinnerCluster(
                                 tmpBufferVector,
                                 tmpClusterMatrix[tmpRhoWinner.getIndexOfCluster()],
                                 tmpThresholdForContrastEnhancement,
@@ -648,8 +657,8 @@ public class Art2aEuclidKernel {
                     tmpNumberOfDetectedClusters = tmpClusterRemovalInfo.getNumberOfDetectedClusters();
                     tmpIsConverged = false;
                 } else {
-                    tmpIsConverged = 
-                        Art2aEuclidUtils.isConverged(
+                    tmpIsConverged =
+                        Art2aEuclidKernel.isConverged(
                             tmpNumberOfDetectedClusters, 
                             tmpCurrentNumberOfEpochs, 
                             tmpClusterMatrix, 
@@ -662,10 +671,10 @@ public class Art2aEuclidKernel {
             // Check if cluster overflow occurred
             if (tmpIsClusterOverflow) {
                 // Cluster overflow occurred: Finally assign ALL data vectors
-                Art2aEuclidUtils.assignDataVectorsToClusters(
+                Art2aEuclidKernel.assignDataVectorsToClusters(
                     tmpNumberOfDetectedClusters,
                     tmpDataVectorZeroLengthFlags,
-                    this.art2aEuclidData,
+                    this.preprocessedData,
                     tmpBufferVector,
                     tmpThresholdForContrastEnhancement,
                     tmpClusterMatrix,
@@ -685,10 +694,10 @@ public class Art2aEuclidKernel {
             // clusters in the cluster matrix
             while (tmpClusterRemovalInfo.isClusterRemoved()) {
                 // Empty clusters are removed: Assign data vectors again
-                Art2aEuclidUtils.assignDataVectorsToClusters(
+                Art2aEuclidKernel.assignDataVectorsToClusters(
                     tmpNumberOfDetectedClusters,
                     tmpDataVectorZeroLengthFlags,
-                    this.art2aEuclidData,
+                    this.preprocessedData,
                     tmpBufferVector,
                     tmpThresholdForContrastEnhancement,
                     tmpClusterMatrix,
@@ -713,7 +722,7 @@ public class Art2aEuclidKernel {
                 tmpDataVectorZeroLengthFlags,
                 tmpIsClusterOverflow,
                 tmpIsConverged,
-                this.art2aEuclidData
+                this.preprocessedData
             );
         } catch (Exception anException) {
             Art2aEuclidKernel.LOGGER.log(
@@ -1004,8 +1013,8 @@ public class Art2aEuclidKernel {
     //</editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Creates ART-2a-Euclid data object with preprocessed data for maximum 
-     * speed  of the clustering process. The ART-2a-Euclid data object allocates 
+     * Creates PreprocessedData object with preprocessed ART-2a-Euclid data for maximum
+     * speed  of the clustering process. The PreprocessedData object allocates
      * about the same memory as aDataMatrix.
      * <br>
      * Note: There a no checks! Check aDataMatrix in advance with method
@@ -1018,10 +1027,10 @@ public class Art2aEuclidKernel {
      * with Utils.isDataMatrixValid() in advance)
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
      * (must be greater zero)
-     * @return ART-2a-Euclid data object for maximum clustering speed but with 
+     * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aEuclidData getPreprocessedArt2aEuclidData(
+    public static PreprocessedData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
@@ -1052,17 +1061,18 @@ public class Art2aEuclidKernel {
                 );
             tmpContrastEnhancedMatrix[i] = tmpContrastEnhancedVector;
         }
-        return new Art2aEuclidData(
+        return new PreprocessedData(
             tmpContrastEnhancedMatrix,
             tmpDataVectorZeroLengthFlags,
             tmpMinMaxComponents,
-            anOffsetForContrastEnhancement
+            anOffsetForContrastEnhancement,
+            false
         );
     }
 
     /**
-     * Creates ART-2a-Euclid data object with preprocessed data for maximum 
-     * speed of the clustering process. The ART-2a-Euclid data object allocates 
+     * Creates PreprocessedData object with preprocessed ART-2a-Euclid data for maximum
+     * speed of the clustering process. The PreprocessedData object allocates
      * about twice the memory of aDataMatrix. A default value of 1.0 is used 
      * for the offset for contrast enhancement.
      * <br>
@@ -1071,13 +1081,217 @@ public class Art2aEuclidKernel {
 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
      * with Utils.isDataMatrixValid() in advance)
-     * @return ART-2a-Euclid data object for maximum clustering speed but with 
+     * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aEuclidData getPreprocessedArt2aEuclidData(
+    public static PreprocessedData getPreprocessedArt2aEuclidData(
         float[][] aDataMatrix
     ) {
         return Art2aEuclidKernel.getPreprocessedArt2aEuclidData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Private static methods" defaultstate="collapsed">
+    /**
+     * Assigns data vectors to clusters
+     *
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled
+     * data row vectors have a length of zero (i.e. where all components are
+     * equal to zero). True: Scaled data row vector has a length of zero
+     * (corresponding contrast enhanced unit vector is set to null in this
+     * case), false: Otherwise.
+     * @param aPreprocessedArt2aEuclidData PreprocessedData instance (IS NOT CHANGED)
+     * @param aBufferVector Buffer vector (MUST BE ALREADY INSTANTIATED)
+     * @param aThresholdForContrastEnhancement Threshold for contrast
+     * enhancement
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aClusterIndexOfDataVector Cluster index of data vector (MAY BE
+     * CHANGED and MUST ALREADY BE INSTANTIATED)
+     * @param aClusterUsageFlags Flags for cluster usage. True: Cluster is used,
+     * false: Cluster is empty and has to be removed (MAY BE CHANGED and MUST
+     * ALREADY BE INSTANTIATED)
+     */
+    private static void assignDataVectorsToClusters(
+            int aNumberOfDetectedClusters,
+            boolean[] aDataVectorZeroLengthFlags,
+            PreprocessedData aPreprocessedArt2aEuclidData,
+            float[] aBufferVector,
+            float aThresholdForContrastEnhancement,
+            float[][]aClusterMatrix,
+            int[] aClusterIndexOfDataVector,
+            boolean[] aClusterUsageFlags
+    ) {
+        // Assign data vectors to clusters (last pass)
+        Arrays.fill(aClusterUsageFlags, false);
+        for (int i = 0; i < aDataVectorZeroLengthFlags.length; i++) {
+            if (!aDataVectorZeroLengthFlags[i]) {
+                if (aPreprocessedArt2aEuclidData.hasPreprocessedData()) {
+                    aBufferVector = aPreprocessedArt2aEuclidData.getPreprocessedMatrix()[i];
+                } else {
+                    // Check of length is NOT necessary
+                    Art2aEuclidUtils.setContrastEnhancedVector(
+                            aPreprocessedArt2aEuclidData.getDataMatrix()[i],
+                            aBufferVector,
+                            aPreprocessedArt2aEuclidData.getMinMaxComponentsOfDataMatrix(),
+                            aThresholdForContrastEnhancement
+                    );
+                }
+                int tmpWinnerClusterIndex =
+                        Art2aEuclidKernel.getClusterIndex(
+                            aBufferVector,
+                            aNumberOfDetectedClusters,
+                            aClusterMatrix
+                        );
+                aClusterIndexOfDataVector[i] = tmpWinnerClusterIndex;
+                aClusterUsageFlags[tmpWinnerClusterIndex] = true;
+            }
+        }
+    }
+
+    /**
+     * Returns index of cluster for contrast enhanced vector
+     *
+     * @param aContrastEnhancedVector Contrast enhanced vector
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aClusterMatrix Cluster matrix
+     * @return Index of cluster for contrast enhanced unit vector
+     */
+    private static int getClusterIndex(
+            float[] aContrastEnhancedVector,
+            int aNumberOfDetectedClusters,
+            float[][] aClusterMatrix
+    ) {
+        float tmpMinSquaredDistance = Float.MAX_VALUE;
+        int tmpWinnerClusterIndex = -1;
+        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpSquaredDistance = Utils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i]);
+            if (tmpSquaredDistance < tmpMinSquaredDistance) {
+                tmpMinSquaredDistance = tmpSquaredDistance;
+                tmpWinnerClusterIndex = i;
+            }
+        }
+        return tmpWinnerClusterIndex;
+    }
+
+    /**
+     * Determines convergence of clustering process.
+     * Note: No checks are performed.
+     *
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param anEpoch Current epochs
+     * @param aClusterCentroidMatrix Cluster centroid matrix with centroid row
+     * vectors
+     * @param aClusterCentroidMatrixOld Cluster centroid matrix with
+     * centroid row vectors of the previous epoch
+     * @param aMaximumNumberOfEpochs Maximum number of epochs
+     * @param aConvergenceThreshold Convergence threshold
+     * @return True if clustering process has converged, false otherwise.
+     */
+    private static boolean isConverged(
+            int aNumberOfDetectedClusters,
+            int anEpoch,
+            float[][] aClusterCentroidMatrix,
+            float[][] aClusterCentroidMatrixOld,
+            int aMaximumNumberOfEpochs,
+            float aConvergenceThreshold
+    ) {
+        if (anEpoch == 1) {
+            // Convergence check needs at least 2 epochs
+            Utils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+            return false;
+        } else {
+            float tmpSquaredConvergenceThreshold = aConvergenceThreshold * aConvergenceThreshold;
+            boolean tmpIsConverged = false;
+            if(anEpoch < aMaximumNumberOfEpochs) {
+                // Check convergence by evaluating the similarity (scalar product)
+                // of the cluster vectors of this and the previous epoch
+                tmpIsConverged = true;
+                for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+                    if (
+                            aClusterCentroidMatrixOld[i] == null ||
+                                    Utils.getSquaredDistance(
+                                            aClusterCentroidMatrix[i],
+                                            aClusterCentroidMatrixOld[i]
+                                    ) > tmpSquaredConvergenceThreshold
+                    ) {
+                        tmpIsConverged = false;
+                        break;
+                    }
+                }
+                if(!tmpIsConverged) {
+                    Utils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+                }
+            }
+            return tmpIsConverged;
+        }
+    }
+
+    /**
+     * Modifies winner cluster (see code).
+     * Note: aContrastEnhancedVector is used for modification and may be
+     * changed.
+     * Note: No checks are performed.
+     *
+     * @param aContrastEnhancedVector Contrast enhanced unit vector for
+     * modification (MAY BE CHANGED)
+     * @param aWinnerClusterVector Winner cluster centroid vector (MAY BE CHANGED)
+     * @param aThresholdForContrastEnhancement Threshold for contrast enhancement
+     * @param aLearningParameter  Learning parameter
+     */
+    private static void modifyWinnerCluster(
+            float[] aContrastEnhancedVector,
+            float[] aWinnerClusterVector,
+            float aThresholdForContrastEnhancement,
+            float aLearningParameter
+    ) {
+        // Note: aContrastEnhancedVector is used for modification
+        for(int j = 0; j < aWinnerClusterVector.length; j++) {
+            if(aWinnerClusterVector[j] <= aThresholdForContrastEnhancement) {
+                aContrastEnhancedVector[j] = 0.0f;
+            }
+        }
+        float tmpFactor = ONE - aLearningParameter;
+        for(int j = 0; j < aWinnerClusterVector.length; j++) {
+            aContrastEnhancedVector[j] = aLearningParameter * aContrastEnhancedVector[j] + tmpFactor * aWinnerClusterVector[j];
+        }
+        Utils.copyVector(aContrastEnhancedVector, aWinnerClusterVector);
+    }
+
+    /**
+     * Sets rho winner with the rho value and the cluster index of the winner
+     * (see code). If the cluster index is negative the first scaled rho value
+     * is the winner.
+     *
+     * @param aContrastEnhancedVector Contrast enhanced unit vector (IS NOT
+     * CHANGED)
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aScalingFactor Scaling factor
+     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster
+     * index of the winner. If the cluster index is negative the first scaled
+     * rho value is the winner.
+     */
+    private static void setRhoWinner(
+            float[] aContrastEnhancedVector,
+            float[][] aClusterMatrix,
+            int aNumberOfDetectedClusters,
+            float aScalingFactor,
+            Utils.RhoWinner aRhoWinner
+    ) {
+        // Calculate first rho value
+        float tmpRhoValue = Utils.getSumOfSquaredDifferences(aContrastEnhancedVector, aScalingFactor);
+        // Set winner index to negative value
+        int tmpIndex = -1;
+        // Calculate other rho values
+        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpRhoForCluster = Utils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i]);
+            if(tmpRhoForCluster < tmpRhoValue) {
+                tmpRhoValue = tmpRhoForCluster;
+                tmpIndex = i;
+            }
+        }
+        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
     }
     //</editor-fold>
 

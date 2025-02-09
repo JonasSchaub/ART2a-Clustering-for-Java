@@ -548,10 +548,10 @@ public class Art2aTest {
             }
 
             // Preprocessed Art2aData
-            Art2aData tmpArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            PreprocessedData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aKernel tmpArt2aKernelWithArt2aData = 
                 new Art2aKernel(
-                    tmpArt2aData, 
+                    tmpPreprocessedArt2aData,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -637,11 +637,11 @@ public class Art2aTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aTask> tmpArt2aTaskList = new LinkedList<>();
-        Art2aData tmpArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        PreprocessedData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aTaskList.add(
                 new Art2aTask(
-                    tmpArt2aData, 
+                    tmpPreprocessedArt2aData,
                     tmpVigilance, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,

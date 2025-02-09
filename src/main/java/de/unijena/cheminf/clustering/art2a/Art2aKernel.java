@@ -131,7 +131,13 @@ public class Art2aKernel {
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aKernel.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private static final class constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
+    /**
+     * Value 1.0
+     */
+    private static final float ONE = 1.0f;
+    //</editor-fold>
+    //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
     /**
      * Default fraction of the (maximum) number of clusters relative to 
      * number of data vectors
@@ -181,9 +187,9 @@ public class Art2aKernel {
      */
     private final long randomSeed;
     /**
-     * Art2aData data object
+     * PreprocessedData object
      */
-    private final Art2aData art2aData;
+    private final PreprocessedData preprocessedData;
     //</editor-fold>
     //<editor-fold desc="Private helper callable" defaultstate="collapsed">
     /**
@@ -330,14 +336,14 @@ public class Art2aKernel {
         //</editor-fold>
 
         if(anIsDataPreprocessing) {
-            this.art2aData = 
+            this.preprocessedData =
                 Art2aKernel.getPreprocessedArt2aData(
                     aDataMatrix,
                     anOffsetForContrastEnhancement
                 );
         } else {
-            this.art2aData = 
-                new Art2aData(
+            this.preprocessedData =
+                new PreprocessedData(
                     aDataMatrix, 
                     Utils.getMinMaxComponents(aDataMatrix),
                     anOffsetForContrastEnhancement
@@ -379,8 +385,8 @@ public class Art2aKernel {
     /**
      * Constructor.
      *
-     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
-     * Art2aKernel.getPreprocessedArt2aData()
+     * @param aPreprocessedArt2aData PreprocessedData object created by static
+     * method Art2aKernel.getPreprocessedArt2aData()
      * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
      * interval [2, number of data row vectors of aDataMatrix])
      * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
@@ -393,7 +399,7 @@ public class Art2aKernel {
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aKernel(
-        Art2aData aPreprocessedArt2aData,
+        PreprocessedData aPreprocessedArt2aData,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs, 
         float aConvergenceThreshold, 
@@ -404,9 +410,16 @@ public class Art2aKernel {
         if(aPreprocessedArt2aData == null) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
-                "Art2aKernel.Constructor: anArt2aData is null."
+                "Art2aKernel.Constructor: aPreprocessedArt2aData is null."
             );
-            throw new IllegalArgumentException("Art2aKernel.Constructor: anArt2aData is null.");
+            throw new IllegalArgumentException("Art2aKernel.Constructor: aPreprocessedArt2aData is null.");
+        }
+        if(!aPreprocessedArt2aData.hasArt2aPreprocessedData()) {
+            Art2aKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aKernel.Constructor: aPreprocessedArt2aData does not have ART-2a preprocessed data."
+            );
+            throw new IllegalArgumentException("Art2aKernel.Constructor: aPreprocessedArt2aData does not have ART-2a preprocessed data.");
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aKernel.LOGGER.log(
@@ -438,7 +451,7 @@ public class Art2aKernel {
         }
         //</editor-fold>
 
-        this.art2aData = aPreprocessedArt2aData;
+        this.preprocessedData = aPreprocessedArt2aData;
         this.maximumNumberOfClusters = aMaximumNumberOfClusters;
         this.maximumNumberOfEpochs = aMaximumNumberOfEpochs;
         this.convergenceThreshold = aConvergenceThreshold;
@@ -451,16 +464,16 @@ public class Art2aKernel {
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
-     * @param aPreprocessedArt2aData Preprocessed ART-2a data object created by method
-     * Art2aKernel.getPreprocessedArt2aData()
+     * @param aPreprocessedArt2aData PreprocessedData object created by static
+     * method Art2aKernel.getPreprocessedArt2aData()
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aKernel(
-        Art2aData aPreprocessedArt2aData
+        PreprocessedData aPreprocessedArt2aData
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aData,
-            Math.max((int) (aPreprocessedArt2aData.getContrastEnhancedUnitMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            Math.max((int) (aPreprocessedArt2aData.getPreprocessedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -504,25 +517,25 @@ public class Art2aKernel {
             boolean[] tmpDataVectorZeroLengthFlags = null;
             int tmpNumberOfComponents = -1;
             int tmpNumberOfDataVectors = -1;
-            if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedUnitMatrix = this.art2aData.getContrastEnhancedUnitMatrix();
-                tmpDataVectorZeroLengthFlags = this.art2aData.getDataVectorZeroLengthFlags();
+            if (this.preprocessedData.hasPreprocessedData()) {
+                tmpContrastEnhancedUnitMatrix = this.preprocessedData.getPreprocessedMatrix();
+                tmpDataVectorZeroLengthFlags = this.preprocessedData.getDataVectorZeroLengthFlags();
                 tmpNumberOfDataVectors = tmpContrastEnhancedUnitMatrix.length;
                 tmpNumberOfComponents = tmpContrastEnhancedUnitMatrix[0].length;
             } else {
-                tmpDataMatrix = this.art2aData.getDataMatrix();
+                tmpDataMatrix = this.preprocessedData.getDataMatrix();
                 tmpDataVectorZeroLengthFlags = new boolean[tmpDataMatrix.length];
                 Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
                 tmpNumberOfDataVectors = tmpDataMatrix.length;
                 tmpNumberOfComponents = tmpDataMatrix[0].length;
             }
-            Utils.MinMaxValue[] tmpMinMaxComponents = this.art2aData.getMinMaxComponentsOfDataMatrix();
+            Utils.MinMaxValue[] tmpMinMaxComponents = this.preprocessedData.getMinMaxComponentsOfDataMatrix();
 
             // Definitions
             float tmpThresholdForContrastEnhancement = 
                 Utils.getThresholdForContrastEnhancement(
                     tmpNumberOfComponents,
-                    this.art2aData.getOffsetForContrastEnhancement()
+                    this.preprocessedData.getOffsetForContrastEnhancement()
                 );
             // Scaling factor alpha
             float tmpScalingFactor = tmpThresholdForContrastEnhancement;
@@ -570,10 +583,10 @@ public class Art2aKernel {
                         continue;
                     }
 
-                    if (this.art2aData.hasPreprocessedData()) {
+                    if (this.preprocessedData.hasPreprocessedData()) {
                         Utils.copyVector(tmpContrastEnhancedUnitMatrix[tmpRandomIndex], tmpBufferVector);
                     } else {
-                        tmpDataVectorZeroLengthFlags[tmpRandomIndex] = 
+                        tmpDataVectorZeroLengthFlags[tmpRandomIndex] =
                             Art2aUtils.setContrastEnhancedUnitVector(
                                 tmpDataMatrix[tmpRandomIndex],
                                 tmpBufferVector,
@@ -593,7 +606,7 @@ public class Art2aKernel {
                         tmpNumberOfDetectedClusters++;
                     } else {
                         // Cluster number is greater than or equal to 1
-                        Art2aUtils.setRhoWinner(
+                        Art2aKernel.setRhoWinner(
                             tmpBufferVector, 
                             tmpClusterMatrix, 
                             tmpNumberOfDetectedClusters, 
@@ -616,7 +629,7 @@ public class Art2aKernel {
                             // Assign to existing winner cluster with modification
                             // Note: tmpBufferVector (= contrast enhanced unit vector)
                             // is used for modification
-                            Art2aUtils.modifyWinnerCluster(
+                            Art2aKernel.modifyWinnerCluster(
                                 tmpBufferVector,
                                 tmpClusterMatrix[tmpRhoWinner.getIndexOfCluster()],
                                 tmpThresholdForContrastEnhancement,
@@ -637,8 +650,8 @@ public class Art2aKernel {
                     tmpNumberOfDetectedClusters = tmpClusterRemovalInfo.getNumberOfDetectedClusters();
                     tmpIsConverged = false;
                 } else {
-                    tmpIsConverged = 
-                        Art2aUtils.isConverged(
+                    tmpIsConverged =
+                        Art2aKernel.isConverged(
                             tmpNumberOfDetectedClusters, 
                             tmpCurrentNumberOfEpochs, 
                             tmpClusterMatrix, 
@@ -651,10 +664,10 @@ public class Art2aKernel {
             // Check if cluster overflow occurred
             if (tmpIsClusterOverflow) {
                 // Cluster overflow occurred: Finally assign ALL data vectors
-                Art2aUtils.assignDataVectorsToClusters(
+                Art2aKernel.assignDataVectorsToClusters(
                     tmpNumberOfDetectedClusters,
                     tmpDataVectorZeroLengthFlags,
-                    this.art2aData,
+                    this.preprocessedData,
                     tmpBufferVector,
                     tmpThresholdForContrastEnhancement,
                     tmpClusterMatrix,
@@ -674,10 +687,10 @@ public class Art2aKernel {
             // clusters in the cluster matrix
             while (tmpClusterRemovalInfo.isClusterRemoved()) {
                 // Empty clusters are removed: Assign data vectors again
-                Art2aUtils.assignDataVectorsToClusters(
+                Art2aKernel.assignDataVectorsToClusters(
                     tmpNumberOfDetectedClusters,
                     tmpDataVectorZeroLengthFlags,
-                    this.art2aData,
+                    this.preprocessedData,
                     tmpBufferVector,
                     tmpThresholdForContrastEnhancement,
                     tmpClusterMatrix,
@@ -702,7 +715,7 @@ public class Art2aKernel {
                 tmpDataVectorZeroLengthFlags,
                 tmpIsClusterOverflow,
                 tmpIsConverged,
-                this.art2aData
+                this.preprocessedData
             );
         } catch (Exception anException) {
             Art2aKernel.LOGGER.log(
@@ -993,8 +1006,8 @@ public class Art2aKernel {
     //</editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Public static methods">
     /**
-     * Creates ART-2a data object with preprocessed data for maximum speed  
-     * of the clustering process. The ART-2a data object allocates about the 
+     * Creates PreprocessedData object with preprocessed ART-2a data for maximum speed
+     * of the clustering process. The PreprocessedData object allocates about the
      * same memory as aDataMatrix.
      * <br>
      * Note: There a no checks! Check aDataMatrix in advance with method
@@ -1007,10 +1020,10 @@ public class Art2aKernel {
      * with Utils.isDataMatrixValid() in advance)
      * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
      * (must be greater zero)
-     * @return ART-2a data object for maximum clustering speed but with 
+     * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aData getPreprocessedArt2aData(
+    public static PreprocessedData getPreprocessedArt2aData(
         float[][] aDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
@@ -1032,7 +1045,7 @@ public class Art2aKernel {
 
         for(int i = 0; i < aDataMatrix.length; i++) {
             float[] tmpContrastEnhancedUnitVector = new float[tmpNumberOfComponents];
-            tmpDataVectorZeroLengthFlags[i] = 
+            tmpDataVectorZeroLengthFlags[i] =
                 Art2aUtils.setContrastEnhancedUnitVector(
                     aDataMatrix[i],
                     tmpContrastEnhancedUnitVector,
@@ -1041,17 +1054,18 @@ public class Art2aKernel {
                 );
             tmpContrastEnhancedUnitMatrix[i] = tmpContrastEnhancedUnitVector;
         }
-        return new Art2aData(
+        return new PreprocessedData(
             tmpContrastEnhancedUnitMatrix,
             tmpDataVectorZeroLengthFlags,
             tmpMinMaxComponents,
-            anOffsetForContrastEnhancement
+            anOffsetForContrastEnhancement,
+            true
         );
     }
 
     /**
-     * Creates ART-2a data object with preprocessed data for maximum speed  
-     * of the clustering process. The ART-2a data object allocates about twice 
+     * Creates PreprocessedData object with preprocessed ART-2a data for maximum speed
+     * of the clustering process. The PreprocessedData object allocates about twice
      * the memory of aDataMatrix. A default value of 1.0 is used for the offset 
      * for contrast enhancement.
      * <br>
@@ -1060,13 +1074,221 @@ public class Art2aKernel {
 
      * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
      * with Utils.isDataMatrixValid() in advance)
-     * @return ART-2a data object for maximum clustering speed but with 
+     * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
      */
-    public static Art2aData getPreprocessedArt2aData(
+    public static PreprocessedData getPreprocessedArt2aData(
         float[][] aDataMatrix
     ) {
         return Art2aKernel.getPreprocessedArt2aData(aDataMatrix, DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT);
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Private static methods" defaultstate="collapsed">
+    /**
+     * Assigns data vectors to clusters
+     *
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled
+     * data row vectors have a length of zero (i.e. where all components are
+     * equal to zero). True: Scaled data row vector has a length of zero
+     * (corresponding contrast enhanced unit vector is set to null in this
+     * case), false: Otherwise.
+     * @param aPreprocessedArt2aData PreprocessedData instance (IS NOT CHANGED)
+     * @param aBufferVector Buffer vector (MUST BE ALREADY INSTANTIATED)
+     * @param aThresholdForContrastEnhancement Threshold for contrast
+     * enhancement
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aClusterIndexOfDataVector Cluster index of data vector (MAY BE
+     * CHANGED and MUST ALREADY BE INSTANTIATED)
+     * @param aClusterUsageFlags Flags for cluster usage. True: Cluster is used,
+     * false: Cluster is empty and has to be removed (MAY BE CHANGED and MUST
+     * ALREADY BE INSTANTIATED)
+     */
+    private static void assignDataVectorsToClusters(
+            int aNumberOfDetectedClusters,
+            boolean[] aDataVectorZeroLengthFlags,
+            PreprocessedData aPreprocessedArt2aData,
+            float[] aBufferVector,
+            float aThresholdForContrastEnhancement,
+            float[][]aClusterMatrix,
+            int[] aClusterIndexOfDataVector,
+            boolean[] aClusterUsageFlags
+    ) {
+        Arrays.fill(aClusterUsageFlags, false);
+        for (int i = 0; i < aDataVectorZeroLengthFlags.length; i++) {
+            if (!aDataVectorZeroLengthFlags[i]) {
+                if (aPreprocessedArt2aData.hasPreprocessedData()) {
+                    aBufferVector = aPreprocessedArt2aData.getPreprocessedMatrix()[i];
+                } else {
+                    // Check of length is NOT necessary
+                    Art2aUtils.setContrastEnhancedUnitVector(
+                            aPreprocessedArt2aData.getDataMatrix()[i],
+                            aBufferVector,
+                            aPreprocessedArt2aData.getMinMaxComponentsOfDataMatrix(),
+                            aThresholdForContrastEnhancement
+                    );
+                }
+                int tmpWinnerClusterIndex =
+                        Art2aKernel.getClusterIndex(
+                                aBufferVector,
+                                aNumberOfDetectedClusters,
+                                aClusterMatrix
+                        );
+                aClusterIndexOfDataVector[i] = tmpWinnerClusterIndex;
+                aClusterUsageFlags[tmpWinnerClusterIndex] = true;
+            }
+        }
+    }
+
+    /**
+     * Returns index of cluster for contrast enhanced unit vector
+     *
+     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aClusterMatrix Cluster matrix
+     * @return Index of cluster for contrast enhanced unit vector
+     */
+    private static int getClusterIndex(
+            float[] aContrastEnhancedUnitVector,
+            int aNumberOfDetectedClusters,
+            float[][] aClusterMatrix
+    ) {
+        float tmpMaxScalarProduct = Float.MIN_VALUE;
+        int tmpWinnerClusterIndex = -1;
+        for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpScalarProduct = Utils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
+            if (tmpScalarProduct > tmpMaxScalarProduct) {
+                tmpMaxScalarProduct = tmpScalarProduct;
+                tmpWinnerClusterIndex = i;
+            }
+        }
+        return tmpWinnerClusterIndex;
+    }
+
+    /**
+     * Determines convergence of clustering process.
+     * Note: No checks are performed.
+     *
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param anEpoch Current epochs
+     * @param aClusterCentroidMatrix Cluster centroid matrix with centroid row
+     * vectors
+     * @param aClusterCentroidMatrixOld Cluster centroid matrix with
+     * centroid row vectors of the previous epoch
+     * @param aMaximumNumberOfEpochs Maximum number of epochs
+     * @param aConvergenceThreshold Convergence threshold
+     * @return True if clustering process has converged, false otherwise.
+     */
+    private static boolean isConverged(
+            int aNumberOfDetectedClusters,
+            int anEpoch,
+            float[][] aClusterCentroidMatrix,
+            float[][] aClusterCentroidMatrixOld,
+            int aMaximumNumberOfEpochs,
+            float aConvergenceThreshold
+    ) {
+        if (anEpoch == 1) {
+            // Convergence check needs at least 2 epochs
+            Utils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+            return false;
+        } else {
+            boolean tmpIsConverged = false;
+            if(anEpoch < aMaximumNumberOfEpochs) {
+                // Check convergence by evaluating the similarity (scalar product)
+                // of the cluster vectors of this and the previous epoch
+                tmpIsConverged = true;
+                for (int i = 0; i < aNumberOfDetectedClusters; i++) {
+                    if (
+                            aClusterCentroidMatrixOld[i] == null ||
+                                    Utils.getScalarProduct(aClusterCentroidMatrix[i], aClusterCentroidMatrixOld[i]) < aConvergenceThreshold
+                    ) {
+                        tmpIsConverged = false;
+                        break;
+                    }
+                }
+                if(!tmpIsConverged) {
+                    Utils.copyRows(aClusterCentroidMatrix, aClusterCentroidMatrixOld, aNumberOfDetectedClusters);
+                }
+            }
+            return tmpIsConverged;
+        }
+    }
+
+    /**
+     * Modifies winner cluster (see code).
+     * Note: aContrastEnhancedUnitVector is used for modification and may be
+     * changed.
+     * Note: No checks are performed.
+     *
+     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector for
+     * modification (MAY BE CHANGED)
+     * @param aWinnerClusterVector Winner cluster centroid vector (MAY BE CHANGED)
+     * @param aThresholdForContrastEnhancement Threshold for contrast enhancement
+     * @param aLearningParameter  Learning parameter
+     */
+    private static void modifyWinnerCluster(
+            float[] aContrastEnhancedUnitVector,
+            float[] aWinnerClusterVector,
+            float aThresholdForContrastEnhancement,
+            float aLearningParameter
+    ) {
+        // Note: aContrastEnhancedUnitVector is used for modification
+        boolean tmpIsChanged = false;
+        for(int j = 0; j < aWinnerClusterVector.length; j++) {
+            if(aWinnerClusterVector[j] <= aThresholdForContrastEnhancement) {
+                aContrastEnhancedUnitVector[j] = 0.0f;
+                tmpIsChanged = true;
+            }
+        }
+        float tmpFactor1;
+        if (tmpIsChanged) {
+            tmpFactor1 = aLearningParameter / Utils.getVectorLength(aContrastEnhancedUnitVector);
+        } else {
+            tmpFactor1 = aLearningParameter;
+        }
+        float tmpFactor2 = ONE - aLearningParameter;
+        for(int j = 0; j < aWinnerClusterVector.length; j++) {
+            aContrastEnhancedUnitVector[j] = tmpFactor1 * aContrastEnhancedUnitVector[j] + tmpFactor2 * aWinnerClusterVector[j];
+        }
+        Utils.normalizeVector(aContrastEnhancedUnitVector);
+        Utils.copyVector(aContrastEnhancedUnitVector, aWinnerClusterVector);
+    }
+
+    /**
+     * Sets rho winner with the rho value and the cluster index of the winner
+     * (see code). If the cluster index is negative the first scaled rho value
+     * is the winner.
+     *
+     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector (IS NOT
+     * CHANGED)
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aScalingFactor Scaling factor
+     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster
+     * index of the winner. If the cluster index is negative the first scaled
+     * rho value is the winner.
+     */
+    private static void setRhoWinner(
+            float[] aContrastEnhancedUnitVector,
+            float[][] aClusterMatrix,
+            int aNumberOfDetectedClusters,
+            float aScalingFactor,
+            Utils.RhoWinner aRhoWinner
+    ) {
+        // Calculate first rho value
+        float tmpRhoValue = aScalingFactor * Utils.getSumOfComponents(aContrastEnhancedUnitVector);
+        // Set winner index to negative value
+        int tmpIndex = -1;
+        // Calculate other rho values
+        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
+            float tmpRhoForCluster = Utils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
+            if(tmpRhoForCluster > tmpRhoValue) {
+                tmpRhoValue = tmpRhoForCluster;
+                tmpIndex = i;
+            }
+        }
+        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
     }
     //</editor-fold>
 

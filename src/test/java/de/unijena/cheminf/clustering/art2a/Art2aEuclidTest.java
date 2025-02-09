@@ -515,10 +515,10 @@ public class Art2aEuclidTest {
             }
 
             // Preprocessed Art2aEuclidData
-            Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+            PreprocessedData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
             Art2aEuclidKernel tmpArt2aEuclidKernelWithArt2aEuclidData = 
                 new Art2aEuclidKernel(
-                    tmpArt2aEuclidData, 
+                    tmpPreprocessedArt2aEuclidData,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -604,10 +604,10 @@ public class Art2aEuclidTest {
 
         // Concurrent (parallelized) clustering
         LinkedList<Art2aEuclidTask> tmpArt2aEuclidTaskList = new LinkedList<>();
-        Art2aEuclidData tmpArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
+        PreprocessedData tmpPreprocessedArt2aEuclidData = Art2aEuclidKernel.getPreprocessedArt2aEuclidData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
         for (float tmpVigilance : tmpVigilances) {
             tmpArt2aEuclidTaskList.add(new Art2aEuclidTask(
-                    tmpArt2aEuclidData, 
+                    tmpPreprocessedArt2aEuclidData,
                     tmpVigilance, 
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,

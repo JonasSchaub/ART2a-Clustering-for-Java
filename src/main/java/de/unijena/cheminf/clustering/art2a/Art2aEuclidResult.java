@@ -90,9 +90,9 @@ public class Art2aEuclidResult {
      */
     private final boolean isConverged;
     /**
-     * Art2aEuclidData object
+     * PreprocessedData object
      */
-    private final Art2aEuclidData art2aData;
+    private final PreprocessedData preprocessedArt2aEuclidData;
     //</editor-fold>
     //<editor-fold desc="Private record IndexedValue" defaultstate="collapsed">
     /**
@@ -138,7 +138,7 @@ public class Art2aEuclidResult {
      * @param anIsClusterOverflow True: Cluster overflow occurred, false: 
      * Otherwise
      * @param anIsConverged True: Clustering process converged, false: Otherwise
-     * @param anArt2aEuclidData Art2aEuclidData instance
+     * @param aPreprocessedArt2aEuclidData PreprocessedData instance
      */
     public Art2aEuclidResult(
         float aVigilance,
@@ -150,7 +150,7 @@ public class Art2aEuclidResult {
         boolean[] aDataVectorZeroLengthFlags,
         boolean anIsClusterOverflow,
         boolean anIsConverged,
-        Art2aEuclidData anArt2aEuclidData
+        PreprocessedData aPreprocessedArt2aEuclidData
     ) {
         this.vigilance = aVigilance;
         this.thresholdForContrastEnhancement = aThresholdForContrastEnhancement;
@@ -161,7 +161,7 @@ public class Art2aEuclidResult {
         this.dataVectorZeroLengthFlags = aDataVectorZeroLengthFlags;
         this.isClusterOverflow = anIsClusterOverflow;
         this.isConverged = anIsConverged;
-        this.art2aData = anArt2aEuclidData;
+        this.preprocessedArt2aEuclidData = aPreprocessedArt2aEuclidData;
     }
     //</editor-fold>
 
@@ -389,19 +389,19 @@ public class Art2aEuclidResult {
         int tmpBestIndex = 0;
         float tmpMinimumDistance = Float.MAX_VALUE;
         float[] tmpContrastEnhancedVector = null;
-        if (!this.art2aData.hasPreprocessedData()) {
+        if (!this.preprocessedArt2aEuclidData.hasPreprocessedData()) {
             tmpContrastEnhancedVector = new float[tmpClusterVector.length];
         }
         for (int i = 0; i < tmpDataVectorIndicesOfCluster.length; i++) {
             int tmpIndex = tmpDataVectorIndicesOfCluster[i];
-            if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedVector = this.art2aData.getContrastEnhancedMatrix()[tmpIndex];
+            if (this.preprocessedArt2aEuclidData.hasPreprocessedData()) {
+                tmpContrastEnhancedVector = this.preprocessedArt2aEuclidData.getPreprocessedMatrix()[tmpIndex];
             } else {
                 // Check of length is NOT necessary
                 Art2aEuclidUtils.setContrastEnhancedVector(
-                    this.art2aData.getDataMatrix()[tmpIndex],
+                    this.preprocessedArt2aEuclidData.getDataMatrix()[tmpIndex],
                     tmpContrastEnhancedVector,
-                    this.art2aData.getMinMaxComponentsOfDataMatrix(),
+                    this.preprocessedArt2aEuclidData.getMinMaxComponentsOfDataMatrix(),
                     this.thresholdForContrastEnhancement
                 );
             }
@@ -444,19 +444,19 @@ public class Art2aEuclidResult {
         float[] tmpClusterVector = this.clusterMatrix[aClusterIndex];
         IndexedValue[] tmpIndexedValues = new IndexedValue[tmpDataVectorIndicesOfCluster.length];
         float[] tmpContrastEnhancedVector = null;
-        if (!this.art2aData.hasPreprocessedData()) {
+        if (!this.preprocessedArt2aEuclidData.hasPreprocessedData()) {
             tmpContrastEnhancedVector = new float[tmpClusterVector.length];
         }
         for (int i = 0; i < tmpDataVectorIndicesOfCluster.length; i++) {
             int tmpIndex = tmpDataVectorIndicesOfCluster[i];
-            if (this.art2aData.hasPreprocessedData()) {
-                tmpContrastEnhancedVector = this.art2aData.getContrastEnhancedMatrix()[tmpIndex];
+            if (this.preprocessedArt2aEuclidData.hasPreprocessedData()) {
+                tmpContrastEnhancedVector = this.preprocessedArt2aEuclidData.getPreprocessedMatrix()[tmpIndex];
             } else {
                 // Check of length is NOT necessary
                 Art2aEuclidUtils.setContrastEnhancedVector(
-                    this.art2aData.getDataMatrix()[tmpIndex],
+                    this.preprocessedArt2aEuclidData.getDataMatrix()[tmpIndex],
                     tmpContrastEnhancedVector,
-                    this.art2aData.getMinMaxComponentsOfDataMatrix(),
+                    this.preprocessedArt2aEuclidData.getMinMaxComponentsOfDataMatrix(),
                     this.thresholdForContrastEnhancement
                 );
             }
