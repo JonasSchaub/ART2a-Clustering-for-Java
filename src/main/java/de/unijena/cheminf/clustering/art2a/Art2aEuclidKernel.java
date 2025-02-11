@@ -198,12 +198,6 @@ public class Art2aEuclidKernel {
      */
     private static class HelperTask implements Callable<Art2aEuclidResult> {
 
-        //<editor-fold desc="Private static final LOGGER">
-        /**
-         * Logger of this class
-         */
-        private static final Logger LOGGER = Logger.getLogger(HelperTask.class.getName());
-        //</editor-fold>
         //<editor-fold desc="Private final class variables">
         /**
          * Art2aEuclidKernel
@@ -240,15 +234,6 @@ public class Art2aEuclidKernel {
             try {
                 return this.art2aKernel.getClusterResult(this.vigilance);
             } catch (Exception anException) {
-                HelperTask.LOGGER.log(
-                    Level.SEVERE, 
-                    "SingleTask.call: Can not calculate a cluster result."
-                );
-                HelperTask.LOGGER.log(
-                    Level.SEVERE, 
-                    anException.toString(), 
-                    anException
-                );
                 return null;
             }
         }
