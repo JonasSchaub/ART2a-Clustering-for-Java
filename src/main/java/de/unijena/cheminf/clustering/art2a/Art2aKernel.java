@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -125,24 +126,19 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  */
 public class Art2aKernel {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aKernel.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants">
     /**
      * Value 1.0
      */
     private static final float ONE = 1.0f;
     //</editor-fold>
-    //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
-    /**
-     * Default fraction of the (maximum) number of clusters relative to 
-     * number of data vectors
-     */
-    private static final float DEFAULT_FRACTION_OF_CLUSTERS = 0.2f;
+    //<editor-fold desc="Private static final class variables">
     /**
      * Default seed value for random number generator
      */
@@ -165,7 +161,7 @@ public class Art2aKernel {
      */
     private static final float DEFAULT_CONVERGENCE_THRESHOLD = 0.99f;
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * Maximum number of clusters in interval [2, number of data row vectors of getDataMatrix]
      */
@@ -191,22 +187,23 @@ public class Art2aKernel {
      */
     private final PreprocessedData preprocessedData;
     //</editor-fold>
-    //<editor-fold desc="Private helper callable" defaultstate="collapsed">
+    //<editor-fold desc="Private helper callable">
     /**
      * Helper callable for a single getClusterResult() calculation task of 
      * Art2aKernel with a distinct vigilance parameter.
+     * Note: Parallel Rho winner evaluations is disabled.
      * <br><br>
      * Note: No checks are performed.
      */
     private static class HelperTask implements Callable<Art2aResult> {
 
-        //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+        //<editor-fold desc="Private static final LOGGER">
         /**
          * Logger of this class
          */
         private static final Logger LOGGER = Logger.getLogger(HelperTask.class.getName());
         //</editor-fold>
-        //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+        //<editor-fold desc="Private final class variables">
         /**
          * Art2aKernel
          */
@@ -217,7 +214,7 @@ public class Art2aKernel {
         private final float vigilance;
         //</editor-fold>
 
-        //<editor-fold desc="Constructor" defaultstate="collapsed">
+        //<editor-fold desc="Constructor">
         /**
          * Constructor
          */
@@ -230,9 +227,10 @@ public class Art2aKernel {
         }
         //</editor-fold>
 
-        // <editor-fold defaultstate="collapsed" desc="Overriden call() method">
+        // <editor-fold desc="Overriden call() method">
         /**
          * Performs single getClusterResult() calculation task.
+         * Note: Parallel Rho winner evaluations is disabled.
          *
          * @return Art2aResult or null if getClusterResult() calculation task 
          * could not be performed.
@@ -240,7 +238,8 @@ public class Art2aKernel {
         @Override
         public Art2aResult call() {
             try {
-                return this.art2aKernel.getClusterResult(this.vigilance);
+                // Note: Parallel Rho winner evaluations is disabled: Parameter false.
+                return this.art2aKernel.getClusterResult(this.vigilance, false);
             } catch (Exception anException) {
                 HelperTask.LOGGER.log(
                     Level.SEVERE, 
@@ -259,7 +258,7 @@ public class Art2aKernel {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public constructors">
+    // <editor-fold desc="Public constructors">
     /**
      * Constructor.
      *
@@ -275,7 +274,7 @@ public class Art2aKernel {
      * (must be greater zero)
      * @param aRandomSeed Random seed value for random number generator 
      * (must be greater zero)
-     * @param anIsDataPreprocessing True: Data preprocessing is used, false:
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      *
@@ -290,7 +289,7 @@ public class Art2aKernel {
         long aRandomSeed,
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(!Utils.isDataMatrixValid(aDataMatrix)) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -298,10 +297,20 @@ public class Art2aKernel {
             );
             throw new IllegalArgumentException("Art2aKernel.Constructor: aDataMatrix is not valid.");
         }
-        if(aMaximumNumberOfEpochs <= 0) {
+        if(aMaximumNumberOfClusters < 2) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
-                "Art2aKernel.Constructor: aMaximumNumberOfEpochs must be greater zero."
+                "Art2aKernel.Constructor: aMaximumNumberOfClusters must be greater 1."
+            );
+            throw new IllegalArgumentException("Art2aKernel.Constructor: aMaximumNumberOfClusters must be greater 1.");
+        }
+        if(aMaximumNumberOfClusters > aDataMatrix.length) {
+            aMaximumNumberOfClusters = aDataMatrix.length;
+        }
+        if(aMaximumNumberOfEpochs <= 0) {
+            Art2aKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aKernel.Constructor: aMaximumNumberOfEpochs must be greater zero."
             );
             throw new IllegalArgumentException("Art2aKernel.Constructor: aMaximumNumberOfEpochs must be greater zero.");
         }
@@ -358,27 +367,32 @@ public class Art2aKernel {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
      * (= 1.0) and RANDOM_SEED (= 1).
-     * Note: There is NO data preprocessing.
-     * 
+     *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
+     * Otherwise.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aKernel(
-        float[][] aDataMatrix
+        float[][] aDataMatrix,
+        int aMaximumNumberOfClusters,
+        boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
         this(
             aDataMatrix,
-            Math.max((int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aMaximumNumberOfClusters,
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
             DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT,
             DEFAULT_RANDOM_SEED,
-            false
+            anIsDataPreprocessing
         );
     }
     
@@ -406,13 +420,23 @@ public class Art2aKernel {
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aPreprocessedArt2aData == null) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aKernel.Constructor: aPreprocessedArt2aData is null."
             );
             throw new IllegalArgumentException("Art2aKernel.Constructor: aPreprocessedArt2aData is null.");
+        }
+        if(aMaximumNumberOfClusters < 2) {
+            Art2aKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aKernel.Constructor: aMaximumNumberOfClusters must be greater 1."
+            );
+            throw new IllegalArgumentException("Art2aKernel.Constructor: aMaximumNumberOfClusters must be greater 1.");
+        }
+        if(aMaximumNumberOfClusters > aPreprocessedArt2aData.getPreprocessedMatrix().length) {
+            aMaximumNumberOfClusters = aPreprocessedArt2aData.getPreprocessedMatrix().length;
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aKernel.LOGGER.log(
@@ -453,20 +477,23 @@ public class Art2aKernel {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aData PreprocessedData object created by static
      * method Art2aKernel.getPreprocessedArt2aData()
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aKernel(
-        PreprocessedArt2aData aPreprocessedArt2aData
+        PreprocessedArt2aData aPreprocessedArt2aData,
+        int aMaximumNumberOfClusters
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aData,
-            Math.max((int) (aPreprocessedArt2aData.getPreprocessedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aMaximumNumberOfClusters,
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -475,20 +502,22 @@ public class Art2aKernel {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public methods">
+    // <editor-fold desc="Public methods">
     /**
-     * Performs ART-2a clustering and returns corresponding 
-     * Art2aResult.
+     * Performs ART-2a clustering and returns corresponding Art2aResult.
      *
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
+     * winner is evaluated by sequential calculation
      * @return Art2aResult instance
      * @throws IllegalArgumentException Thrown if argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
      */
     public Art2aResult getClusterResult(
-        float aVigilance
+        float aVigilance,
+        boolean anIsParallelRhoWinnerEvaluation
     ) throws Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -540,6 +569,11 @@ public class Art2aKernel {
             // Cluster usage flags. True: Cluster is used, false: Cluster is 
             // empty and can be removed.
             boolean[] tmpClusterUsageFlags = new boolean[this.maximumNumberOfClusters];
+            // Buffer for Rho values for parallelized Rho winner evaluation
+            float[] tmpRhoValueBuffer = null;
+            if (anIsParallelRhoWinnerEvaluation) {
+                tmpRhoValueBuffer = new float[this.maximumNumberOfClusters];
+            }
 
             // Initialize cluster indices for data row vectors with -1 to 
             // indicate missing cluster assignment
@@ -599,13 +633,24 @@ public class Art2aKernel {
                         tmpNumberOfDetectedClusters++;
                     } else {
                         // Cluster number is greater than or equal to 1
-                        Art2aKernel.setRhoWinner(
-                            tmpBufferVector, 
-                            tmpClusterMatrix, 
-                            tmpNumberOfDetectedClusters, 
-                            tmpScalingFactor,
-                            tmpRhoWinner
-                        );
+                        if (anIsParallelRhoWinnerEvaluation) {
+                            Art2aKernel.setRhoWinnerParallel(
+                                    tmpBufferVector,
+                                    tmpClusterMatrix,
+                                    tmpNumberOfDetectedClusters,
+                                    tmpScalingFactor,
+                                    tmpRhoValueBuffer,
+                                    tmpRhoWinner
+                            );
+                        } else {
+                            Art2aKernel.setRhoWinner(
+                                    tmpBufferVector,
+                                    tmpClusterMatrix,
+                                    tmpNumberOfDetectedClusters,
+                                    tmpScalingFactor,
+                                    tmpRhoWinner
+                            );
+                        }
                         // Assign to existing cluster or increment clusters
                         if(tmpRhoWinner.getIndexOfCluster() < 0 || tmpRhoWinner.getRhoValue() < aVigilance) {
                             // Increment clusters (if possible)
@@ -727,6 +772,7 @@ public class Art2aKernel {
     /**
      * Performs ART-2a clustering for specified vigilance parameters and 
      * returns corresponding Art2aResult objects.
+     * Note: Parallel Rho winner evaluations is disabled.
      *
      * @param aVigilances Vigilance parameters (must each be in interval (0,1))
      * @return Art2aResult objects or null if clustering result could 
@@ -742,7 +788,7 @@ public class Art2aKernel {
         float[] aVigilances,
         int aNumberOfConcurrentCalculationThreads
     ) throws Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -802,14 +848,14 @@ public class Art2aKernel {
         } else {
             Art2aResult[] tmpSequentialResults = new Art2aResult[aVigilances.length];
             for (int i = 0; i < aVigilances.length; i++) {
-                tmpSequentialResults[i] = this.getClusterResult(aVigilances[i]);
+                tmpSequentialResults[i] = this.getClusterResult(aVigilances[i], false);
             }
             return tmpSequentialResults;
         }
     }
     
     /**
-     * Nearest (smaller) indices of approximants to the desired number of 
+     * Nearest (smaller) indices of approximates to the desired number of
      * representatives.
      * 
      * @param aNumberOfRepresentatives Number of representatives (MUST be 
@@ -820,7 +866,9 @@ public class Art2aKernel {
      * (0,1))
      * @param aNumberOfTrialSteps Number of trial steps (MUST be greater or 
      * equal to 1)
-     * @return Nearest (smaller) indices of approximants to the desired number 
+     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
+     * winner is evaluated by sequential calculation
+     * @return Nearest (smaller) indices of approximates to the desired number
      * of representatives.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
@@ -829,9 +877,10 @@ public class Art2aKernel {
         int aNumberOfRepresentatives,
         float aVigilanceMin,
         float aVigilanceMax,
-        int aNumberOfTrialSteps
+        int aNumberOfTrialSteps,
+        boolean anIsParallelRhoWinnerEvaluation
     ) throws IllegalArgumentException, Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aNumberOfRepresentatives < 2) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -870,12 +919,12 @@ public class Art2aKernel {
         //</editor-fold>
 
         try {
-            Art2aResult tmpArt2aResult = this.getClusterResult(aVigilanceMin);
+            Art2aResult tmpArt2aResult = this.getClusterResult(aVigilanceMin, anIsParallelRhoWinnerEvaluation);
             int[] tmpRepresentativeIndicesOfClusters = tmpArt2aResult.getRepresentativeIndicesOfClusters();
             if (tmpArt2aResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                 return tmpRepresentativeIndicesOfClusters;
             }
-            tmpArt2aResult = this.getClusterResult(aVigilanceMax);
+            tmpArt2aResult = this.getClusterResult(aVigilanceMax, anIsParallelRhoWinnerEvaluation);
             if (tmpArt2aResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
                 return tmpArt2aResult.getRepresentativeIndicesOfClusters();
             }
@@ -884,7 +933,7 @@ public class Art2aKernel {
             float tmpVigilanceMax = aVigilanceMax;
             for (int i = 0; i < aNumberOfTrialSteps; i++) {
                 float tmpVigilanceMean = (tmpVigilanceMin + tmpVigilanceMax) / 2.0f;
-                tmpArt2aResult = this.getClusterResult(tmpVigilanceMean);
+                tmpArt2aResult = this.getClusterResult(tmpVigilanceMean, anIsParallelRhoWinnerEvaluation);
                 if (tmpArt2aResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                     tmpVigilanceMax = tmpVigilanceMean;
                 } else if (tmpArt2aResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
@@ -920,7 +969,9 @@ public class Art2aKernel {
      * CHECKED)
      * @param aMinimumNumberOfRepresentatives Minimum number of representatives
      * @param aMaximumNumberOfRepresentatives Maximum number of representatives
-     * @return Representatives whose mean distance is nearest to the mean 
+     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
+     * winner is evaluated by sequential calculation
+     * @return Representatives whose mean distance is nearest to the mean
      * distance of all data vectors of specified original data matrix.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
@@ -928,9 +979,10 @@ public class Art2aKernel {
     public int[] getBestRepresentatives(
         float[][] aDataMatrix,
         int aMinimumNumberOfRepresentatives,
-        int aMaximumNumberOfRepresentatives
+        int aMaximumNumberOfRepresentatives,
+        boolean anIsParallelRhoWinnerEvaluation
     ) throws IllegalArgumentException, Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aDataMatrix == null || aDataMatrix.length == 0) {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -973,7 +1025,8 @@ public class Art2aKernel {
                         i, 
                         tmpVigilanceMin, 
                         tmpVigilanceMax, 
-                        tmpNumberOfTrialSteps
+                        tmpNumberOfTrialSteps,
+                        anIsParallelRhoWinnerEvaluation
                     );
                 float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
                 float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
@@ -997,7 +1050,7 @@ public class Art2aKernel {
         }
     }
     //</editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Public static methods">
+    // <editor-fold desc="Public static methods">
     /**
      * Creates PreprocessedData object with preprocessed ART-2a data for maximum speed
      * of the clustering process. The PreprocessedData object allocates about the
@@ -1076,7 +1129,7 @@ public class Art2aKernel {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Private static methods" defaultstate="collapsed">
+    //<editor-fold desc="Private static methods">
     /**
      * Assigns data vectors to clusters
      *
@@ -1146,7 +1199,8 @@ public class Art2aKernel {
             int aNumberOfDetectedClusters,
             float[][] aClusterMatrix
     ) {
-        float tmpMaxScalarProduct = Float.MIN_VALUE;
+        // Note: Scalar product is always greater or equal to 0
+        float tmpMaxScalarProduct = -1.0f;
         int tmpWinnerClusterIndex = -1;
         for (int i = 0; i < aNumberOfDetectedClusters; i++) {
             float tmpScalarProduct = Utils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
@@ -1277,6 +1331,47 @@ public class Art2aKernel {
             float tmpRhoForCluster = Utils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i]);
             if(tmpRhoForCluster > tmpRhoValue) {
                 tmpRhoValue = tmpRhoForCluster;
+                tmpIndex = i;
+            }
+        }
+        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
+    }
+
+    /**
+     * Sets rho winner with the rho value and the cluster index of the winner
+     * (see code). If the cluster index is negative the first scaled rho value
+     * is the winner.
+     * Note: A parallelized stream is used for calculation.
+     *
+     * @param aContrastEnhancedUnitVector Contrast enhanced unit vector (IS NOT
+     * CHANGED)
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aScalingFactor Scaling factor
+     * @param aRhoValueBuffer Buffer for Rho values
+     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster
+     * index of the winner. If the cluster index is negative the first scaled
+     * rho value is the winner.
+     */
+    private static void setRhoWinnerParallel(
+            float[] aContrastEnhancedUnitVector,
+            float[][] aClusterMatrix,
+            int aNumberOfDetectedClusters,
+            float aScalingFactor,
+            float[] aRhoValueBuffer,
+            Utils.RhoWinner aRhoWinner
+    ) {
+        // Calculate first rho value
+        float tmpRhoValue = aScalingFactor * Utils.getSumOfComponents(aContrastEnhancedUnitVector);
+        // Set winner index to negative value
+        int tmpIndex = -1;
+        // Calculate other rho values
+        IntStream.range(0, aNumberOfDetectedClusters).parallel().forEach(
+            i -> aRhoValueBuffer[i] = Utils.getScalarProduct(aContrastEnhancedUnitVector, aClusterMatrix[i])
+        );
+        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
+            if(aRhoValueBuffer[i] > tmpRhoValue) {
+                tmpRhoValue = aRhoValueBuffer[i];
                 tmpIndex = i;
             }
         }

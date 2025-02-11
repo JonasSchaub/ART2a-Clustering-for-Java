@@ -179,6 +179,63 @@ public class Art2aEuclidTest {
      * Test method for development purposes only
      */
     @Test
+    public void test_Development_CombinedGaussianCouldData_Performance() {
+        System.out.println("--------------------------------------------------------");
+        System.out.println("test_Development_CombinedGaussianCouldData_Performance()");
+        System.out.println("--------------------------------------------------------");
+        int tmpNumberOfDimensions = 100;
+        int tmpNumberOfGaussianCloudVectors = 1000;
+        float tmpStandardDeviation = 0.01f;
+        Random tmpRandomNumberGenerator = new Random(1L);
+        float[][] tmpCombinedGaussianCloudDataMatrix =
+                this.getCombinedGaussianCloudMatrix(
+                        tmpNumberOfDimensions,
+                        tmpNumberOfGaussianCloudVectors,
+                        tmpStandardDeviation,
+                        tmpRandomNumberGenerator
+                );
+
+        float tmpVigilance = 0.1f;
+        int tmpMaximumNumberOfClusters = 200;
+        boolean tmpIsDataPreprocessing = true;
+        int tmpMaximumNumberOfEpochs = 10;
+        float tmpConvergenceThreshold = 0.1f;
+        float tmpLearningParameter = 0.01f;
+        float tmpOffsetForContrastEnhancement = 1.0f;
+        long tmpRandomSeed = 1L;
+
+        long tmpStart = System.currentTimeMillis();
+        Art2aEuclidKernel tmpArt2aEuclidKernel =
+                new Art2aEuclidKernel(
+                        tmpCombinedGaussianCloudDataMatrix,
+                        tmpMaximumNumberOfClusters,
+                        tmpMaximumNumberOfEpochs,
+                        tmpConvergenceThreshold,
+                        tmpLearningParameter,
+                        tmpOffsetForContrastEnhancement,
+                        tmpRandomSeed,
+                        tmpIsDataPreprocessing
+                );
+        Art2aEuclidResult tmpArt2aEuclidResult = null;
+        try {
+            tmpArt2aEuclidResult = tmpArt2aEuclidKernel.getClusterResult(tmpVigilance);
+        } catch (Exception anException) {
+            Assertions.assertTrue(false);
+        }
+        long tmpEnd = System.currentTimeMillis();
+
+        System.out.println("  Number of data vectors      = " + String.valueOf(tmpNumberOfDimensions * tmpNumberOfGaussianCloudVectors));
+        System.out.println("  Elapsed time in ms          = " + String.valueOf(tmpEnd - tmpStart));
+        System.out.println("  Number of detected clusters = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfDetectedClusters()));
+        System.out.println("  Number of epochs            = " + String.valueOf(tmpArt2aEuclidResult.getNumberOfEpochs()));
+        System.out.println("  Is converged?               = " + String.valueOf(tmpArt2aEuclidResult.isConverged()));
+        System.out.println("  Is cluster overflow?        = " + String.valueOf(tmpArt2aEuclidResult.isClusterOverflow()));
+    }
+
+    /**
+     * Test method for development purposes only
+     */
+    @Test
     public void test_Development_GetRepresentatives() {
         System.out.println("-------------------------------------");
         System.out.println("test_Development_GetRepresentatives()");

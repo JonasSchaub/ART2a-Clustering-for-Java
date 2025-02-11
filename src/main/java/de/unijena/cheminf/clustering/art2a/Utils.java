@@ -40,13 +40,13 @@ import java.util.Random;
  */
 public class Utils {
 
-    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants">
     /**
      * Value 1.0
      */
     private static final float ONE = 1.0f;
     //</editor-fold>
-    //<editor-fold desc="Protected helper record" defaultstate="collapsed">
+    //<editor-fold desc="Protected helper record">
     /**
      * Helper record: Minimum and maximum value.
      * <br><br>
@@ -67,7 +67,7 @@ public class Utils {
 
     }
     //</editor-fold>
-    //<editor-fold desc="Protected static helper classes" defaultstate="collapsed">
+    //<editor-fold desc="Protected static helper classes">
     /**
      * Helper class: Rho winner.
      * <br><br>
@@ -75,7 +75,7 @@ public class Utils {
      */
     protected static class RhoWinner {
 
-        //<editor-fold desc="Private class variables" defaultstate="collapsed">
+        //<editor-fold desc="Private class variables">
         /**
          * Rho value
          */
@@ -86,14 +86,14 @@ public class Utils {
         private int indexOfCluster;
         //</editor-fold>
 
-        //<editor-fold desc="Constructor" defaultstate="collapsed">
+        //<editor-fold desc="Constructor">
         /**
          * Constructor
          */
         protected RhoWinner() {}
         //</editor-fold>
 
-        //<editor-fold desc="Protected get/set methods" defaultstate="collapsed">
+        //<editor-fold desc="Protected get/set methods">
         /**
          * Set rho winner
          *
@@ -136,7 +136,7 @@ public class Utils {
      */
     protected static class ClusterRemovalInfo {
 
-        //<editor-fold desc="Private class variables" defaultstate="collapsed">
+        //<editor-fold desc="Private class variables">
         /**
          * True: Cluster is removed, false: Otherwise
          */
@@ -147,14 +147,14 @@ public class Utils {
         private int numberOfDetectedClusters;
         //</editor-fold>
 
-        //<editor-fold desc="Constructor" defaultstate="collapsed">
+        //<editor-fold desc="Constructor">
         /**
          * Constructor
          */
         protected ClusterRemovalInfo() {}
         //</editor-fold>
 
-        //<editor-fold desc="Protected get/set methods" defaultstate="collapsed">
+        //<editor-fold desc="Protected get/set methods">
         /**
          * Set cluster removal info
          *
@@ -191,7 +191,7 @@ public class Utils {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Constructor" defaultstate="collapsed">
+    //<editor-fold desc="Constructor">
     /**
      * Constructor
      */
@@ -200,7 +200,7 @@ public class Utils {
 
     // TODO: Make tests for public methods
 
-    //<editor-fold desc="Public static utility methods" defaultstate="collapsed">
+    //<editor-fold desc="Public static utility methods">
     /**
      * Checks if aDataMatrix is valid.
      *
@@ -246,7 +246,7 @@ public class Utils {
     public static boolean isNonFiniteComponentRemoval(
             float[][] aDataMatrix
     ) {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aDataMatrix == null || aDataMatrix.length == 0) {
             return false;
         }
@@ -299,7 +299,7 @@ public class Utils {
         return tmpHasNonFiniteComponent;
     }
     //</editor-fold>
-    //<editor-fold desc="Protected static utility methods" defaultstate="collapsed">
+    //<editor-fold desc="Protected static utility methods">
     /**
      * (Deep) Copies source matrix to destination matrix. Row vectors of
      * destination matrix may not have been instantiated.
@@ -667,7 +667,7 @@ public class Utils {
     protected static boolean hasNonFiniteComponent(
             float[][] aDataMatrix
     ) {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aDataMatrix == null || aDataMatrix.length == 0) {
             return false;
         }

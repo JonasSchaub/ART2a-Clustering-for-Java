@@ -35,14 +35,14 @@ package de.unijena.cheminf.clustering.art2a;
  */
 public class Art2aEuclidUtils {
 
-    //<editor-fold desc="Constructor" defaultstate="collapsed">
+    //<editor-fold desc="Constructor">
     /**
      * Constructor
      */
     protected Art2aEuclidUtils() {}
     //</editor-fold>
     
-    //<editor-fold desc="Protected static utility methods" defaultstate="collapsed">
+    //<editor-fold desc="Protected static utility methods">
     /**
      * Transforms original data vector into corresponding contrast enhanced 
      * unit vector (see code).

@@ -128,24 +128,19 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  */
 public class Art2aEuclidKernel {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aEuclidKernel.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants">
     /**
      * Value 1.0
      */
     private static final float ONE = 1.0f;
     //</editor-fold>
-    //<editor-fold desc="Private static final class variables" defaultstate="collapsed">
-    /**
-     * Default fraction of the (maximum) number of clusters relative to 
-     * number of data vectors
-     */
-    private static final float DEFAULT_FRACTION_OF_CLUSTERS = 0.2f;
+    //<editor-fold desc="Private static final class variables">
     /**
      * Default seed value for random number generator
      */
@@ -168,7 +163,7 @@ public class Art2aEuclidKernel {
      */
     private static final float DEFAULT_CONVERGENCE_THRESHOLD = 0.1f;
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * Maximum number of clusters in interval [2, number of data row vectors of getDataMatrix]
      */
@@ -194,7 +189,7 @@ public class Art2aEuclidKernel {
      */
     private final PreprocessedData preprocessedData;
     //</editor-fold>
-    //<editor-fold desc="Private helper callable" defaultstate="collapsed">
+    //<editor-fold desc="Private helper callable">
     /**
      * Helper callable for a single getClusterResult() calculation task of 
      * Art2aEuclidKernel with a distinct vigilance parameter.
@@ -203,13 +198,13 @@ public class Art2aEuclidKernel {
      */
     private static class HelperTask implements Callable<Art2aEuclidResult> {
 
-        //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+        //<editor-fold desc="Private static final LOGGER">
         /**
          * Logger of this class
          */
         private static final Logger LOGGER = Logger.getLogger(HelperTask.class.getName());
         //</editor-fold>
-        //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+        //<editor-fold desc="Private final class variables">
         /**
          * Art2aEuclidKernel
          */
@@ -220,7 +215,7 @@ public class Art2aEuclidKernel {
         private final float vigilance;
         //</editor-fold>
 
-        //<editor-fold desc="Constructor" defaultstate="collapsed">
+        //<editor-fold desc="Constructor">
         /**
          * Constructor
          */
@@ -233,7 +228,7 @@ public class Art2aEuclidKernel {
         }
         //</editor-fold>
 
-        // <editor-fold defaultstate="collapsed" desc="Overriden call() method">
+        // <editor-fold desc="Overriden call() method">
         /**
          * Performs single getClusterResult() calculation task.
          *
@@ -262,7 +257,7 @@ public class Art2aEuclidKernel {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public constructors">
+    // <editor-fold desc="Public constructors">
     /**
      * Constructor.
      *
@@ -278,7 +273,7 @@ public class Art2aEuclidKernel {
      * (must be greater zero)
      * @param aRandomSeed Random seed value for random number generator 
      * (must be greater zero)
-     * @param anIsDataPreprocessing True: Data preprocessing is used, false:
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      *
@@ -293,13 +288,23 @@ public class Art2aEuclidKernel {
         long aRandomSeed,
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(!Utils.isDataMatrixValid(aDataMatrix)) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidKernel.Constructor: aDataMatrix is not valid."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aDataMatrix is not valid.");
+        }
+        if(aMaximumNumberOfClusters < 2) {
+            Art2aEuclidKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aEuclidKernel.Constructor: aMaximumNumberOfClusters must be greater 1."
+            );
+            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aMaximumNumberOfClusters must be greater 1.");
+        }
+        if(aMaximumNumberOfClusters > aDataMatrix.length) {
+            aMaximumNumberOfClusters = aDataMatrix.length;
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
@@ -361,27 +366,32 @@ public class Art2aEuclidKernel {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
      * (= 0.5) and RANDOM_SEED (= 1).
-     * Note: There is NO data preprocessing.
-     * 
+     *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
+     * Otherwise.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidKernel(
-        float[][] aDataMatrix
+        float[][] aDataMatrix,
+        int aMaximumNumberOfClusters,
+        boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
         this(
             aDataMatrix,
-            Math.max((int) (aDataMatrix.length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aMaximumNumberOfClusters,
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
             DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT,
             DEFAULT_RANDOM_SEED,
-            false
+            anIsDataPreprocessing
         );
     }
     
@@ -409,13 +419,23 @@ public class Art2aEuclidKernel {
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aPreprocessedArt2aEuclidData == null) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null.");
+        }
+        if(aMaximumNumberOfClusters < 2) {
+            Art2aEuclidKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aEuclidKernel.Constructor: aMaximumNumberOfClusters must be greater 1."
+            );
+            throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aMaximumNumberOfClusters must be greater 1.");
+        }
+        if(aMaximumNumberOfClusters > aPreprocessedArt2aEuclidData.getPreprocessedMatrix().length) {
+            aMaximumNumberOfClusters = aPreprocessedArt2aEuclidData.getPreprocessedMatrix().length;
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
@@ -456,20 +476,23 @@ public class Art2aEuclidKernel {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData object created by method
      * Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidKernel(
-        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData
+        PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
+        int aMaximumNumberOfClusters
     ) throws IllegalArgumentException {
         this(
             aPreprocessedArt2aEuclidData,
-            Math.max((int) (aPreprocessedArt2aEuclidData.getPreprocessedMatrix().length * DEFAULT_FRACTION_OF_CLUSTERS), 2),
+            aMaximumNumberOfClusters,
             DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
             DEFAULT_CONVERGENCE_THRESHOLD, 
             DEFAULT_LEARNING_PARAMETER,
@@ -478,7 +501,7 @@ public class Art2aEuclidKernel {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public methods">
+    // <editor-fold desc="Public methods">
     /**
      * Performs ART-2a-Euclid clustering and returns corresponding 
      * Art2aEuclidResult.
@@ -491,7 +514,7 @@ public class Art2aEuclidKernel {
     public Art2aEuclidResult getClusterResult(
         float aVigilance
     ) throws Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -749,7 +772,7 @@ public class Art2aEuclidKernel {
         float[] aVigilances,
         int aNumberOfConcurrentCalculationThreads
     ) throws Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -838,7 +861,7 @@ public class Art2aEuclidKernel {
         float aVigilanceMax,
         int aNumberOfTrialSteps
     ) throws IllegalArgumentException, Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aNumberOfRepresentatives < 2) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -937,7 +960,7 @@ public class Art2aEuclidKernel {
         int aMinimumNumberOfRepresentatives,
         int aMaximumNumberOfRepresentatives
     ) throws IllegalArgumentException, Exception {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aDataMatrix == null || aDataMatrix.length == 0) {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -1004,7 +1027,7 @@ public class Art2aEuclidKernel {
         }
     }
     //</editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Public static methods">
+    // <editor-fold desc="Public static methods">
     /**
      * Creates PreprocessedData object with preprocessed ART-2a-Euclid data for maximum
      * speed  of the clustering process. The PreprocessedData object allocates
@@ -1083,7 +1106,7 @@ public class Art2aEuclidKernel {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Private static methods" defaultstate="collapsed">
+    //<editor-fold desc="Private static methods">
     /**
      * Assigns data vectors to clusters
      *

@@ -31,7 +31,7 @@ package de.unijena.cheminf.clustering.art2a;
  */
 public class PreprocessedArt2aEuclidData extends PreprocessedData {
 
-    //<editor-fold desc="Public constructors" defaultstate="collapsed">
+    //<editor-fold desc="Public constructors">
     /**
      * Constructor
      *

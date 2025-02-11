@@ -45,19 +45,19 @@ import java.util.logging.Logger;
  */
 public class Art2aResult {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aResult.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private static final constants" defaultstate="collapsed">
+    //<editor-fold desc="Private static final constants">
     /**
      * Conversion constant from radiant to degree
      */
     private static final float CONVERSION_TO_DEGREE = 180.0f / (float) Math.PI;
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * Cluster index of data vector
      */
@@ -101,7 +101,7 @@ public class Art2aResult {
      */
     private final PreprocessedData preprocessedArt2aData;
     //</editor-fold>
-    //<editor-fold desc="Private record IndexedValue" defaultstate="collapsed">
+    //<editor-fold desc="Private record IndexedValue">
     /**
      * Indexed value
      */
@@ -125,7 +125,7 @@ public class Art2aResult {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Public constructor" defaultstate="collapsed">
+    //<editor-fold desc="Public constructor">
     /**
      * Constructor.
      * Note: No checks are performed.
@@ -172,7 +172,7 @@ public class Art2aResult {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Public methods" defaultstate="collapsed">
+    //<editor-fold desc="Public methods">
     /**
      * Returns specified cluster vector with index aClusterIndex in 
      * clusterMatrix.
@@ -184,7 +184,7 @@ public class Art2aResult {
     public float[] getClusterVector(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -208,7 +208,7 @@ public class Art2aResult {
     public float[] getScaledClusterVector(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -233,7 +233,7 @@ public class Art2aResult {
     public int[] getDataVectorIndicesOfCluster(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -284,7 +284,7 @@ public class Art2aResult {
         int aClusterIndex1, 
         int aClusterIndex2
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex1 < 0 || aClusterIndex1 >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -329,7 +329,7 @@ public class Art2aResult {
     public int getClusterSize(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -378,7 +378,7 @@ public class Art2aResult {
     public int getClusterRepresentativeIndex(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 
@@ -434,7 +434,7 @@ public class Art2aResult {
     public int[] getClusterRepresentativeIndices(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aResult.LOGGER.log(
                 Level.SEVERE, 

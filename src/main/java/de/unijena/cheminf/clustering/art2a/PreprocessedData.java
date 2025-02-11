@@ -50,13 +50,13 @@ import java.util.logging.Logger;
  */
 public class PreprocessedData {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(PreprocessedData.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * Original data matrix with data row vectors
      */
@@ -88,7 +88,7 @@ public class PreprocessedData {
     //</editor-fold>
     
     
-    //<editor-fold desc="Private constructor" defaultstate="collapsed">
+    //<editor-fold desc="Private constructor">
     /**
      * Private constructor
      * Note: No checks are necessary
@@ -124,7 +124,7 @@ public class PreprocessedData {
         this.hasPreprocessedData = aHasPreprocessedData;
     }
     //</editor-fold>
-    //<editor-fold desc="Public constructors" defaultstate="collapsed">
+    //<editor-fold desc="Public constructors">
     /**
      * Constructor
      * 
@@ -232,7 +232,7 @@ public class PreprocessedData {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Protected get/has methods" defaultstate="collapsed">
+    //<editor-fold desc="Protected get/has methods">
     /**
      * Original data matrix with data row vectors
      * 

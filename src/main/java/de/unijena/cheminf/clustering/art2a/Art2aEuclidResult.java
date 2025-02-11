@@ -44,13 +44,13 @@ import java.util.logging.Logger;
  */
 public class Art2aEuclidResult {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aEuclidResult.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * Cluster index of data vector
      */
@@ -94,7 +94,7 @@ public class Art2aEuclidResult {
      */
     private final PreprocessedData preprocessedArt2aEuclidData;
     //</editor-fold>
-    //<editor-fold desc="Private record IndexedValue" defaultstate="collapsed">
+    //<editor-fold desc="Private record IndexedValue">
     /**
      * Indexed value
      */
@@ -118,7 +118,7 @@ public class Art2aEuclidResult {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Public constructor" defaultstate="collapsed">
+    //<editor-fold desc="Public constructor">
     /**
      * Constructor.
      * Note: No checks are performed.
@@ -165,7 +165,7 @@ public class Art2aEuclidResult {
     }
     //</editor-fold>
 
-    //<editor-fold desc="Public methods" defaultstate="collapsed">
+    //<editor-fold desc="Public methods">
     /**
      * Returns specified cluster vector with index aClusterIndex in 
      * clusterMatrix.
@@ -177,7 +177,7 @@ public class Art2aEuclidResult {
     public float[] getClusterVector(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -201,7 +201,7 @@ public class Art2aEuclidResult {
     public float[] getScaledClusterVector(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -226,7 +226,7 @@ public class Art2aEuclidResult {
     public int[] getDataVectorIndicesOfCluster(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -277,7 +277,7 @@ public class Art2aEuclidResult {
         int aClusterIndex1, 
         int aClusterIndex2
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex1 < 0 || aClusterIndex1 >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -323,7 +323,7 @@ public class Art2aEuclidResult {
     public int getClusterSize(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -372,7 +372,7 @@ public class Art2aEuclidResult {
     public int getClusterRepresentativeIndex(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 
@@ -428,7 +428,7 @@ public class Art2aEuclidResult {
     public int[] getClusterRepresentativeIndices(
         int aClusterIndex
     ) throws IllegalArgumentException {
-        //<editor-fold desc="Checks" defaultstate="collapsed">
+        //<editor-fold desc="Checks">
         if(aClusterIndex < 0 || aClusterIndex >= this.numberOfDetectedClusters) {
             Art2aEuclidResult.LOGGER.log(
                 Level.SEVERE, 

@@ -39,13 +39,13 @@ import java.util.logging.Logger;
  */
 public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aEuclidTask.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * ART-2a-Euclid clustering kernel instance
      */
@@ -56,7 +56,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     private final float vigilance;
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public constructors">
+    // <editor-fold desc="Public constructors">
     /**
      * Constructor.
      *
@@ -73,7 +73,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * (must be greater zero)
      * @param aRandomSeed Random seed value for random number generator 
      * (must be greater zero)
-     * @param anIsDataPreprocessing True: Data preprocessing is used, false:
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
@@ -88,7 +88,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         long aRandomSeed,
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
                 Level.SEVERE, 
@@ -126,21 +126,26 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
      * (= 0.5) and RANDOM_SEED (= 1).
-     * Note: There is NO data preprocessing.
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
+     * Otherwise.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidTask(
         float[][] aDataMatrix,
-        float aVigilance
+        float aVigilance,
+        int aMaximumNumberOfClusters,
+        boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
                 Level.SEVERE, 
@@ -154,7 +159,9 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aEuclidKernel(
-                    aDataMatrix
+                    aDataMatrix,
+                    aMaximumNumberOfClusters,
+                    anIsDataPreprocessing
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
@@ -196,7 +203,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
                 Level.SEVERE, 
@@ -232,20 +239,23 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData object created by method
      *  Art2aEuclidKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aEuclidTask(
         PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
-        float aVigilance
+        float aVigilance,
+        int aMaximumNumberOfClusters
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
                 Level.SEVERE, 
@@ -259,7 +269,8 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aEuclidKernel(
-                    aPreprocessedArt2aEuclidData
+                    aPreprocessedArt2aEuclidData,
+                    aMaximumNumberOfClusters
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
@@ -276,7 +287,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Overriden call() method">
+    // <editor-fold desc="Overriden call() method">
     /**
      * Performs the clustering process.
      *

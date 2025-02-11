@@ -35,14 +35,14 @@ package de.unijena.cheminf.clustering.art2a;
  */
 public class Art2aUtils {
 
-    //<editor-fold desc="Constructor" defaultstate="collapsed">
+    //<editor-fold desc="Constructor">
     /**
      * Constructor
      */
     protected Art2aUtils() {}
     //</editor-fold>
 
-    //<editor-fold desc="Protected methods" defaultstate="collapsed">
+    //<editor-fold desc="Protected methods">
     /**
      * Transforms original data vector into corresponding contrast enhanced
      * unit vector (see code).

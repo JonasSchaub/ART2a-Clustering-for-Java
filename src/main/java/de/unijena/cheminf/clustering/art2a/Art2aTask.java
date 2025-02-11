@@ -38,13 +38,13 @@ import java.util.logging.Logger;
  */
 public class Art2aTask implements Callable<Art2aResult> {
 
-    //<editor-fold desc="Private static final LOGGER" defaultstate="collapsed">
+    //<editor-fold desc="Private static final LOGGER">
     /**
      * Logger of this class
      */
     private static final Logger LOGGER = Logger.getLogger(Art2aTask.class.getName());
     //</editor-fold>
-    //<editor-fold desc="Private final class variables" defaultstate="collapsed">
+    //<editor-fold desc="Private final class variables">
     /**
      * ART-2a clustering kernel instance
      */
@@ -55,7 +55,7 @@ public class Art2aTask implements Callable<Art2aResult> {
     private final float vigilance;
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public constructors">
+    // <editor-fold desc="Public constructors">
     /**
      * Constructor.
      *
@@ -72,7 +72,7 @@ public class Art2aTask implements Callable<Art2aResult> {
      * (must be greater zero)
      * @param aRandomSeed Random seed value for random number generator 
      * (must be greater zero)
-     * @param anIsDataPreprocessing True: Data preprocessing is used, false:
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
@@ -87,7 +87,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         long aRandomSeed,
         boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
                 Level.SEVERE, 
@@ -125,21 +125,26 @@ public class Art2aTask implements Callable<Art2aResult> {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
      * (= 1.0) and RANDOM_SEED (= 1).
-     * Note: There is NO data preprocessing.
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
+     * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
+     * Otherwise.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aTask(
         float[][] aDataMatrix,
-        float aVigilance
+        float aVigilance,
+        int aMaximumNumberOfClusters,
+        boolean anIsDataPreprocessing
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
                 Level.SEVERE, 
@@ -153,7 +158,9 @@ public class Art2aTask implements Callable<Art2aResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aKernel(
-                    aDataMatrix
+                    aDataMatrix,
+                    aMaximumNumberOfClusters,
+                    anIsDataPreprocessing
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
@@ -195,7 +202,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
                 Level.SEVERE, 
@@ -231,20 +238,23 @@ public class Art2aTask implements Callable<Art2aResult> {
     }
 
     /**
-     * Constructor with default values for DEFAULT_FRACTION_OF_CLUSTERS (= 0.2), 
+     * Constructor with default values for
      * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99), 
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aData PreprocessedData object created by method
      * Art2aKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
+     * interval [2, number of data row vectors of aDataMatrix])
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aTask(
         PreprocessedArt2aData aPreprocessedArt2aData,
-        float aVigilance
+        float aVigilance,
+        int aMaximumNumberOfClusters
     ) throws IllegalArgumentException {
-        // <editor-fold defaultstate="collapsed" desc="Checks">
+        // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
                 Level.SEVERE, 
@@ -258,7 +268,8 @@ public class Art2aTask implements Callable<Art2aResult> {
         try {
             this.art2aClusteringKernel = 
                 new Art2aKernel(
-                    aPreprocessedArt2aData
+                    aPreprocessedArt2aData,
+                    aMaximumNumberOfClusters
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
@@ -275,9 +286,10 @@ public class Art2aTask implements Callable<Art2aResult> {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Overriden call() method">
+    // <editor-fold desc="Overriden call() method">
     /**
      * Performs the clustering process.
+     * Note: Parallel Rho winner evaluations is disabled.
      *
      * @return Clustering result or null if clustering process could not be 
      * performed.
@@ -285,7 +297,8 @@ public class Art2aTask implements Callable<Art2aResult> {
     @Override
     public Art2aResult call() {
         try {
-            return this.art2aClusteringKernel.getClusterResult(this.vigilance);
+            // Note: Parallel Rho winner evaluations is disabled: Parameter false.
+            return this.art2aClusteringKernel.getClusterResult(this.vigilance, false);
         } catch (Exception anException) {
             Art2aTask.LOGGER.log(
                 Level.SEVERE, 
