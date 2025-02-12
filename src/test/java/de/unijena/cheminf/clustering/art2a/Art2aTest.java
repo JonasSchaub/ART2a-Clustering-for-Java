@@ -59,7 +59,7 @@ public class Art2aTest {
 
         int tmpMaximumNumberOfClusters = 150;
         boolean tmpIsDataPreprocessing = false;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
         int tmpMaximumNumberOfEpochs = 100;
         float tmpConvergenceThreshold = 0.99f;
         float tmpLearningParameter = 0.01f;
@@ -82,7 +82,7 @@ public class Art2aTest {
             Assertions.assertNotNull(tmpArt2aKernel);
             Art2aResult tmpArt2aResult = null;
             try {
-                tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.fail();
             }
@@ -127,7 +127,7 @@ public class Art2aTest {
         float tmpVigilance = 0.1f;
         int tmpMaximumNumberOfClusters = 1000;
         boolean tmpIsDataPreprocessing = false;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
         int tmpMaximumNumberOfEpochs = 100;
         float tmpConvergenceThreshold = 0.99f;
         float tmpLearningParameter = 0.01f;
@@ -148,7 +148,7 @@ public class Art2aTest {
             );
         Art2aResult tmpArt2aResult = null;
         try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
         } catch (Exception anException) {
             Assertions.fail();
         }
@@ -196,9 +196,9 @@ public class Art2aTest {
             );
 
         float tmpVigilance = 0.1f;
-        int tmpMaximumNumberOfClusters = 2000;
+        int tmpMaximumNumberOfClusters = 500;
         boolean tmpIsDataPreprocessing = true;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = true;
         int tmpMaximumNumberOfEpochs = 10;
         float tmpConvergenceThreshold = 0.99f;
         float tmpLearningParameter = 0.01f;
@@ -219,7 +219,7 @@ public class Art2aTest {
             );
         Art2aResult tmpArt2aResult = null;
         try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
         } catch (Exception anException) {
             Assertions.fail();
         }
@@ -249,7 +249,7 @@ public class Art2aTest {
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
         boolean tmpIsDataPreprocessing = false;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
 
         float tmpVigilanceMin = 0.0001f;
         float tmpVigilanceMax = 0.9999f;
@@ -273,7 +273,7 @@ public class Art2aTest {
                     tmpIrisFlowerDataMatrix,
                     2,
                     tmpIrisFlowerDataMatrix.length,
-                    tmpIsParallelRhoWinnerEvaluation
+                    tmpIsParallelRhoWinnerCalculation
                 );
             Arrays.sort(tmpBestRepresentatives);
             System.out.println(
@@ -299,7 +299,7 @@ public class Art2aTest {
                         tmpVigilanceMin, 
                         tmpVigilanceMax, 
                         tmpNumberOfTrialSteps,
-                        tmpIsParallelRhoWinnerEvaluation
+                        tmpIsParallelRhoWinnerCalculation
                     );
                 if (tmpNumberOfRepresentatives == tmpRepresentatives.length) {
                     Arrays.sort(tmpRepresentatives);
@@ -334,7 +334,7 @@ public class Art2aTest {
         float tmpOffsetForContrastEnhancement = 0.5f;
         long tmpRandomSeed = 1L;
         boolean tmpIsDataPreprocessing = false;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
 
         float tmpVigilanceMin = 0.0001f;
         float tmpVigilanceMax = 0.9999f;
@@ -359,7 +359,7 @@ public class Art2aTest {
                     tmpVigilanceMin, 
                     tmpVigilanceMax, 
                     tmpNumberOfTrialSteps,
-                    tmpIsParallelRhoWinnerEvaluation
+                    tmpIsParallelRhoWinnerCalculation
                 );
             Assertions.assertEquals(tmpRepresentatives.length, tmpNumberOfRepresentatives);
         } catch (Exception anException) {
@@ -390,7 +390,7 @@ public class Art2aTest {
         float tmpVigilance = 0.1f;
         int tmpMaximumNumberOfClusters = 100;
         boolean tmpIsDataPreprocessing = false;
-        boolean tmpIsParallelRhoWinnerEvaluation = false;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
         int tmpMaximumNumberOfEpochs = 100;
         float tmpConvergenceThreshold = 0.99f;
         float tmpLearningParameter = 0.01f;
@@ -410,7 +410,7 @@ public class Art2aTest {
             );
         Art2aResult tmpArt2aResult = null;
         try {
-            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
         } catch (Exception anException) {
             Assertions.assertTrue(false);
         }
@@ -458,7 +458,7 @@ public class Art2aTest {
         for (float tmpVigilance : tmpVigilances) {
             // No preprocessing
             boolean tmpIsDataPreprocessing = false;
-            boolean tmpIsParallelRhoWinnerEvaluation = false;
+            boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
                     tmpIrisFlowerDataMatrix, 
@@ -472,7 +472,7 @@ public class Art2aTest {
                 );
             Art2aResult tmpArt2aResultWithoutPreprocessing = null;
             try {
-                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.fail();
             }
@@ -492,7 +492,7 @@ public class Art2aTest {
                 );
             Art2aResult tmpArt2aResultWithPreprocessing = null;
             try {
-                tmpArt2aResultWithPreprocessing = tmpArt2aKernelWithPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpArt2aResultWithPreprocessing = tmpArt2aKernelWithPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.fail();
             }
@@ -536,7 +536,7 @@ public class Art2aTest {
         for (float tmpVigilance : tmpVigilances) {
             // No preprocessing
             boolean tmpIsDataPreprocessing = false;
-            boolean tmpIsParallelRhoWinnerEvaluation = false;
+            boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
                     tmpIrisFlowerDataMatrix, 
@@ -550,7 +550,7 @@ public class Art2aTest {
                 );
             Art2aResult tmpArt2aResultWithoutPreprocessing = null;
             try {
-                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpArt2aResultWithoutPreprocessing = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.fail();
             }
@@ -568,7 +568,7 @@ public class Art2aTest {
                 );
             Art2aResult tmpArt2aResultWithArt2aData = null;
             try {
-                tmpArt2aResultWithArt2aData = tmpArt2aKernelWithArt2aData.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpArt2aResultWithArt2aData = tmpArt2aKernelWithArt2aData.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.assertTrue(false);
             }
@@ -625,7 +625,7 @@ public class Art2aTest {
         int tmpIndex = 0;
         for (float tmpVigilance : tmpVigilances) {
             boolean tmpIsDataPreprocessing = false;
-            boolean tmpIsParallelRhoWinnerEvaluation = false;
+            boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
                     tmpIrisFlowerDataMatrix, 
@@ -638,7 +638,7 @@ public class Art2aTest {
                     tmpIsDataPreprocessing
                 );
             try {
-                tmpSequentialResults[tmpIndex++] = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerEvaluation);
+                tmpSequentialResults[tmpIndex++] = tmpArt2aKernelWithoutPreprocessing.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
                 Assertions.fail();
             }
@@ -715,9 +715,9 @@ public class Art2aTest {
      * Art2aKernel.getClusterResults() leads to identical results.
      */
     @Test
-    public void test_ParallelClusteringWithGetGlusterResults() {
+    public void test_ParallelClusteringWithGetClusterResults() {
         System.out.println("----------------------------------------------");
-        System.out.println("test_ParallelClusteringWithGetGlusterResults()");
+        System.out.println("test_ParallelClusteringWithGetClusterResults()");
         System.out.println("----------------------------------------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
@@ -746,7 +746,7 @@ public class Art2aTest {
         try {
             tmpSequentialResults = tmpArt2aKernel.getClusterResults(tmpVigilances, 0);
         } catch (Exception anException) {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
 
         // Concurrent (parallel) clustering
@@ -755,21 +755,15 @@ public class Art2aTest {
         try {
             tmpParallelResults = tmpArt2aKernel.getClusterResults(tmpVigilances, tmpNumberOfParallelCalculationThreads);
         } catch (Exception anException) {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
         
         // Assertions.assert that sequential results without preprocessing and concurrent 
         // results with preprocessed Art2aData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
-            Assertions.assertTrue(
-                tmpSequentialResults[i].getNumberOfDetectedClusters() == 
-                    tmpParallelResults[i].getNumberOfDetectedClusters()
-            );
+            Assertions.assertEquals(tmpSequentialResults[i].getNumberOfDetectedClusters(), tmpParallelResults[i].getNumberOfDetectedClusters());
 
-            Assertions.assertTrue(
-                tmpSequentialResults[i].getNumberOfEpochs() ==  
-                    tmpParallelResults[i].getNumberOfEpochs()
-            );
+            Assertions.assertEquals(tmpSequentialResults[i].getNumberOfEpochs(), tmpParallelResults[i].getNumberOfEpochs());
 
             int tmpNumberOfDetectedClusters = tmpSequentialResults[i].getNumberOfDetectedClusters();
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
@@ -781,10 +775,7 @@ public class Art2aTest {
 
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 for (int k = j + 1; k < tmpNumberOfDetectedClusters; k++) {
-                    Assertions.assertTrue(
-                        tmpSequentialResults[i].getAngleBetweenClusters(j, k) == 
-                            tmpParallelResults[i].getAngleBetweenClusters(j, k)
-                    );
+                    Assertions.assertEquals(tmpSequentialResults[i].getAngleBetweenClusters(j, k), tmpParallelResults[i].getAngleBetweenClusters(j, k));
                 }
             }
         }        

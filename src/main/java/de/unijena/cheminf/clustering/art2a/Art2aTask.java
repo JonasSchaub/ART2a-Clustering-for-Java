@@ -289,7 +289,7 @@ public class Art2aTask implements Callable<Art2aResult> {
     // <editor-fold desc="Overriden call() method">
     /**
      * Performs the clustering process.
-     * Note: Parallel Rho winner evaluations is disabled.
+     * Note: Parallel Rho winner evaluation is disabled.
      *
      * @return Clustering result or null if clustering process could not be 
      * performed.

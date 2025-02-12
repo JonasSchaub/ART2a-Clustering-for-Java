@@ -27,17 +27,11 @@
 package de.unijena.cheminf.clustering.art2a;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
-
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * ART-2a algorithm implementation for unsupervised, open categorical 
@@ -186,61 +180,6 @@ public class Art2aKernel {
      * PreprocessedData object
      */
     private final PreprocessedData preprocessedData;
-    //</editor-fold>
-    //<editor-fold desc="Private helper callable">
-    /**
-     * Helper callable for a single getClusterResult() calculation task of 
-     * Art2aKernel with a distinct vigilance parameter.
-     * Note: Parallel Rho winner evaluations is disabled.
-     * <br><br>
-     * Note: No checks are performed.
-     */
-    private static class HelperTask implements Callable<Art2aResult> {
-
-        //<editor-fold desc="Private final class variables">
-        /**
-         * Art2aKernel
-         */
-        private final Art2aKernel art2aKernel;
-        /**
-         * Vigilance parameter
-         */
-        private final float vigilance;
-        //</editor-fold>
-
-        //<editor-fold desc="Constructor">
-        /**
-         * Constructor
-         */
-        protected HelperTask(
-            Art2aKernel anArt2aKernel,
-            float aVigilance
-        ) {
-            this.art2aKernel = anArt2aKernel;
-            this.vigilance = aVigilance;
-        }
-        //</editor-fold>
-
-        // <editor-fold desc="Overriden call() method">
-        /**
-         * Performs single getClusterResult() calculation task.
-         * Note: Parallel Rho winner evaluations is disabled.
-         *
-         * @return Art2aResult or null if getClusterResult() calculation task 
-         * could not be performed.
-         */
-        @Override
-        public Art2aResult call() {
-            try {
-                // Note: Parallel Rho winner evaluations is disabled: Parameter false.
-                return this.art2aKernel.getClusterResult(this.vigilance, false);
-            } catch (Exception anException) {
-                return null;
-            }
-        }
-        //</editor-fold>
-    
-    }
     //</editor-fold>
 
     // <editor-fold desc="Public constructors">
@@ -492,15 +431,15 @@ public class Art2aKernel {
      * Performs ART-2a clustering and returns corresponding Art2aResult.
      *
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
-     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
-     * winner is evaluated by sequential calculation
+     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
+     * is parallelized, false: Rho winner calculation is sequential.
      * @return Art2aResult instance
      * @throws IllegalArgumentException Thrown if argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
      */
     public Art2aResult getClusterResult(
         float aVigilance,
-        boolean anIsParallelRhoWinnerEvaluation
+        boolean anIsParallelRhoWinnerCalculation
     ) throws Exception {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
@@ -511,7 +450,7 @@ public class Art2aKernel {
             throw new IllegalArgumentException("Art2aKernel.getClusterResult: aVigilance must be in interval (0,1).");
         }
         //</editor-fold>
-        
+
         try {
             Random tmpRandomNumberGenerator = new Random(this.randomSeed);
             boolean tmpIsClusterOverflow = false;
@@ -556,7 +495,7 @@ public class Art2aKernel {
             boolean[] tmpClusterUsageFlags = new boolean[this.maximumNumberOfClusters];
             // Buffer for Rho values for parallelized Rho winner evaluation
             float[] tmpRhoValueBuffer = null;
-            if (anIsParallelRhoWinnerEvaluation) {
+            if (anIsParallelRhoWinnerCalculation) {
                 tmpRhoValueBuffer = new float[this.maximumNumberOfClusters];
             }
 
@@ -580,9 +519,10 @@ public class Art2aKernel {
             Utils.RhoWinner tmpRhoWinner = new Utils.RhoWinner();
             Utils.ClusterRemovalInfo tmpClusterRemovalInfo = new Utils.ClusterRemovalInfo();
             boolean tmpIsConverged = false;
+
             while(!tmpIsConverged && tmpCurrentNumberOfEpochs < this.maximumNumberOfEpochs) {
                 tmpCurrentNumberOfEpochs++;
-                
+
                 // Get random sequence of indices for data row vectors
                 Utils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
 
@@ -618,17 +558,17 @@ public class Art2aKernel {
                         tmpNumberOfDetectedClusters++;
                     } else {
                         // Cluster number is greater than or equal to 1
-                        if (anIsParallelRhoWinnerEvaluation) {
-                            Art2aKernel.setRhoWinnerParallel(
-                                    tmpBufferVector,
-                                    tmpClusterMatrix,
-                                    tmpNumberOfDetectedClusters,
-                                    tmpScalingFactor,
-                                    tmpRhoValueBuffer,
-                                    tmpRhoWinner
-                            );
+                        if (anIsParallelRhoWinnerCalculation) {
+                             Art2aKernel.setRhoWinnerParallel(
+                                 tmpBufferVector,
+                                 tmpClusterMatrix,
+                                 tmpNumberOfDetectedClusters,
+                                 tmpScalingFactor,
+                                 tmpRhoValueBuffer,
+                                 tmpRhoWinner
+                             );
                         } else {
-                            Art2aKernel.setRhoWinner(
+                            Art2aKernel.setRhoWinnerSequential(
                                     tmpBufferVector,
                                     tmpClusterMatrix,
                                     tmpNumberOfDetectedClusters,
@@ -755,90 +695,112 @@ public class Art2aKernel {
     }
 
     /**
-     * Performs ART-2a clustering for specified vigilance parameters and 
+     * Performs ART-2a clustering for specified vigilance parameters and
      * returns corresponding Art2aResult objects.
-     * Note: Parallel Rho winner evaluations is disabled.
+     * Note: Parallel Rho winner evaluation is disabled.
      *
      * @param aVigilances Vigilance parameters (must each be in interval (0,1))
-     * @return Art2aResult objects or null if clustering result could 
-     * not be calculated.
-     * @param aNumberOfConcurrentCalculationThreads Number of concurrent 
-     * calculation threads for the different vigilance parameters to be 
-     * calculated concurrently (in parallel). If zero, then the different 
+     * @param aNumberOfConcurrentCalculationThreads Number of concurrent
+     * calculation threads for the different vigilance parameters to be
+     * calculated concurrently (in parallel). If zero, then the different
      * vigilance parameters are calculated one after another (sequentially)
+     * @return Art2aResult objects or null if clustering result could
+     * not be calculated.
      * @throws IllegalArgumentException Thrown if argument is illegal
-     * @throws Exception Thrown if exception occurs which should never happen
      */
     public Art2aResult[] getClusterResults(
-        float[] aVigilances,
-        int aNumberOfConcurrentCalculationThreads
-    ) throws Exception {
+            float[] aVigilances,
+            int aNumberOfConcurrentCalculationThreads
+    ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
             Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getClusterResults: aVigilances is null or has length 0."
+                    Level.SEVERE,
+                    "Art2aKernel.getClusterResults: aVigilances is null or has length 0."
             );
             throw new IllegalArgumentException("Art2aKernel.getClusterResults: aVigilances is null or has length 0.");
         }
         for (float tmpVigilance : aVigilances) {
             if(tmpVigilance <= 0.0f || tmpVigilance >= 1.0f) {
                 Art2aKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aKernel.getClusterResults: Vigilance parameter must be in interval (0,1)."
+                        Level.SEVERE,
+                        "Art2aKernel.getClusterResults: Vigilance parameter must be in interval (0,1)."
                 );
                 throw new IllegalArgumentException("Art2aKernel.getClusterResults: Vigilance parameter must be in interval (0,1).");
             }
         }
         if (aNumberOfConcurrentCalculationThreads < 0) {
             Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0."
+                    Level.SEVERE,
+                    "Art2aKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0."
             );
             throw new IllegalArgumentException("Art2aKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0.");
         }
         //</editor-fold>
 
         if (aNumberOfConcurrentCalculationThreads > 0) {
-            LinkedList<HelperTask> tmpSingleTaskList = new LinkedList<>();
-            for (float tmpVigilance : aVigilances) {
-                tmpSingleTaskList.add(new HelperTask(this, tmpVigilance));
-            }
-            ExecutorService tmpExecutorService = newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
-            List<Future<Art2aResult>> tmpFutureList = null;
+            ForkJoinPool tmpForkJoinPool = null;
             try {
-                tmpFutureList = tmpExecutorService.invokeAll(tmpSingleTaskList);
-            } catch (InterruptedException anInterruptedException) {
+                tmpForkJoinPool = new ForkJoinPool(aNumberOfConcurrentCalculationThreads);
+                Art2aResult[] tmpParallelResults = new Art2aResult[aVigilances.length];
+                tmpForkJoinPool.submit(
+                    () -> IntStream.range(0, aVigilances.length).parallel().forEach(
+                        i ->
+                        {
+                            try {
+                                // Note: Parallel Rho winner calculation is disabled: Parameter false.
+                                tmpParallelResults[i] = this.getClusterResult(aVigilances[i], false);
+                            } catch (Exception anException) {
+                                Art2aKernel.LOGGER.log(
+                                        Level.SEVERE,
+                                        "Art2aKernel.getClusterResults: An exception occurred in custom fork-join pool: This should never happen."
+                                );
+                                tmpParallelResults[i] = null;
+                            }
+                        }
+                    )
+                ).invoke();
+                boolean tmpIsSuccessful = true;
+                for (int i = 0; i < aVigilances.length; i++) {
+                    if (tmpParallelResults[i] == null) {
+                        tmpIsSuccessful = false;
+                        break;
+                    }
+                }
+                if (tmpIsSuccessful) {
+                    return tmpParallelResults;
+                } else {
+                    return null;
+                }
+            } catch (Exception anException) {
                 Art2aKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aKernel.getClusterResults: Interrupted exception during concurrent calculation: This should never happen."
+                    Level.SEVERE,
+                    "Art2aKernel.getClusterResults: An exception occurred: This should never happen."
                 );
-                throw anInterruptedException;
-            }
-            tmpExecutorService.shutdown();
-            Art2aResult[] tmpParallelResults = new Art2aResult[aVigilances.length];
-            int tmpIndex = 0;
-            for (Future<Art2aResult> tmpFuture : tmpFutureList) {
-                try {
-                    tmpParallelResults[tmpIndex++] = tmpFuture.get();
-                } catch (Exception anException) {
-                    Art2aKernel.LOGGER.log(
-                        Level.SEVERE, 
-                        "Art2aKernel.getClusterResults: Exception in tmpFuture.get()."
-                    );
-                    throw anException;
+                return null;
+            } finally {
+                if (tmpForkJoinPool != null) {
+                    tmpForkJoinPool.shutdown();
                 }
             }
-            return tmpParallelResults;
         } else {
-            Art2aResult[] tmpSequentialResults = new Art2aResult[aVigilances.length];
-            for (int i = 0; i < aVigilances.length; i++) {
-                tmpSequentialResults[i] = this.getClusterResult(aVigilances[i], false);
+            try {
+                Art2aResult[] tmpSequentialResults = new Art2aResult[aVigilances.length];
+                for (int i = 0; i < aVigilances.length; i++) {
+                    // Note: Parallel Rho winner evaluations is disabled: Parameter 0.
+                    tmpSequentialResults[i] = this.getClusterResult(aVigilances[i], false);
+                }
+                return tmpSequentialResults;
+            } catch (Exception anException) {
+                Art2aKernel.LOGGER.log(
+                    Level.SEVERE,
+                    "Art2aKernel.getClusterResults: An exception occurred: This should never happen."
+                );
+                return null;
             }
-            return tmpSequentialResults;
         }
     }
-    
+
     /**
      * Nearest (smaller) indices of approximates to the desired number of
      * representatives.
@@ -851,8 +813,8 @@ public class Art2aKernel {
      * (0,1))
      * @param aNumberOfTrialSteps Number of trial steps (MUST be greater or 
      * equal to 1)
-     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
-     * winner is evaluated by sequential calculation
+     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
+     * is parallelized, false: Rho winner calculation is sequential.
      * @return Nearest (smaller) indices of approximates to the desired number
      * of representatives.
      * @throws IllegalArgumentException Thrown if an argument is illegal
@@ -863,7 +825,7 @@ public class Art2aKernel {
         float aVigilanceMin,
         float aVigilanceMax,
         int aNumberOfTrialSteps,
-        boolean anIsParallelRhoWinnerEvaluation
+        boolean anIsParallelRhoWinnerCalculation
     ) throws IllegalArgumentException, Exception {
         // <editor-fold desc="Checks">
         if(aNumberOfRepresentatives < 2) {
@@ -904,12 +866,12 @@ public class Art2aKernel {
         //</editor-fold>
 
         try {
-            Art2aResult tmpArt2aResult = this.getClusterResult(aVigilanceMin, anIsParallelRhoWinnerEvaluation);
+            Art2aResult tmpArt2aResult = this.getClusterResult(aVigilanceMin, anIsParallelRhoWinnerCalculation);
             int[] tmpRepresentativeIndicesOfClusters = tmpArt2aResult.getRepresentativeIndicesOfClusters();
             if (tmpArt2aResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                 return tmpRepresentativeIndicesOfClusters;
             }
-            tmpArt2aResult = this.getClusterResult(aVigilanceMax, anIsParallelRhoWinnerEvaluation);
+            tmpArt2aResult = this.getClusterResult(aVigilanceMax, anIsParallelRhoWinnerCalculation);
             if (tmpArt2aResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
                 return tmpArt2aResult.getRepresentativeIndicesOfClusters();
             }
@@ -918,7 +880,7 @@ public class Art2aKernel {
             float tmpVigilanceMax = aVigilanceMax;
             for (int i = 0; i < aNumberOfTrialSteps; i++) {
                 float tmpVigilanceMean = (tmpVigilanceMin + tmpVigilanceMax) / 2.0f;
-                tmpArt2aResult = this.getClusterResult(tmpVigilanceMean, anIsParallelRhoWinnerEvaluation);
+                tmpArt2aResult = this.getClusterResult(tmpVigilanceMean, anIsParallelRhoWinnerCalculation);
                 if (tmpArt2aResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                     tmpVigilanceMax = tmpVigilanceMean;
                 } else if (tmpArt2aResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
@@ -954,8 +916,8 @@ public class Art2aKernel {
      * CHECKED)
      * @param aMinimumNumberOfRepresentatives Minimum number of representatives
      * @param aMaximumNumberOfRepresentatives Maximum number of representatives
-     * @param anIsParallelRhoWinnerEvaluation True: Rho winner is evaluated by parallelized calculation, false: Rho
-     * winner is evaluated by sequential calculation
+     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
+     * is parallelized, false: Rho winner calculation is sequential.
      * @return Representatives whose mean distance is nearest to the mean
      * distance of all data vectors of specified original data matrix.
      * @throws IllegalArgumentException Thrown if an argument is illegal
@@ -965,7 +927,7 @@ public class Art2aKernel {
         float[][] aDataMatrix,
         int aMinimumNumberOfRepresentatives,
         int aMaximumNumberOfRepresentatives,
-        boolean anIsParallelRhoWinnerEvaluation
+        boolean anIsParallelRhoWinnerCalculation
     ) throws IllegalArgumentException, Exception {
         // <editor-fold desc="Checks">
         if(aDataMatrix == null || aDataMatrix.length == 0) {
@@ -1011,7 +973,7 @@ public class Art2aKernel {
                         tmpVigilanceMin, 
                         tmpVigilanceMax, 
                         tmpNumberOfTrialSteps,
-                        anIsParallelRhoWinnerEvaluation
+                        anIsParallelRhoWinnerCalculation
                     );
                 float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
                 float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
@@ -1300,7 +1262,7 @@ public class Art2aKernel {
      * index of the winner. If the cluster index is negative the first scaled
      * rho value is the winner.
      */
-    private static void setRhoWinner(
+    private static void setRhoWinnerSequential(
             float[] aContrastEnhancedUnitVector,
             float[][] aClusterMatrix,
             int aNumberOfDetectedClusters,
