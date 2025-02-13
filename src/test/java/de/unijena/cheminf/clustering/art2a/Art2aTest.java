@@ -744,16 +744,15 @@ public class Art2aTest {
         // Sequential clustering one after another
         Art2aResult[] tmpSequentialResults = null;
         try {
-            tmpSequentialResults = tmpArt2aKernel.getClusterResults(tmpVigilances, 0);
+            tmpSequentialResults = tmpArt2aKernel.getClusterResults(tmpVigilances, false);
         } catch (Exception anException) {
             Assertions.fail();
         }
 
         // Concurrent (parallel) clustering
-        int tmpNumberOfParallelCalculationThreads = 2;
         Art2aResult[] tmpParallelResults = null;
         try {
-            tmpParallelResults = tmpArt2aKernel.getClusterResults(tmpVigilances, tmpNumberOfParallelCalculationThreads);
+            tmpParallelResults = tmpArt2aKernel.getClusterResults(tmpVigilances, true);
         } catch (Exception anException) {
             Assertions.fail();
         }

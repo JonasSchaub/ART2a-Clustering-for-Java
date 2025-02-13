@@ -28,7 +28,6 @@ package de.unijena.cheminf.clustering.art2a;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -700,17 +699,14 @@ public class Art2aKernel {
      * Note: Parallel Rho winner evaluation is disabled.
      *
      * @param aVigilances Vigilance parameters (must each be in interval (0,1))
-     * @param aNumberOfConcurrentCalculationThreads Number of concurrent
-     * calculation threads for the different vigilance parameters to be
-     * calculated concurrently (in parallel). If zero, then the different
-     * vigilance parameters are calculated one after another (sequentially)
+     * @param anIsParallelCalculation True: Calculations are parallelized, false: Calculations are sequential (one after another)
      * @return Art2aResult objects or null if clustering result could
      * not be calculated.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aResult[] getClusterResults(
             float[] aVigilances,
-            int aNumberOfConcurrentCalculationThreads
+            boolean anIsParallelCalculation
     ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
@@ -729,38 +725,27 @@ public class Art2aKernel {
                 throw new IllegalArgumentException("Art2aKernel.getClusterResults: Vigilance parameter must be in interval (0,1).");
             }
         }
-        if (aNumberOfConcurrentCalculationThreads < 0) {
-            Art2aKernel.LOGGER.log(
-                    Level.SEVERE,
-                    "Art2aKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0."
-            );
-            throw new IllegalArgumentException("Art2aKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0.");
-        }
         //</editor-fold>
 
-        if (aNumberOfConcurrentCalculationThreads > 0) {
-            ForkJoinPool tmpForkJoinPool = null;
+        if (anIsParallelCalculation) {
             try {
-                tmpForkJoinPool = new ForkJoinPool(aNumberOfConcurrentCalculationThreads);
                 Art2aResult[] tmpParallelResults = new Art2aResult[aVigilances.length];
-                tmpForkJoinPool.submit(
-                    () -> IntStream.range(0, aVigilances.length).parallel().forEach(
-                        i ->
-                        {
-                            try {
-                                // Note: Parallel Rho winner calculation is disabled: Parameter false.
-                                tmpParallelResults[i] = this.getClusterResult(aVigilances[i], false);
-                            } catch (Exception anException) {
-                                Art2aKernel.LOGGER.log(
-                                        Level.SEVERE,
-                                        "Art2aKernel.getClusterResults: An exception occurred in custom fork-join pool: This should never happen."
-                                );
-                                tmpParallelResults[i] = null;
-                            }
+                // Advise by Oracle: Parallel streams should use the common fork-join pool.
+                IntStream.range(0, aVigilances.length).parallel().forEach(
+                    i ->
+                    {
+                        try {
+                            // Note: Parallel Rho winner calculation is disabled: Parameter false.
+                            tmpParallelResults[i] = this.getClusterResult(aVigilances[i], false);
+                        } catch (Exception anException) {
+                            Art2aKernel.LOGGER.log(
+                                Level.SEVERE,
+                                "Art2aKernel.getClusterResults: An exception occurred in fork-join pool: This should never happen."
+                            );
+                            tmpParallelResults[i] = null;
                         }
-                    )
-                ).invoke();
-                boolean tmpIsSuccessful = true;
+                    }
+                );                boolean tmpIsSuccessful = true;
                 for (int i = 0; i < aVigilances.length; i++) {
                     if (tmpParallelResults[i] == null) {
                         tmpIsSuccessful = false;
@@ -778,10 +763,6 @@ public class Art2aKernel {
                     "Art2aKernel.getClusterResults: An exception occurred: This should never happen."
                 );
                 return null;
-            } finally {
-                if (tmpForkJoinPool != null) {
-                    tmpForkJoinPool.shutdown();
-                }
             }
         } else {
             try {
