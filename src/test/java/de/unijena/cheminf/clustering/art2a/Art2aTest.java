@@ -198,7 +198,7 @@ public class Art2aTest {
         float tmpVigilance = 0.1f;
         int tmpMaximumNumberOfClusters = 500;
         boolean tmpIsDataPreprocessing = true;
-        boolean tmpIsParallelRhoWinnerCalculation = true;
+        boolean tmpIsParallelRhoWinnerCalculation = false;
         int tmpMaximumNumberOfEpochs = 10;
         float tmpConvergenceThreshold = 0.99f;
         float tmpLearningParameter = 0.01f;
@@ -267,22 +267,6 @@ public class Art2aTest {
                 tmpIsDataPreprocessing
             );
 
-        try {
-            int[] tmpBestRepresentatives =
-                tmpArt2aKernel.getBestRepresentatives(
-                    tmpIrisFlowerDataMatrix,
-                    2,
-                    tmpIrisFlowerDataMatrix.length,
-                    tmpIsParallelRhoWinnerCalculation
-                );
-            Arrays.sort(tmpBestRepresentatives);
-            System.out.println(
-                String.valueOf(tmpBestRepresentatives.length) + " best representatives = " + this.getStringFromIntArray(tmpBestRepresentatives)
-            );
-        } catch (Exception anException) {
-            Assertions.fail();
-        }
-        
         int[] tmpAllIndices = new int[150];
         for (int i = 0; i < 150; i++) {
             tmpAllIndices[i] = i;
@@ -361,7 +345,7 @@ public class Art2aTest {
                     tmpNumberOfTrialSteps,
                     tmpIsParallelRhoWinnerCalculation
                 );
-            Assertions.assertEquals(tmpRepresentatives.length, tmpNumberOfRepresentatives);
+            Assertions.assertEquals(tmpNumberOfRepresentatives, tmpRepresentatives.length);
         } catch (Exception anException) {
             Assertions.fail();
         }
@@ -412,13 +396,13 @@ public class Art2aTest {
         try {
             tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
         } catch (Exception anException) {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
 
-        Assertions.assertEquals(tmpArt2aResult.getNumberOfDetectedClusters(), tmpNumberOfDimensions);
+        Assertions.assertEquals(tmpNumberOfDimensions, tmpArt2aResult.getNumberOfDetectedClusters());
         Assertions.assertTrue(tmpArt2aResult.getNumberOfEpochs() < tmpMaximumNumberOfEpochs);
         for (int i = 0; i < tmpArt2aResult.getNumberOfDetectedClusters(); i++) {
-            Assertions.assertEquals(tmpArt2aResult.getClusterSize(i), tmpNumberOfGaussianCloudVectors);
+            Assertions.assertEquals(tmpNumberOfGaussianCloudVectors, tmpArt2aResult.getClusterSize(i));
             int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getDataVectorIndicesOfCluster(i);
             int[] tmpClusterRepresentativeIndices = tmpArt2aResult.getClusterRepresentativeIndices(i);
             Assertions.assertEquals(tmpArt2aResult.getClusterRepresentativeIndex(i), tmpClusterRepresentativeIndices[0]);
@@ -428,7 +412,7 @@ public class Art2aTest {
         }
         for (int i = 0; i < tmpArt2aResult.getNumberOfDetectedClusters(); i++) {
             for (int j = i + 1; j < tmpArt2aResult.getNumberOfDetectedClusters(); j++) {
-                Assertions.assertEquals(tmpArt2aResult.getAngleBetweenClusters(i, j), 90.0, 0.001);
+                Assertions.assertEquals(90.0, tmpArt2aResult.getAngleBetweenClusters(i, j), 0.001);
             }
         }
         Assertions.assertFalse(tmpArt2aResult.isClusterOverflow());
@@ -570,19 +554,13 @@ public class Art2aTest {
             try {
                 tmpArt2aResultWithArt2aData = tmpArt2aKernelWithArt2aData.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
             } catch (Exception anException) {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             // Assertions.assert that results without preprocessing and preprocessed 
             // Art2aData are identical
-            Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters() == 
-                    tmpArt2aResultWithArt2aData.getNumberOfDetectedClusters()
-            );
-            Assertions.assertTrue(
-                tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs() ==  
-                    tmpArt2aResultWithArt2aData.getNumberOfEpochs()
-            );
+            Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters(), tmpArt2aResultWithArt2aData.getNumberOfDetectedClusters());
+            Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs(), tmpArt2aResultWithArt2aData.getNumberOfEpochs());
             
             int tmpNumberOfDetectedClusters = tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters();
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
@@ -593,10 +571,7 @@ public class Art2aTest {
             }
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 for (int j = i + 1; j < tmpNumberOfDetectedClusters; j++) {
-                    Assertions.assertTrue(
-                        tmpArt2aResultWithoutPreprocessing.getAngleBetweenClusters(i, j) == 
-                            tmpArt2aResultWithArt2aData.getAngleBetweenClusters(i, j)
-                    );
+                    Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getAngleBetweenClusters(i, j), tmpArt2aResultWithArt2aData.getAngleBetweenClusters(i, j));
                 }
             }
         }
@@ -681,15 +656,9 @@ public class Art2aTest {
         // Assertions.assert that sequential results without preprocessing and concurrent 
         // results with preprocessed Art2aData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
-            Assertions.assertTrue(
-                tmpSequentialResults[i].getNumberOfDetectedClusters() == 
-                    tmpParallelResults[i].getNumberOfDetectedClusters()
-            );
+            Assertions.assertEquals(tmpSequentialResults[i].getNumberOfDetectedClusters(), tmpParallelResults[i].getNumberOfDetectedClusters());
 
-            Assertions.assertTrue(
-                tmpSequentialResults[i].getNumberOfEpochs() ==  
-                    tmpParallelResults[i].getNumberOfEpochs()
-            );
+            Assertions.assertEquals(tmpSequentialResults[i].getNumberOfEpochs(), tmpParallelResults[i].getNumberOfEpochs());
 
             int tmpNumberOfDetectedClusters = tmpSequentialResults[i].getNumberOfDetectedClusters();
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
@@ -701,10 +670,7 @@ public class Art2aTest {
 
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 for (int k = j + 1; k < tmpNumberOfDetectedClusters; k++) {
-                    Assertions.assertTrue(
-                        tmpSequentialResults[i].getAngleBetweenClusters(j, k) == 
-                            tmpParallelResults[i].getAngleBetweenClusters(j, k)
-                    );
+                    Assertions.assertEquals(tmpSequentialResults[i].getAngleBetweenClusters(j, k), tmpParallelResults[i].getAngleBetweenClusters(j, k));
                 }
             }
         }        

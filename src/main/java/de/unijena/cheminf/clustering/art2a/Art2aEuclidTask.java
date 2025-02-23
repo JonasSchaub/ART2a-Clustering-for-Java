@@ -290,6 +290,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     // <editor-fold desc="Overriden call() method">
     /**
      * Performs the clustering process.
+     * Note: Parallel Rho winner evaluation is disabled.
      *
      * @return Clustering result or null if clustering process could not be 
      * performed.
@@ -297,7 +298,8 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
     @Override
     public Art2aEuclidResult call() {
         try {
-            return this.art2aClusteringKernel.getClusterResult(this.vigilance);
+            // Note: Parallel Rho winner evaluations is disabled: Parameter false.
+            return this.art2aClusteringKernel.getClusterResult(this.vigilance, false);
         } catch (Exception anException) {
             Art2aEuclidTask.LOGGER.log(
                 Level.SEVERE, 

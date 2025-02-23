@@ -428,6 +428,9 @@ public class Art2aKernel {
     // <editor-fold desc="Public methods">
     /**
      * Performs ART-2a clustering and returns corresponding Art2aResult.
+     * Note: Parallelized Rho winner calculation is faster if many detected clusters, sequential Rho winner
+     * calculation is faster for a small number of formed clusters. The crossover between both must be evaluated
+     * experimentally.
      *
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
      * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
@@ -439,7 +442,7 @@ public class Art2aKernel {
     public Art2aResult getClusterResult(
         float aVigilance,
         boolean anIsParallelRhoWinnerCalculation
-    ) throws Exception {
+    ) throws IllegalArgumentException, Exception {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aKernel.LOGGER.log(
@@ -568,11 +571,11 @@ public class Art2aKernel {
                              );
                         } else {
                             Art2aKernel.setRhoWinnerSequential(
-                                    tmpBufferVector,
-                                    tmpClusterMatrix,
-                                    tmpNumberOfDetectedClusters,
-                                    tmpScalingFactor,
-                                    tmpRhoWinner
+                                tmpBufferVector,
+                                tmpClusterMatrix,
+                                tmpNumberOfDetectedClusters,
+                                tmpScalingFactor,
+                                tmpRhoWinner
                             );
                         }
                         // Assign to existing cluster or increment clusters
@@ -694,14 +697,13 @@ public class Art2aKernel {
     }
 
     /**
-     * Performs ART-2a clustering for specified vigilance parameters and
-     * returns corresponding Art2aResult objects.
-     * Note: Parallel Rho winner evaluation is disabled.
+     * Performs ART-2a clustering for specified vigilance parameters and returns corresponding Art2aResult objects.
+     * Note: Parallelized Rho winner evaluation is disabled.
      *
      * @param aVigilances Vigilance parameters (must each be in interval (0,1))
-     * @param anIsParallelCalculation True: Calculations are parallelized, false: Calculations are sequential (one after another)
-     * @return Art2aResult objects or null if clustering result could
-     * not be calculated.
+     * @param anIsParallelCalculation True: Calculations are parallelized, false: Calculations are sequential (one
+     *                                after another)
+     * @return Art2aResult objects or null if clustering result could not be calculated.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public Art2aResult[] getClusterResults(
@@ -740,12 +742,13 @@ public class Art2aKernel {
                         } catch (Exception anException) {
                             Art2aKernel.LOGGER.log(
                                 Level.SEVERE,
-                                "Art2aKernel.getClusterResults: An exception occurred in fork-join pool: This should never happen."
+                                "Art2aKernel.getClusterResults: An exception occurred in common fork-join pool: This should never happen."
                             );
                             tmpParallelResults[i] = null;
                         }
                     }
-                );                boolean tmpIsSuccessful = true;
+                );
+                boolean tmpIsSuccessful = true;
                 for (int i = 0; i < aVigilances.length; i++) {
                     if (tmpParallelResults[i] == null) {
                         tmpIsSuccessful = false;
@@ -768,7 +771,7 @@ public class Art2aKernel {
             try {
                 Art2aResult[] tmpSequentialResults = new Art2aResult[aVigilances.length];
                 for (int i = 0; i < aVigilances.length; i++) {
-                    // Note: Parallel Rho winner evaluations is disabled: Parameter 0.
+                    // Note: Parallel Rho winner evaluations is disabled: Parameter false.
                     tmpSequentialResults[i] = this.getClusterResult(aVigilances[i], false);
                 }
                 return tmpSequentialResults;
@@ -789,11 +792,11 @@ public class Art2aKernel {
      * @param aNumberOfRepresentatives Number of representatives (MUST be 
      * greater or equal to 2)
      * @param aVigilanceMin Minimal vigilance parameter (must be in interval 
-     * (0,1))
+     * (0,1), a good default value is 0.0001f)
      * @param aVigilanceMax Maximal vigilance parameter (must be in interval 
-     * (0,1))
+     * (0,1), a good default value is 0.9999f)
      * @param aNumberOfTrialSteps Number of trial steps (MUST be greater or 
-     * equal to 1)
+     * equal to 1, a good default value is 32)
      * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
      * is parallelized, false: Rho winner calculation is sequential.
      * @return Nearest (smaller) indices of approximates to the desired number
@@ -876,98 +879,6 @@ public class Art2aKernel {
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aKernel.getRepresentatives: An exception occurred: This should never happen!"
-            );
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
-                anException
-            );
-            throw anException;
-        }
-    }
-    
-    /**
-     * Note: This is a purely experimental nonsense method.
-     * 
-     * Returns representatives whose mean distance is nearest to the mean 
-     * distance of all data vectors of specified original data matrix.
-     * Note: This is a O(N^2) operation, N: Number of data vectors.
-     * 
-     * @param aDataMatrix Original data matrix (IS NOT CHANGED and NOT properly
-     * CHECKED)
-     * @param aMinimumNumberOfRepresentatives Minimum number of representatives
-     * @param aMaximumNumberOfRepresentatives Maximum number of representatives
-     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
-     * is parallelized, false: Rho winner calculation is sequential.
-     * @return Representatives whose mean distance is nearest to the mean
-     * distance of all data vectors of specified original data matrix.
-     * @throws IllegalArgumentException Thrown if an argument is illegal
-     * @throws Exception Thrown if exception occurs which should never happen
-     */
-    public int[] getBestRepresentatives(
-        float[][] aDataMatrix,
-        int aMinimumNumberOfRepresentatives,
-        int aMaximumNumberOfRepresentatives,
-        boolean anIsParallelRhoWinnerCalculation
-    ) throws IllegalArgumentException, Exception {
-        // <editor-fold desc="Checks">
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getBestRepresentatives: aDataMatrix is null/has length zero."
-            );
-            throw new IllegalArgumentException("Art2aKernel.getBestRepresentatives: aDataMatrix is null/has length zero.");
-        }
-        if(aMinimumNumberOfRepresentatives < 2 || aMinimumNumberOfRepresentatives > aDataMatrix.length - 1) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getBestRepresentatives: aMinimumNumberOfRepresentatives is invalid."
-            );
-            throw new IllegalArgumentException("Art2aKernel.getBestRepresentatives: aMinimumNumberOfRepresentatives is invalid.");
-        }
-        if(aMaximumNumberOfRepresentatives <= aMinimumNumberOfRepresentatives || aMaximumNumberOfRepresentatives > aDataMatrix.length) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getBestRepresentatives: aMaximumNumberOfRepresentatives is invalid."
-            );
-            throw new IllegalArgumentException("Art2aKernel.getBestRepresentatives: aMaximumNumberOfRepresentatives is invalid.");
-        }
-        //</editor-fold>
-
-        try {
-            int[] tmpAllIndices = new int[aDataMatrix.length];
-            for (int i = 0; i < tmpAllIndices.length; i++) {
-                tmpAllIndices[i] = i;
-            }
-            float tmpBaseMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpAllIndices);
-
-            float tmpVigilanceMin = 0.0001f;
-            float tmpVigilanceMax = 0.9999f;
-            int tmpNumberOfTrialSteps = 32;
-
-            float tmpMinimalDifference = Float.MAX_VALUE;
-            int[] tmpBestRepresentatives = null;
-            for (int i = aMinimumNumberOfRepresentatives; i < aMaximumNumberOfRepresentatives; i++) {
-                int[] tmpRepresentatives = 
-                    this.getRepresentatives(
-                        i, 
-                        tmpVigilanceMin, 
-                        tmpVigilanceMax, 
-                        tmpNumberOfTrialSteps,
-                        anIsParallelRhoWinnerCalculation
-                    );
-                float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
-                float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
-                if (tmpDifference < tmpMinimalDifference) {
-                    tmpMinimalDifference = tmpDifference;
-                    tmpBestRepresentatives = tmpRepresentatives;
-                }
-            }
-            return tmpBestRepresentatives;
-        } catch (Exception anException) {
-            Art2aKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aKernel.getBestRepresentatives: An exception occurred: This should never happen!"
             );
             Art2aKernel.LOGGER.log(
                 Level.SEVERE, 

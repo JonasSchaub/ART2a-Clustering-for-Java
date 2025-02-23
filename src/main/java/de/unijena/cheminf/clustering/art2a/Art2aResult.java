@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * Result of an ART-2a clustering process.
  * <br><br>
  * Note: Art2aResult is a read-only class, i.e. thread-safe. In addition, there
- * are NO internal calculated values cached, i.e. each method call performs 
+ * are NO internally calculated values cached, i.e. each method call performs
  * a full calculation procedure. An Art2aResult object may be distributed to 
  * several concurrent (parallelized) evaluation tasks without any mutual 
  * interference problems.
@@ -101,6 +101,7 @@ public class Art2aResult {
      */
     private final PreprocessedData preprocessedArt2aData;
     //</editor-fold>
+
     //<editor-fold desc="Private record IndexedValue">
     /**
      * Indexed value

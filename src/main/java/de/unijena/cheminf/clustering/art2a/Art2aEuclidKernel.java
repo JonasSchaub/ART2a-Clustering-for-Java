@@ -27,16 +27,10 @@
 package de.unijena.cheminf.clustering.art2a;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import java.util.stream.IntStream;
 
 /**
  * ART-2a-Euclid algorithm implementation for unsupervised, open categorical 
@@ -188,58 +182,6 @@ public class Art2aEuclidKernel {
      * PreprocessedData object
      */
     private final PreprocessedData preprocessedData;
-    //</editor-fold>
-    //<editor-fold desc="Private helper callable">
-    /**
-     * Helper callable for a single getClusterResult() calculation task of 
-     * Art2aEuclidKernel with a distinct vigilance parameter.
-     * <br><br>
-     * Note: No checks are performed.
-     */
-    private static class HelperTask implements Callable<Art2aEuclidResult> {
-
-        //<editor-fold desc="Private final class variables">
-        /**
-         * Art2aEuclidKernel
-         */
-        private final Art2aEuclidKernel art2aKernel;
-        /**
-         * Vigilance parameter
-         */
-        private final float vigilance;
-        //</editor-fold>
-
-        //<editor-fold desc="Constructor">
-        /**
-         * Constructor
-         */
-        protected HelperTask(
-            Art2aEuclidKernel anArt2aEuclidKernel,
-            float aVigilance
-        ) {
-            this.art2aKernel = anArt2aEuclidKernel;
-            this.vigilance = aVigilance;
-        }
-        //</editor-fold>
-
-        // <editor-fold desc="Overriden call() method">
-        /**
-         * Performs single getClusterResult() calculation task.
-         *
-         * @return Art2aEuclidResult or null if getClusterResult() calculation task 
- could not be performed.
-         */
-        @Override
-        public Art2aEuclidResult call() {
-            try {
-                return this.art2aKernel.getClusterResult(this.vigilance);
-            } catch (Exception anException) {
-                return null;
-            }
-        }
-        //</editor-fold>
-    
-    }
     //</editor-fold>
 
     // <editor-fold desc="Public constructors">
@@ -488,17 +430,22 @@ public class Art2aEuclidKernel {
 
     // <editor-fold desc="Public methods">
     /**
-     * Performs ART-2a-Euclid clustering and returns corresponding 
-     * Art2aEuclidResult.
+     * Performs ART-2a-Euclid clustering and returns corresponding Art2aEuclidResult.
+     * Note: Parallelized Rho winner calculation is faster if many detected clusters, sequential Rho winner
+     * calculation is faster for a small number of formed clusters. The crossover between both must be evaluated
+     * experimentally.
      *
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
+     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
+     * is parallelized, false: Rho winner calculation is sequential.
      * @return Art2aEuclidResult instance
      * @throws IllegalArgumentException Thrown if argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
      */
     public Art2aEuclidResult getClusterResult(
-        float aVigilance
-    ) throws Exception {
+        float aVigilance,
+        boolean anIsParallelRhoWinnerCalculation
+    ) throws IllegalArgumentException, Exception {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
@@ -554,6 +501,11 @@ public class Art2aEuclidKernel {
             // Cluster usage flags. True: Cluster is used, false: Cluster is 
             // empty and can be removed.
             boolean[] tmpClusterUsageFlags = new boolean[this.maximumNumberOfClusters];
+            // Buffer for Rho values for parallelized Rho winner evaluation
+            float[] tmpRhoValueBuffer = null;
+            if (anIsParallelRhoWinnerCalculation) {
+                tmpRhoValueBuffer = new float[this.maximumNumberOfClusters];
+            }
 
             // Initialize cluster indices for data row vectors with -1 to 
             // indicate missing cluster assignment
@@ -613,13 +565,24 @@ public class Art2aEuclidKernel {
                         tmpNumberOfDetectedClusters++;
                     } else {
                         // Cluster number is greater than or equal to 1
-                        Art2aEuclidKernel.setRhoWinner(
-                            tmpBufferVector, 
-                            tmpClusterMatrix, 
-                            tmpNumberOfDetectedClusters, 
-                            tmpScalingFactor,
-                            tmpRhoWinner
-                        );
+                        if (anIsParallelRhoWinnerCalculation) {
+                            Art2aEuclidKernel.setRhoWinnerParallel(
+                                tmpBufferVector,
+                                tmpClusterMatrix,
+                                tmpNumberOfDetectedClusters,
+                                tmpScalingFactor,
+                                tmpRhoValueBuffer,
+                                tmpRhoWinner
+                            );
+                        } else {
+                            Art2aEuclidKernel.setRhoWinnerSequential(
+                                tmpBufferVector,
+                                tmpClusterMatrix,
+                                tmpNumberOfDetectedClusters,
+                                tmpScalingFactor,
+                                tmpRhoWinner
+                            );
+                        }
                         // Assign to existing cluster or increment clusters
                         if(tmpRhoWinner.getIndexOfCluster() < 0 || tmpRhoWinner.getRhoValue() > tmpRhoStar) {
                             // Increment clusters (if possible)
@@ -740,23 +703,21 @@ public class Art2aEuclidKernel {
     }
 
     /**
-     * Performs ART-2a-Euclid clustering for specified vigilance parameters and 
-     * returns corresponding Art2aEuclidResult objects.
+     * Performs ART-2a-Euclid clustering for specified vigilance parameters and returns corresponding Art2aEuclidResult
+     * objects.
+     * Note: Parallelized Rho winner evaluation is disabled.
      *
      * @param aVigilances Vigilance parameters (must each be in interval (0,1))
-     * @return Art2aEuclidResult objects or null if clustering result could 
+     * @param anIsParallelCalculation True: Calculations are parallelized, false: Calculations are sequential (one
+     *                                after another)
+     * @return Art2aEuclidResult objects or null if clustering result could
      * not be calculated.
-     * @param aNumberOfConcurrentCalculationThreads Number of concurrent 
-     * calculation threads for the different vigilance parameters to be 
-     * calculated concurrently (in parallel). If zero, then the different 
-     * vigilance parameters are calculated one after another (sequentially)
      * @throws IllegalArgumentException Thrown if argument is illegal
-     * @throws Exception Thrown if exception occurs which should never happen
      */
     public Art2aEuclidResult[] getClusterResults(
         float[] aVigilances,
-        int aNumberOfConcurrentCalculationThreads
-    ) throws Exception {
+        boolean anIsParallelCalculation
+    ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
             Art2aEuclidKernel.LOGGER.log(
@@ -774,52 +735,60 @@ public class Art2aEuclidKernel {
                 throw new IllegalArgumentException("Art2aEuclidKernel.getClusterResults: Vigilance parameter must be in interval (0,1).");
             }
         }
-        if (aNumberOfConcurrentCalculationThreads < 0) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0."
-            );
-            throw new IllegalArgumentException("Art2aEuclidKernel.getClusterResults: aNumberOfConcurrentCalculationThreads must be greater or equal to 0.");
-        }
         //</editor-fold>
 
-        if (aNumberOfConcurrentCalculationThreads > 0) {
-            LinkedList<HelperTask> tmpSingleTaskList = new LinkedList<>();
-            for (float tmpVigilance : aVigilances) {
-                tmpSingleTaskList.add(new HelperTask(this, tmpVigilance));
-            }
-            ExecutorService tmpExecutorService = newFixedThreadPool(aNumberOfConcurrentCalculationThreads);
-            List<Future<Art2aEuclidResult>> tmpFutureList = null;
+        if (anIsParallelCalculation) {
             try {
-                tmpFutureList = tmpExecutorService.invokeAll(tmpSingleTaskList);
-            } catch (InterruptedException anInterruptedException) {
-                Art2aEuclidKernel.LOGGER.log(
-                    Level.SEVERE, 
-                    "Art2aEuclidKernel.getClusterResults: Interrupted exception during concurrent calculation: This should never happen."
+                Art2aEuclidResult[] tmpParallelResults = new Art2aEuclidResult[aVigilances.length];
+                IntStream.range(0, aVigilances.length).parallel().forEach(
+                        i ->
+                        {
+                            try {
+                                // Note: Parallel Rho winner calculation is disabled: Parameter false.
+                                tmpParallelResults[i] = this.getClusterResult(aVigilances[i], false);
+                            } catch (Exception anException) {
+                                Art2aEuclidKernel.LOGGER.log(
+                                        Level.SEVERE,
+                                        "Art2aEuclidKernel.getClusterResults: An exception occurred in common fork-join pool: This should never happen."
+                                );
+                                tmpParallelResults[i] = null;
+                            }
+                        }
                 );
-                throw anInterruptedException;
-            }
-            tmpExecutorService.shutdown();
-            Art2aEuclidResult[] tmpParallelResults = new Art2aEuclidResult[aVigilances.length];
-            int tmpIndex = 0;
-            for (Future<Art2aEuclidResult> tmpFuture : tmpFutureList) {
-                try {
-                    tmpParallelResults[tmpIndex++] = tmpFuture.get();
-                } catch (Exception anException) {
-                    Art2aEuclidKernel.LOGGER.log(
-                        Level.SEVERE, 
-                        "Art2aEuclidKernel.getClusterResults: Exception in tmpFuture.get()."
-                    );
-                    throw anException;
+                boolean tmpIsSuccessful = true;
+                for (int i = 0; i < aVigilances.length; i++) {
+                    if (tmpParallelResults[i] == null) {
+                        tmpIsSuccessful = false;
+                        break;
+                    }
                 }
+                if (tmpIsSuccessful) {
+                    return tmpParallelResults;
+                } else {
+                    return null;
+                }
+            } catch (Exception anException) {
+                Art2aEuclidKernel.LOGGER.log(
+                        Level.SEVERE,
+                        "Art2aEuclidKernel.getClusterResults: An exception occurred: This should never happen."
+                );
+                return null;
             }
-            return tmpParallelResults;
         } else {
-            Art2aEuclidResult[] tmpSequentialResults = new Art2aEuclidResult[aVigilances.length];
-            for (int i = 0; i < aVigilances.length; i++) {
-                tmpSequentialResults[i] = this.getClusterResult(aVigilances[i]);
+            try {
+                Art2aEuclidResult[] tmpSequentialResults = new Art2aEuclidResult[aVigilances.length];
+                for (int i = 0; i < aVigilances.length; i++) {
+                    // Note: Parallel Rho winner evaluations is disabled: Parameter false.
+                    tmpSequentialResults[i] = this.getClusterResult(aVigilances[i], false);
+                }
+                return tmpSequentialResults;
+            } catch (Exception anException) {
+                Art2aEuclidKernel.LOGGER.log(
+                        Level.SEVERE,
+                        "Art2aEuclidKernel.getClusterResults: An exception occurred: This should never happen."
+                );
+                return null;
             }
-            return tmpSequentialResults;
         }
     }
     
@@ -830,12 +799,14 @@ public class Art2aEuclidKernel {
      * @param aNumberOfRepresentatives Number of representatives (MUST be 
      * greater or equal to 2)
      * @param aVigilanceMin Minimal vigilance parameter (must be in interval 
-     * (0,1))
-     * @param aVigilanceMax Maximal vigilance parameter (must be in interval 
-     * (0,1))
-     * @param aNumberOfTrialSteps Number of trial steps (MUST be greater or 
-     * equal to 1)
-     * @return Nearest (smaller) indices of approximants to the desired number 
+     * (0,1), a good default value is 0.0001f)
+     * @param aVigilanceMax Maximal vigilance parameter (must be in interval
+     * (0,1), a good default value is 0.9999f)
+     * @param aNumberOfTrialSteps Number of trial steps (MUST be greater or
+     * equal to 1, a good default value is 32)
+     * @param anIsParallelRhoWinnerCalculation True: Rho winner calculation
+     * is parallelized, false: Rho winner calculation is sequential.
+     * @return Nearest (smaller) indices of approximants to the desired number
      * of representatives.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      * @throws Exception Thrown if exception occurs which should never happen
@@ -844,7 +815,8 @@ public class Art2aEuclidKernel {
         int aNumberOfRepresentatives,
         float aVigilanceMin,
         float aVigilanceMax,
-        int aNumberOfTrialSteps
+        int aNumberOfTrialSteps,
+        boolean anIsParallelRhoWinnerCalculation
     ) throws IllegalArgumentException, Exception {
         // <editor-fold desc="Checks">
         if(aNumberOfRepresentatives < 2) {
@@ -885,12 +857,12 @@ public class Art2aEuclidKernel {
         //</editor-fold>
 
         try {
-            Art2aEuclidResult tmpArt2aEuclidResult = this.getClusterResult(aVigilanceMin);
+            Art2aEuclidResult tmpArt2aEuclidResult = this.getClusterResult(aVigilanceMin, anIsParallelRhoWinnerCalculation);
             int[] tmpRepresentativeIndicesOfClusters = tmpArt2aEuclidResult.getRepresentativeIndicesOfClusters();
             if (tmpArt2aEuclidResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                 return tmpRepresentativeIndicesOfClusters;
             }
-            tmpArt2aEuclidResult = this.getClusterResult(aVigilanceMax);
+            tmpArt2aEuclidResult = this.getClusterResult(aVigilanceMax, anIsParallelRhoWinnerCalculation);
             if (tmpArt2aEuclidResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
                 return tmpArt2aEuclidResult.getRepresentativeIndicesOfClusters();
             }
@@ -899,7 +871,7 @@ public class Art2aEuclidKernel {
             float tmpVigilanceMax = aVigilanceMax;
             for (int i = 0; i < aNumberOfTrialSteps; i++) {
                 float tmpVigilanceMean = (tmpVigilanceMin + tmpVigilanceMax) / 2.0f;
-                tmpArt2aEuclidResult = this.getClusterResult(tmpVigilanceMean);
+                tmpArt2aEuclidResult = this.getClusterResult(tmpVigilanceMean, anIsParallelRhoWinnerCalculation);
                 if (tmpArt2aEuclidResult.getNumberOfDetectedClusters() > aNumberOfRepresentatives) {
                     tmpVigilanceMax = tmpVigilanceMean;
                 } else if (tmpArt2aEuclidResult.getNumberOfDetectedClusters() < aNumberOfRepresentatives) {
@@ -914,94 +886,6 @@ public class Art2aEuclidKernel {
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
                 "Art2aEuclidKernel.getRepresentatives: An exception occurred: This should never happen!"
-            );
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
-                anException
-            );
-            throw anException;
-        }
-    }
-    
-    /**
-     * Note: This is a purely experimental nonsense method.
-     * 
-     * Returns representatives whose mean distance is nearest to the mean 
-     * distance of all data vectors of specified original data matrix.
-     * Note: This is a O(N^2) operation, N: Number of data vectors.
-     * 
-     * @param aDataMatrix Original data matrix (IS NOT CHANGED and NOT properly
-     * CHECKED)
-     * @param aMinimumNumberOfRepresentatives Minimum number of representatives
-     * @param aMaximumNumberOfRepresentatives Maximum number of representatives
-     * @return Representatives whose mean distance is nearest to the mean 
-     * distance of all data vectors of specified original data matrix.
-     * @throws IllegalArgumentException Thrown if an argument is illegal
-     * @throws Exception Thrown if exception occurs which should never happen
-     */
-    public int[] getBestRepresentatives(
-        float[][] aDataMatrix,
-        int aMinimumNumberOfRepresentatives,
-        int aMaximumNumberOfRepresentatives
-    ) throws IllegalArgumentException, Exception {
-        // <editor-fold desc="Checks">
-        if(aDataMatrix == null || aDataMatrix.length == 0) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.getBestRepresentatives: aDataMatrix is null/has length zero."
-            );
-            throw new IllegalArgumentException("Art2aEuclidKernel.getBestRepresentatives: aDataMatrix is null/has length zero.");
-        }
-        if(aMinimumNumberOfRepresentatives < 2 || aMinimumNumberOfRepresentatives > aDataMatrix.length - 1) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.getBestRepresentatives: aMinimumNumberOfRepresentatives is invalid."
-            );
-            throw new IllegalArgumentException("Art2aEuclidKernel.getBestRepresentatives: aMinimumNumberOfRepresentatives is invalid.");
-        }
-        if(aMaximumNumberOfRepresentatives <= aMinimumNumberOfRepresentatives || aMaximumNumberOfRepresentatives > aDataMatrix.length) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.getBestRepresentatives: aMaximumNumberOfRepresentatives is invalid."
-            );
-            throw new IllegalArgumentException("Art2aEuclidKernel.getBestRepresentatives: aMaximumNumberOfRepresentatives is invalid.");
-        }
-        //</editor-fold>
-
-        try {
-            int[] tmpAllIndices = new int[aDataMatrix.length];
-            for (int i = 0; i < tmpAllIndices.length; i++) {
-                tmpAllIndices[i] = i;
-            }
-            float tmpBaseMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpAllIndices);
-
-            float tmpVigilanceMin = 0.0001f;
-            float tmpVigilanceMax = 0.9999f;
-            int tmpNumberOfTrialSteps = 32;
-
-            float tmpMinimalDifference = Float.MAX_VALUE;
-            int[] tmpBestRepresentatives = null;
-            for (int i = aMinimumNumberOfRepresentatives; i < aMaximumNumberOfRepresentatives; i++) {
-                int[] tmpRepresentatives = 
-                    this.getRepresentatives(
-                        i, 
-                        tmpVigilanceMin, 
-                        tmpVigilanceMax, 
-                        tmpNumberOfTrialSteps
-                    );
-                float tmpMeanDistance = Utils.getMeanDistance(aDataMatrix, tmpRepresentatives);
-                float tmpDifference = Math.abs(tmpMeanDistance - tmpBaseMeanDistance);
-                if (tmpDifference < tmpMinimalDifference) {
-                    tmpMinimalDifference = tmpDifference;
-                    tmpBestRepresentatives = tmpRepresentatives;
-                }
-            }
-            return tmpBestRepresentatives;
-        } catch (Exception anException) {
-            Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                "Art2aEuclidKernel.getBestRepresentatives: An exception occurred: This should never happen!"
             );
             Art2aEuclidKernel.LOGGER.log(
                 Level.SEVERE, 
@@ -1263,8 +1147,7 @@ public class Art2aEuclidKernel {
      * (see code). If the cluster index is negative the first scaled rho value
      * is the winner.
      *
-     * @param aContrastEnhancedVector Contrast enhanced unit vector (IS NOT
-     * CHANGED)
+     * @param aContrastEnhancedVector Contrast enhanced unit vector (IS NOT CHANGED)
      * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
      * @param aNumberOfDetectedClusters Number of detected clusters
      * @param aScalingFactor Scaling factor
@@ -1272,7 +1155,7 @@ public class Art2aEuclidKernel {
      * index of the winner. If the cluster index is negative the first scaled
      * rho value is the winner.
      */
-    private static void setRhoWinner(
+    private static void setRhoWinnerSequential(
             float[] aContrastEnhancedVector,
             float[][] aClusterMatrix,
             int aNumberOfDetectedClusters,
@@ -1288,6 +1171,46 @@ public class Art2aEuclidKernel {
             float tmpRhoForCluster = Utils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i]);
             if(tmpRhoForCluster < tmpRhoValue) {
                 tmpRhoValue = tmpRhoForCluster;
+                tmpIndex = i;
+            }
+        }
+        aRhoWinner.setRhoWinner(tmpRhoValue, tmpIndex);
+    }
+
+    /**
+     * Sets rho winner with the rho value and the cluster index of the winner
+     * (see code). If the cluster index is negative the first scaled rho value
+     * is the winner.
+     * Note: A parallelized stream is used for calculation.
+     *
+     * @param aContrastEnhancedVector Contrast enhanced vector (IS NOT CHANGED)
+     * @param aClusterMatrix Cluster matrix (IS NOT CHANGED)
+     * @param aNumberOfDetectedClusters Number of detected clusters
+     * @param aScalingFactor Scaling factor
+     * @param aRhoValueBuffer Buffer for Rho values
+     * @param aRhoWinner Rho winner: Is set with the rho value and the cluster
+     * index of the winner. If the cluster index is negative the first scaled
+     * rho value is the winner.
+     */
+    private static void setRhoWinnerParallel(
+            float[] aContrastEnhancedVector,
+            float[][] aClusterMatrix,
+            int aNumberOfDetectedClusters,
+            float aScalingFactor,
+            float[] aRhoValueBuffer,
+            Utils.RhoWinner aRhoWinner
+    ) {
+        // Calculate first rho value
+        float tmpRhoValue = Utils.getSumOfSquaredDifferences(aContrastEnhancedVector, aScalingFactor);
+        // Set winner index to negative value
+        int tmpIndex = -1;
+        // Calculate other rho values
+        IntStream.range(0, aNumberOfDetectedClusters).parallel().forEach(
+                i -> aRhoValueBuffer[i] = Utils.getSquaredDistance(aContrastEnhancedVector, aClusterMatrix[i])
+        );
+        for(int i = 0; i < aNumberOfDetectedClusters; i++) {
+            if(aRhoValueBuffer[i] < tmpRhoValue) {
+                tmpRhoValue = aRhoValueBuffer[i];
                 tmpIndex = i;
             }
         }
