@@ -1,8 +1,8 @@
 /*
- * ART-2a-Euclid Clustering for Java
+ * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@ package de.unijena.cheminf.clustering.art2a;
  * Library of static, thread-safe (stateless) utility methods for ART-2a-Euclid clustering.
  * <br><br>
  * Note: No checks are performed.
- * 
+ *
  * @author Achim Zielesny
  */
 public class Art2aEuclidUtils {
@@ -41,19 +41,19 @@ public class Art2aEuclidUtils {
      */
     protected Art2aEuclidUtils() {}
     //</editor-fold>
-    
+
     //<editor-fold desc="Protected static utility methods">
     /**
-     * Transforms original data vector into corresponding contrast enhanced 
+     * Transforms original data vector into corresponding contrast enhanced
      * unit vector (see code).
      * Note: No checks are performed.
-     * 
+     *
      * @param aDataVector Data vector (IS NOT CHANGED)
-     * @param aBufferVector Buffer vector for contrast enhanced unit vector 
-     * derived from data vector (MUST ALREADY BE INSTANTIATED and is set within 
+     * @param aBufferVector Buffer vector for contrast enhanced unit vector
+     * derived from data vector (MUST ALREADY BE INSTANTIATED and is set within
      * the method)
      * @param aMinMaxComponents Min-max components of original data matrix
-     * @param aThresholdForContrastEnhancement Threshold for contrast 
+     * @param aThresholdForContrastEnhancement Threshold for contrast
      * enhancement
      * @return True: Scaled data vector has a length of zero, false: Otherwise
      */
@@ -79,5 +79,5 @@ public class Art2aEuclidUtils {
         }
     }
     //</editor-fold>
-    
+
 }

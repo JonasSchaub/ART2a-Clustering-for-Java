@@ -2,7 +2,7 @@
  * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * Note: PreprocessedData is a read-only class, i.e. thread-safe. The same PreprocessedData
  * object may be distributed to several concurrently working clustering tasks without
  * any mutual interference problems.
- * 
+ *
  * @author Achim Zielesny
  */
 public class PreprocessedData {
@@ -66,14 +66,14 @@ public class PreprocessedData {
      */
     private final float[][] preprocessedMatrix;
     /**
-     * Flags array that indicates if scaled data row vectors have a length 
-     * of zero (i.e. where all components are equal to zero, the corresponding 
+     * Flags array that indicates if scaled data row vectors have a length
+     * of zero (i.e. where all components are equal to zero, the corresponding
      * preprocessed vector is set to null in this case). True:
      * Scaled data row vector has a length of zero, false: Otherwise.
      */
     private final boolean[] dataVectorZeroLengthFlags;
     /**
-     * Min-max components of original data matrix (see method 
+     * Min-max components of original data matrix (see method
      * Utils.getMinMaxComponents() for data structure)
      */
     private final Utils.MinMaxValue[] minMaxComponentsOfDataMatrix;
@@ -86,37 +86,37 @@ public class PreprocessedData {
      */
     private final boolean hasPreprocessedData;
     //</editor-fold>
-    
-    
+
+
     //<editor-fold desc="Private constructor">
     /**
      * Private constructor
      * Note: No checks are necessary
-     * 
+     *
      * @param aDataMatrix Original data matrix with data row vectors (MAY BE NULL)
      * @param aPreprocessedMatrix Preprocessed matrix (MAY BE NULL)
-     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled 
-     * data row vectors have a length of zero (i.e. where all components are 
-     * equal to zero). True: Scaled data row vector has a length of zero 
-     * (corresponding contrast enhanced unit vector is set to null in this 
+     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled
+     * data row vectors have a length of zero (i.e. where all components are
+     * equal to zero). True: Scaled data row vector has a length of zero
+     * (corresponding contrast enhanced unit vector is set to null in this
      * case), false: Otherwise.
-     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data 
+     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data
      * matrix
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
      * @param aHasPreprocessedData True: PreprocessedData object has preprocessed data,
      * false: Otherwise
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     private PreprocessedData (
-        float[][] aDataMatrix,        
+        float[][] aDataMatrix,
         float[][] aPreprocessedMatrix,
         boolean[] aDataVectorZeroLengthFlags,
         Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement,
         boolean aHasPreprocessedData
     ) {
-        this.dataMatrix = aDataMatrix;       
+        this.dataMatrix = aDataMatrix;
         this.preprocessedMatrix = aPreprocessedMatrix;
         this.dataVectorZeroLengthFlags = aDataVectorZeroLengthFlags;
         this.minMaxComponentsOfDataMatrix = aMinMaxComponentsOfDataMatrix;
@@ -127,17 +127,17 @@ public class PreprocessedData {
     //<editor-fold desc="Public constructors">
     /**
      * Constructor
-     * 
-     * @param aDataMatrix Original data matrix with data row vectors (NOT 
+     *
+     * @param aDataMatrix Original data matrix with data row vectors (NOT
      * allowed to be null)
-     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data 
+     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data
      * matrix
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     protected PreprocessedData (
-        float[][] aDataMatrix, 
+        float[][] aDataMatrix,
         Utils.MinMaxValue[] aMinMaxComponentsOfDataMatrix,
         float anOffsetForContrastEnhancement
     ) {
@@ -151,21 +151,21 @@ public class PreprocessedData {
         );
         if (!Utils.isMatrixValid(aDataMatrix)) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: aDataMatrix is invalid."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: aDataMatrix is invalid");
         }
         if (aMinMaxComponentsOfDataMatrix == null || aMinMaxComponentsOfDataMatrix.length != aDataMatrix[0].length) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: aMinMaxComponentsOfDataMatrix is invalid."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: aMinMaxComponentsOfDataMatrix is invalid");
         }
         if (anOffsetForContrastEnhancement <= 0.0f) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: anOffsetForContrastEnhancement must be greater zero."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: anOffsetForContrastEnhancement must be greater zero.");
@@ -174,16 +174,16 @@ public class PreprocessedData {
 
     /**
      * Constructor
-     * 
+     *
      * @param aPreprocessedMatrix Preprocessed matrix (NOT allowed to be null)
-     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled 
-     * data row vectors have a length of zero (i.e. where all components are 
-     * equal to zero). True: Scaled data row vector has a length of zero 
+     * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled
+     * data row vectors have a length of zero (i.e. where all components are
+     * equal to zero). True: Scaled data row vector has a length of zero
      * (corresponding preprocessed vector is set to null in this
      * case), false: Otherwise.
-     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data 
+     * @param aMinMaxComponentsOfDataMatrix Min-max components of original data
      * matrix
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
@@ -203,28 +203,28 @@ public class PreprocessedData {
         );
         if (!Utils.isMatrixValid(aPreprocessedMatrix)) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: aPreprocessedMatrix is invalid."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: aPreprocessedMatrix is invalid.");
         }
         if (aDataVectorZeroLengthFlags == null || aDataVectorZeroLengthFlags.length == 0 || aDataVectorZeroLengthFlags.length != aPreprocessedMatrix.length) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: aDataVectorZeroLengthFlags is illegal."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: aDataVectorZeroLengthFlags is illegal.");
         }
         if (aMinMaxComponentsOfDataMatrix == null || aMinMaxComponentsOfDataMatrix.length != aPreprocessedMatrix[0].length) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: aMinMaxComponentsOfDataMatrix is invalid."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: aMinMaxComponentsOfDataMatrix is invalid");
         }
         if (anOffsetForContrastEnhancement <= 0.0f) {
             PreprocessedData.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "PreprocessedData.Constructor: anOffsetForContrastEnhancement must be greater zero."
             );
             throw new IllegalArgumentException("PreprocessedData.Constructor: anOffsetForContrastEnhancement must be greater zero.");
@@ -235,8 +235,8 @@ public class PreprocessedData {
     //<editor-fold desc="Protected get/has methods">
     /**
      * Original data matrix with data row vectors
-     * 
-     * @return Original data matrix with data row vectors or null if 
+     *
+     * @return Original data matrix with data row vectors or null if
      * hasPreprocessedData() returns true
      */
     protected float[][] getDataMatrix() {
@@ -245,8 +245,8 @@ public class PreprocessedData {
 
     /**
      * Matrix of contrast enhanced unit vectors
-     * 
-     * @return Matrix of contrast enhanced unit vectors or null if 
+     *
+     * @return Matrix of contrast enhanced unit vectors or null if
      * hasPreprocessedData() returns false
      */
     protected float[][] getPreprocessedMatrix() {
@@ -254,11 +254,11 @@ public class PreprocessedData {
     }
 
     /**
-     * Flags array that indicates if scaled data row vectors have a length 
-     * of zero (i.e. where all components are equal to zero, the corresponding 
-     * contrast enhanced unit vector is set to null in this case). True: 
+     * Flags array that indicates if scaled data row vectors have a length
+     * of zero (i.e. where all components are equal to zero, the corresponding
+     * contrast enhanced unit vector is set to null in this case). True:
      * Scaled data row vector has a length of zero, false: Otherwise.
-     * 
+     *
      * @return Array with flags or null if hasPreprocessedData() returns false
      */
     protected boolean[] getDataVectorZeroLengthFlags() {
@@ -267,17 +267,17 @@ public class PreprocessedData {
 
     /**
      * Min-max components of original data matrix (see method Utils.getMinMaxComponents() for data structure)
-     * 
+     *
      * @return Min-max components of original data matrix
      */
     protected Utils.MinMaxValue[] getMinMaxComponentsOfDataMatrix() {
         return this.minMaxComponentsOfDataMatrix;
     }
-    
+
     /**
-     * Returns if Art2aData object has preprocessed data, i.e. 
+     * Returns if Art2aData object has preprocessed data, i.e.
      * contrastEnhancedUnitMatrix and dataVectorZeroLengthFlags are defined.
-     * 
+     *
      * @return True: Art2aData object has preprocessed data, false: Otherwise
      */
     protected boolean hasPreprocessedData() {
@@ -286,7 +286,7 @@ public class PreprocessedData {
 
     /**
      * Returns offset for contrast enhancement
-     * 
+     *
      * @return Offset for contrast enhancement
      */
     protected float getOffsetForContrastEnhancement() {

@@ -1,8 +1,8 @@
 /*
- * ART-2a-Euclid Clustering for Java
+ * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,8 +31,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Callable that wraps an Art2aEuclidKernel instance where the call() method 
- * returns an Art2aEuclidResult object. See Art2aEuclidKernel for further 
+ * Callable that wraps an Art2aEuclidKernel instance where the call() method
+ * returns an Art2aEuclidResult object. See Art2aEuclidKernel for further
  * details.
  *
  * @author Betuel Sevindik, Achim Zielesny
@@ -62,27 +62,27 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * similarity (must be in interval (0,1))
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidTask(
-        float[][] aDataMatrix, 
+        float[][] aDataMatrix,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
-        float aConvergenceThreshold, 
+        float aConvergenceThreshold,
         float aLearningParameter,
         float anOffsetForContrastEnhancement,
         long aRandomSeed,
@@ -91,7 +91,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1).");
@@ -100,12 +100,12 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aEuclidKernel(
-                    aDataMatrix, 
+                    aDataMatrix,
                     aMaximumNumberOfClusters,
-                    aMaximumNumberOfEpochs, 
-                    aConvergenceThreshold, 
+                    aMaximumNumberOfEpochs,
+                    aConvergenceThreshold,
                     aLearningParameter,
                     anOffsetForContrastEnhancement,
                     aRandomSeed,
@@ -113,12 +113,12 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: Can not instantiate Art2aEuclidKernel object."
             );
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -127,8 +127,8 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1), 
-     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1),
+     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT
      * (= 0.5) and RANDOM_SEED (= 1).
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
@@ -148,7 +148,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1).");
@@ -157,7 +157,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aEuclidKernel(
                     aDataMatrix,
                     aMaximumNumberOfClusters,
@@ -165,32 +165,32 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: Can not instantiate Art2aEuclidKernel object."
             );
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
         }
     }
-    
+
     /**
      * Constructor.
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData data object created by method
      * Art2aEuclidKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * similarity (must be in interval (0,1))
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
@@ -199,14 +199,14 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
-        float aConvergenceThreshold, 
+        float aConvergenceThreshold,
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1).");
@@ -215,23 +215,23 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aEuclidKernel(
                     aPreprocessedArt2aEuclidData,
                     aMaximumNumberOfClusters,
-                    aMaximumNumberOfEpochs, 
-                    aConvergenceThreshold, 
+                    aMaximumNumberOfEpochs,
+                    aConvergenceThreshold,
                     aLearningParameter,
                     aRandomSeed
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: Can not instantiate Art2aEuclidKernel object."
             );
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -240,7 +240,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1), 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.1),
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData object created by method
@@ -258,7 +258,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidTask.Constructor: aVigilance must be in interval (0,1).");
@@ -267,19 +267,19 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aEuclidKernel(
                     aPreprocessedArt2aEuclidData,
                     aMaximumNumberOfClusters
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.Constructor: Can not instantiate Art2aEuclidKernel object."
             );
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -292,7 +292,7 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
      * Performs the clustering process.
      * Note: Parallel Rho winner evaluation is disabled.
      *
-     * @return Clustering result or null if clustering process could not be 
+     * @return Clustering result or null if clustering process could not be
      * performed.
      */
     @Override
@@ -302,12 +302,12 @@ public class Art2aEuclidTask implements Callable<Art2aEuclidResult> {
             return this.art2aClusteringKernel.getClusterResult(this.vigilance, false);
         } catch (Exception anException) {
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidTask.call: Can not calculate a cluster result."
             );
             Art2aEuclidTask.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
+                Level.SEVERE,
+                anException.toString(),
                 anException
             );
             return null;

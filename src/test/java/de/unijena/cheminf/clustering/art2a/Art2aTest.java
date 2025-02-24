@@ -2,7 +2,7 @@
  * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +26,9 @@
 
 package de.unijena.cheminf.clustering.art2a;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,9 +36,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test class for ART-2a clustering.
@@ -53,7 +53,7 @@ public class Art2aTest {
         System.out.println("test_Development_IrisFlowerData()");
         System.out.println("---------------------------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
-        
+
         // float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
         float[] tmpVigilances = new float[] {0.1f};
 
@@ -68,9 +68,9 @@ public class Art2aTest {
 
         for (float tmpVigilance : tmpVigilances) {
             System.out.println("  Vigilance parameter = " + String.valueOf(tmpVigilance));
-            Art2aKernel tmpArt2aKernel = 
+            Art2aKernel tmpArt2aKernel =
                 new Art2aKernel(
-                    tmpIrisFlowerDataMatrix, 
+                    tmpIrisFlowerDataMatrix,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -116,11 +116,11 @@ public class Art2aTest {
         int tmpNumberOfGaussianCloudVectors = 100;
         float tmpStandardDeviation = 0.1f;
         Random tmpRandomNumberGenerator = new Random(1L);
-        float[][] tmpCombinedGaussianCloudDataMatrix = 
+        float[][] tmpCombinedGaussianCloudDataMatrix =
             this.getCombinedGaussianCloudMatrix(
-                tmpNumberOfDimensions, 
-                tmpNumberOfGaussianCloudVectors, 
-                tmpStandardDeviation, 
+                tmpNumberOfDimensions,
+                tmpNumberOfGaussianCloudVectors,
+                tmpStandardDeviation,
                 tmpRandomNumberGenerator
             );
 
@@ -135,9 +135,9 @@ public class Art2aTest {
         long tmpRandomSeed = 1L;
 
         long tmpStart = System.currentTimeMillis();
-        Art2aKernel tmpArt2aKernel = 
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpCombinedGaussianCloudDataMatrix, 
+                tmpCombinedGaussianCloudDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -187,11 +187,11 @@ public class Art2aTest {
         int tmpNumberOfGaussianCloudVectors = 1000;
         float tmpStandardDeviation = 0.01f;
         Random tmpRandomNumberGenerator = new Random(1L);
-        float[][] tmpCombinedGaussianCloudDataMatrix = 
+        float[][] tmpCombinedGaussianCloudDataMatrix =
             this.getCombinedGaussianCloudMatrix(
-                tmpNumberOfDimensions, 
-                tmpNumberOfGaussianCloudVectors, 
-                tmpStandardDeviation, 
+                tmpNumberOfDimensions,
+                tmpNumberOfGaussianCloudVectors,
+                tmpStandardDeviation,
                 tmpRandomNumberGenerator
             );
 
@@ -206,9 +206,9 @@ public class Art2aTest {
         long tmpRandomSeed = 1L;
 
         long tmpStart = System.currentTimeMillis();
-        Art2aKernel tmpArt2aKernel = 
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpCombinedGaussianCloudDataMatrix, 
+                tmpCombinedGaussianCloudDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -254,10 +254,10 @@ public class Art2aTest {
         float tmpVigilanceMin = 0.0001f;
         float tmpVigilanceMax = 0.9999f;
         int tmpNumberOfTrialSteps = 32;
-        
-        Art2aKernel tmpArt2aKernel = 
+
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpIrisFlowerDataMatrix, 
+                tmpIrisFlowerDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -277,11 +277,11 @@ public class Art2aTest {
         );
         for (int tmpNumberOfRepresentatives = 2; tmpNumberOfRepresentatives < tmpIrisFlowerDataMatrix.length; tmpNumberOfRepresentatives++) {
             try {
-                int[] tmpRepresentatives = 
+                int[] tmpRepresentatives =
                     tmpArt2aKernel.getRepresentatives(
-                        tmpNumberOfRepresentatives, 
-                        tmpVigilanceMin, 
-                        tmpVigilanceMax, 
+                        tmpNumberOfRepresentatives,
+                        tmpVigilanceMin,
+                        tmpVigilanceMax,
                         tmpNumberOfTrialSteps,
                         tmpIsParallelRhoWinnerCalculation
                     );
@@ -289,10 +289,10 @@ public class Art2aTest {
                     Arrays.sort(tmpRepresentatives);
                     float tmpMeanDistance = Utils.getMeanDistance(tmpIrisFlowerDataMatrix, tmpRepresentatives);
                     System.out.println(
-                        String.valueOf(tmpNumberOfRepresentatives) + 
+                        String.valueOf(tmpNumberOfRepresentatives) +
                         " Representatives (Mean distance = " +
-                        String.valueOf(tmpMeanDistance) + 
-                        ") = " + 
+                        String.valueOf(tmpMeanDistance) +
+                        ") = " +
                         this.getStringFromIntArray(tmpRepresentatives)
                     );
                 }
@@ -301,7 +301,7 @@ public class Art2aTest {
             }
         }
     }
-    
+
     /**
      * Tests Art2aKernel method getRepresentatives().
      */
@@ -324,10 +324,10 @@ public class Art2aTest {
         float tmpVigilanceMax = 0.9999f;
         int tmpNumberOfRepresentatives = 7;
         int tmpNumberOfTrialSteps = 32;
-        
-        Art2aKernel tmpArt2aKernel = 
+
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpIrisFlowerDataMatrix, 
+                tmpIrisFlowerDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -337,11 +337,11 @@ public class Art2aTest {
                 tmpIsDataPreprocessing
             );
         try {
-            int[] tmpRepresentatives = 
+            int[] tmpRepresentatives =
                 tmpArt2aKernel.getRepresentatives(
-                    tmpNumberOfRepresentatives, 
-                    tmpVigilanceMin, 
-                    tmpVigilanceMax, 
+                    tmpNumberOfRepresentatives,
+                    tmpVigilanceMin,
+                    tmpVigilanceMax,
                     tmpNumberOfTrialSteps,
                     tmpIsParallelRhoWinnerCalculation
                 );
@@ -363,11 +363,11 @@ public class Art2aTest {
         int tmpNumberOfGaussianCloudVectors = 1000;
         float tmpStandardDeviation = 0.01f;
         Random tmpRandomNumberGenerator = new Random(1L);
-        float[][] tmpCombinedGaussianCloudDataMatrix = 
+        float[][] tmpCombinedGaussianCloudDataMatrix =
             this.getCombinedGaussianCloudMatrix(
-                tmpNumberOfDimensions, 
-                tmpNumberOfGaussianCloudVectors, 
-                tmpStandardDeviation, 
+                tmpNumberOfDimensions,
+                tmpNumberOfGaussianCloudVectors,
+                tmpStandardDeviation,
                 tmpRandomNumberGenerator
             );
 
@@ -381,9 +381,9 @@ public class Art2aTest {
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
 
-        Art2aKernel tmpArt2aKernel = 
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpCombinedGaussianCloudDataMatrix, 
+                tmpCombinedGaussianCloudDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -420,9 +420,9 @@ public class Art2aTest {
             Assertions.assertEquals(tmpArt2aResult.getClusterRepresentativeIndex(i), tmpArt2aResult.getClusterRepresentativeIndices(i)[0]);
         }
     }
-    
+
     /**
-     * Tests that clustering with and without preprocessing has identical 
+     * Tests that clustering with and without preprocessing has identical
      * results.
      */
     @Test
@@ -445,7 +445,7 @@ public class Art2aTest {
             boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
-                    tmpIrisFlowerDataMatrix, 
+                    tmpIrisFlowerDataMatrix,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -463,9 +463,9 @@ public class Art2aTest {
 
             // Preprocessing
             tmpIsDataPreprocessing = true;
-            Art2aKernel tmpArt2aKernelWithPreprocessing = 
+            Art2aKernel tmpArt2aKernelWithPreprocessing =
                 new Art2aKernel(
-                    tmpIrisFlowerDataMatrix, 
+                    tmpIrisFlowerDataMatrix,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -480,15 +480,15 @@ public class Art2aTest {
             } catch (Exception anException) {
                 Assertions.fail();
             }
-            
+
             // Assertions.assert that results without and with preprocessing are identical
             Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters(), tmpArt2aResultWithPreprocessing.getNumberOfDetectedClusters());
             Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs(), tmpArt2aResultWithPreprocessing.getNumberOfEpochs());
-            
+
             int tmpNumberOfDetectedClusters = tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters();
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 Assertions.assertArrayEquals(
-                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
+                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i),
                     tmpArt2aResultWithPreprocessing.getDataVectorIndicesOfCluster(i)
                 );
             }
@@ -501,7 +501,7 @@ public class Art2aTest {
     }
 
     /**
-     * Test that generated Art2aData object leads to identical clustering 
+     * Test that generated Art2aData object leads to identical clustering
      * results.
      */
     @Test
@@ -523,7 +523,7 @@ public class Art2aTest {
             boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
-                    tmpIrisFlowerDataMatrix, 
+                    tmpIrisFlowerDataMatrix,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -541,7 +541,7 @@ public class Art2aTest {
 
             // Preprocessed Art2aData
             PreprocessedArt2aData tmpPreprocessedArt2aData = Art2aKernel.getPreprocessedArt2aData(tmpIrisFlowerDataMatrix, tmpOffsetForContrastEnhancement);
-            Art2aKernel tmpArt2aKernelWithArt2aData = 
+            Art2aKernel tmpArt2aKernelWithArt2aData =
                 new Art2aKernel(
                     tmpPreprocessedArt2aData,
                     tmpMaximumNumberOfClusters,
@@ -557,15 +557,15 @@ public class Art2aTest {
                 Assertions.fail();
             }
 
-            // Assertions.assert that results without preprocessing and preprocessed 
+            // Assertions.assert that results without preprocessing and preprocessed
             // Art2aData are identical
             Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters(), tmpArt2aResultWithArt2aData.getNumberOfDetectedClusters());
             Assertions.assertEquals(tmpArt2aResultWithoutPreprocessing.getNumberOfEpochs(), tmpArt2aResultWithArt2aData.getNumberOfEpochs());
-            
+
             int tmpNumberOfDetectedClusters = tmpArt2aResultWithoutPreprocessing.getNumberOfDetectedClusters();
             for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
                 Assertions.assertArrayEquals(
-                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i), 
+                    tmpArt2aResultWithoutPreprocessing.getDataVectorIndicesOfCluster(i),
                     tmpArt2aResultWithArt2aData.getDataVectorIndicesOfCluster(i)
                 );
             }
@@ -594,7 +594,7 @@ public class Art2aTest {
         float tmpLearningParameter = 0.01f;
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
-        
+
         // Sequential clustering one after another
         Art2aResult[] tmpSequentialResults = new Art2aResult[tmpVigilances.length];
         int tmpIndex = 0;
@@ -603,7 +603,7 @@ public class Art2aTest {
             boolean tmpIsParallelRhoWinnerCalculation = false;
             Art2aKernel tmpArt2aKernelWithoutPreprocessing =
                 new Art2aKernel(
-                    tmpIrisFlowerDataMatrix, 
+                    tmpIrisFlowerDataMatrix,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -626,7 +626,7 @@ public class Art2aTest {
             tmpArt2aTaskList.add(
                 new Art2aTask(
                     tmpPreprocessedArt2aData,
-                    tmpVigilance, 
+                    tmpVigilance,
                     tmpMaximumNumberOfClusters,
                     tmpMaximumNumberOfEpochs,
                     tmpConvergenceThreshold,
@@ -652,8 +652,8 @@ public class Art2aTest {
                 System.out.println("test_ParallelClustering: Exception occurred.");
             }
         }
-        
-        // Assertions.assert that sequential results without preprocessing and concurrent 
+
+        // Assertions.assert that sequential results without preprocessing and concurrent
         // results with preprocessed Art2aData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
             Assertions.assertEquals(tmpSequentialResults[i].getNumberOfDetectedClusters(), tmpParallelResults[i].getNumberOfDetectedClusters());
@@ -663,7 +663,7 @@ public class Art2aTest {
             int tmpNumberOfDetectedClusters = tmpSequentialResults[i].getNumberOfDetectedClusters();
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 Assertions.assertArrayEquals(
-                    tmpSequentialResults[i].getDataVectorIndicesOfCluster(j), 
+                    tmpSequentialResults[i].getDataVectorIndicesOfCluster(j),
                     tmpParallelResults[i].getDataVectorIndicesOfCluster(j)
                 );
             }
@@ -673,11 +673,11 @@ public class Art2aTest {
                     Assertions.assertEquals(tmpSequentialResults[i].getAngleBetweenClusters(j, k), tmpParallelResults[i].getAngleBetweenClusters(j, k));
                 }
             }
-        }        
+        }
     }
 
     /**
-     * Tests that sequential and parallelized clustering with 
+     * Tests that sequential and parallelized clustering with
      * Art2aKernel.getClusterResults() leads to identical results.
      */
     @Test
@@ -695,9 +695,9 @@ public class Art2aTest {
         long tmpRandomSeed = 1L;
         boolean tmpIsDataPreprocessing = false;
 
-        Art2aKernel tmpArt2aKernel = 
+        Art2aKernel tmpArt2aKernel =
             new Art2aKernel(
-                tmpIrisFlowerDataMatrix, 
+                tmpIrisFlowerDataMatrix,
                 tmpMaximumNumberOfClusters,
                 tmpMaximumNumberOfEpochs,
                 tmpConvergenceThreshold,
@@ -722,8 +722,8 @@ public class Art2aTest {
         } catch (Exception anException) {
             Assertions.fail();
         }
-        
-        // Assertions.assert that sequential results without preprocessing and concurrent 
+
+        // Assertions.assert that sequential results without preprocessing and concurrent
         // results with preprocessed Art2aData are identical
         for (int i = 0; i < tmpVigilances.length; i++) {
             Assertions.assertEquals(tmpSequentialResults[i].getNumberOfDetectedClusters(), tmpParallelResults[i].getNumberOfDetectedClusters());
@@ -733,7 +733,7 @@ public class Art2aTest {
             int tmpNumberOfDetectedClusters = tmpSequentialResults[i].getNumberOfDetectedClusters();
             for (int j = 0; j < tmpNumberOfDetectedClusters; j++) {
                 Assertions.assertArrayEquals(
-                    tmpSequentialResults[i].getDataVectorIndicesOfCluster(j), 
+                    tmpSequentialResults[i].getDataVectorIndicesOfCluster(j),
                     tmpParallelResults[i].getDataVectorIndicesOfCluster(j)
                 );
             }
@@ -743,14 +743,14 @@ public class Art2aTest {
                     Assertions.assertEquals(tmpSequentialResults[i].getAngleBetweenClusters(j, k), tmpParallelResults[i].getAngleBetweenClusters(j, k));
                 }
             }
-        }        
+        }
     }
-    
+
     // <editor-fold defaultstate="collapsed" desc="Private methods">
     /**
      * Returns int array as a string.
      * Note: No checks are performed.
-     * 
+     *
      * @param anIntArray Int array
      * @return The int array as a string
      */
@@ -766,18 +766,18 @@ public class Art2aTest {
         }
         return tmpStringBuilder.toString();
     }
-    
+
     /**
      * Compares two arrays.
      * Note: No checks are performed.
-     * 
+     *
      * @param anArray1 Array 1
      * @param anArray2 Array 2
-     * @return True: Arrays have the same values in the same order, false: 
+     * @return True: Arrays have the same values in the same order, false:
      * Otherwise
      */
     private boolean compareArrays(
-        int[] anArray1, 
+        int[] anArray1,
         int[] anArray2
     ) {
         boolean isEqual = true;
@@ -795,7 +795,7 @@ public class Art2aTest {
     // <editor-fold defaultstate="collapsed" desc="Private Gaussian cloud methods">
     /**
      * Returns Gaussian cloud matrix
-     * 
+     *
      * @param aCentroidVector Centroid vector (IS NOT CHANGED)
      * @param aNumberOfGaussianCloudVectors Number of Gaussian cloud vectors
      * @param aStandardDeviation Standard deviation of Gaussian distribution
@@ -821,7 +821,7 @@ public class Art2aTest {
 
     /**
      * Returns combined Gaussian cloud matrix (see code)
-     * 
+     *
      * @param aNumberOfDimensions Number of dimensions
      * @param aNumberOfGaussianCloudVectors Number of Gaussian cloud vectors
      * @param aStandardDeviation Standard deviation of Gaussian distribution
@@ -840,11 +840,11 @@ public class Art2aTest {
             float[] tmpCentroidVector = new float[aNumberOfDimensions];
             Arrays.fill(tmpCentroidVector, 0.0f);
             tmpCentroidVector[i] = 1.0f;
-            float[][] tmpGaussianCloudMatrix = 
+            float[][] tmpGaussianCloudMatrix =
                 this.getGaussianCloudMatrix(
-                    tmpCentroidVector, 
-                    aNumberOfGaussianCloudVectors, 
-                    aStandardDeviation, 
+                    tmpCentroidVector,
+                    aNumberOfGaussianCloudVectors,
+                    aStandardDeviation,
                     aRandomNumberGenerator
             );
             for (int j = 0; j < tmpGaussianCloudMatrix.length; j++) {
@@ -856,19 +856,19 @@ public class Art2aTest {
     //</editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Private Iris data methods">
     /**
-     * Returns Iris flower data: Indices 0-49 = Iris setosa, indices 50-99 = 
+     * Returns Iris flower data: Indices 0-49 = Iris setosa, indices 50-99 =
      * Iris versicolor, indices 100-149 = Iris virginica
-     * 
-     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic 
-     * Problems, Annals of Eugenics 7, 179-188, 1936.	
-     * 
+     *
+     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic
+     * Problems, Annals of Eugenics 7, 179-188, 1936.
+     *
      * @return Iris flower data
      */
     private float[][] getIrisFlowerDataMatrix() {
         float[][] tmpIrisSetosaData = this.getIrisSetosaDataMatrix();
         float[][] tmpIrisVersicolorData = this.getIrisVersicolorDataMatrix();
         float[][] tmpIrisVirginicaData = this.getIrisVirginicaDataMatrix();
-        float[][] tmpIrisFlowerData = 
+        float[][] tmpIrisFlowerData =
             new float[tmpIrisSetosaData.length + tmpIrisVersicolorData.length + tmpIrisVirginicaData.length][];
         int tmpIndex = 0;
         for (int i = 0; i < tmpIrisSetosaData.length; i++) {
@@ -882,87 +882,87 @@ public class Art2aTest {
         }
         return tmpIrisFlowerData;
     }
-    
+
     /**
      * Returns Iris setosa data
-     * 
-     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic 
-     * Problems, Annals of Eugenics 7, 179-188, 1936.	
-     * 
+     *
+     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic
+     * Problems, Annals of Eugenics 7, 179-188, 1936.
+     *
      * @return Iris setosa data
      */
     private float[][] getIrisSetosaDataMatrix() {
-        return new 
+        return new
             float[][] {
-                {49.0f, 30.0f, 14.0f, 2.0f}, {51.0f, 38.0f, 19.0f, 4.0f}, {52.0f, 41.0f, 15.0f, 1.0f}, {54.0f, 34.0f, 15.0f, 4.0f}, 
-                {50.0f, 36.0f, 14.0f, 2.0f}, {57.0f, 44.0f, 15.0f, 4.0f}, {46.0f, 32.0f, 14.0f, 2.0f}, {50.0f, 34.0f, 16.0f, 4.0f}, 
-                {51.0f, 35.0f, 14.0f, 2.0f}, {49.0f, 31.0f, 15.0f, 2.0f}, {50.0f, 34.0f, 15.0f, 2.0f}, {58.0f, 40.0f, 12.0f, 2.0f}, 
-                {43.0f, 30.0f, 11.0f, 1.0f}, {50.0f, 32.0f, 12.0f, 2.0f}, {50.0f, 30.0f, 16.0f, 2.0f}, {48.0f, 34.0f, 19.0f, 2.0f}, 
-                {51.0f, 38.0f, 16.0f, 2.0f}, {48.0f, 30.0f, 14.0f, 3.0f}, {55.0f, 42.0f, 14.0f, 2.0f}, {44.0f, 30.0f, 13.0f, 2.0f}, 
-                {54.0f, 39.0f, 17.0f, 4.0f}, {48.0f, 34.0f, 16.0f, 2.0f}, {51.0f, 35.0f, 14.0f, 3.0f}, {52.0f, 35.0f, 15.0f, 2.0f}, 
-                {51.0f, 37.0f, 15.0f, 4.0f}, {54.0f, 34.0f, 17.0f, 2.0f}, {51.0f, 38.0f, 15.0f, 3.0f}, {57.0f, 38.0f, 17.0f, 3.0f}, 
-                {45.0f, 23.0f, 13.0f, 3.0f}, {48.0f, 30.0f, 14.0f, 1.0f}, {53.0f, 37.0f, 15.0f, 2.0f}, {44.0f, 29.0f, 14.0f, 2.0f}, 
-                {54.0f, 39.0f, 13.0f, 4.0f}, {54.0f, 37.0f, 15.0f, 2.0f}, {49.0f, 31.0f, 15.0f, 1.0f}, {50.0f, 35.0f, 13.0f, 3.0f}, 
-                {51.0f, 34.0f, 15.0f, 2.0f}, {46.0f, 31.0f, 15.0f, 2.0f}, {47.0f, 32.0f, 13.0f, 2.0f}, {47.0f, 32.0f, 16.0f, 2.0f}, 
-                {50.0f, 33.0f, 14.0f, 2.0f}, {50.0f, 35.0f, 16.0f, 6.0f}, {55.0f, 35.0f, 13.0f, 2.0f}, {46.0f, 34.0f, 14.0f, 3.0f}, 
-                {51.0f, 33.0f, 17.0f, 5.0f}, {52.0f, 34.0f, 14.0f, 2.0f}, {49.0f, 36.0f, 14.0f, 1.0f}, {48.0f, 31.0f, 16.0f, 2.0f}, 
+                {49.0f, 30.0f, 14.0f, 2.0f}, {51.0f, 38.0f, 19.0f, 4.0f}, {52.0f, 41.0f, 15.0f, 1.0f}, {54.0f, 34.0f, 15.0f, 4.0f},
+                {50.0f, 36.0f, 14.0f, 2.0f}, {57.0f, 44.0f, 15.0f, 4.0f}, {46.0f, 32.0f, 14.0f, 2.0f}, {50.0f, 34.0f, 16.0f, 4.0f},
+                {51.0f, 35.0f, 14.0f, 2.0f}, {49.0f, 31.0f, 15.0f, 2.0f}, {50.0f, 34.0f, 15.0f, 2.0f}, {58.0f, 40.0f, 12.0f, 2.0f},
+                {43.0f, 30.0f, 11.0f, 1.0f}, {50.0f, 32.0f, 12.0f, 2.0f}, {50.0f, 30.0f, 16.0f, 2.0f}, {48.0f, 34.0f, 19.0f, 2.0f},
+                {51.0f, 38.0f, 16.0f, 2.0f}, {48.0f, 30.0f, 14.0f, 3.0f}, {55.0f, 42.0f, 14.0f, 2.0f}, {44.0f, 30.0f, 13.0f, 2.0f},
+                {54.0f, 39.0f, 17.0f, 4.0f}, {48.0f, 34.0f, 16.0f, 2.0f}, {51.0f, 35.0f, 14.0f, 3.0f}, {52.0f, 35.0f, 15.0f, 2.0f},
+                {51.0f, 37.0f, 15.0f, 4.0f}, {54.0f, 34.0f, 17.0f, 2.0f}, {51.0f, 38.0f, 15.0f, 3.0f}, {57.0f, 38.0f, 17.0f, 3.0f},
+                {45.0f, 23.0f, 13.0f, 3.0f}, {48.0f, 30.0f, 14.0f, 1.0f}, {53.0f, 37.0f, 15.0f, 2.0f}, {44.0f, 29.0f, 14.0f, 2.0f},
+                {54.0f, 39.0f, 13.0f, 4.0f}, {54.0f, 37.0f, 15.0f, 2.0f}, {49.0f, 31.0f, 15.0f, 1.0f}, {50.0f, 35.0f, 13.0f, 3.0f},
+                {51.0f, 34.0f, 15.0f, 2.0f}, {46.0f, 31.0f, 15.0f, 2.0f}, {47.0f, 32.0f, 13.0f, 2.0f}, {47.0f, 32.0f, 16.0f, 2.0f},
+                {50.0f, 33.0f, 14.0f, 2.0f}, {50.0f, 35.0f, 16.0f, 6.0f}, {55.0f, 35.0f, 13.0f, 2.0f}, {46.0f, 34.0f, 14.0f, 3.0f},
+                {51.0f, 33.0f, 17.0f, 5.0f}, {52.0f, 34.0f, 14.0f, 2.0f}, {49.0f, 36.0f, 14.0f, 1.0f}, {48.0f, 31.0f, 16.0f, 2.0f},
                 {46.0f, 36.0f, 10.0f, 2.0f}, {44.0f, 32.0f, 13.0f, 2.0f}
         };
     }
 
     /**
      * Returns Iris versicolor data
-     * 
-     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic 
-     * Problems, Annals of Eugenics 7, 179-188, 1936.	
-     * 
+     *
+     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic
+     * Problems, Annals of Eugenics 7, 179-188, 1936.
+     *
      * @return Iris versicolor data
      */
     private float[][] getIrisVersicolorDataMatrix() {
-        return new 
+        return new
             float[][] {
-                {66.0f, 29.0f, 46.0f, 13.0f}, {61.0f, 29.0f, 47.0f, 14.0f}, {60.0f, 34.0f, 45.0f, 16.0f}, {52.0f, 27.0f, 39.0f, 14.0f}, 
-                {49.0f, 24.0f, 33.0f, 10.0f}, {60.0f, 27.0f, 51.0f, 16.0f}, {56.0f, 27.0f, 42.0f, 13.0f}, {61.0f, 30.0f, 46.0f, 14.0f}, 
-                {55.0f, 24.0f, 37.0f, 10.0f}, {57.0f, 30.0f, 42.0f, 12.0f}, {63.0f, 33.0f, 47.0f, 16.0f}, {69.0f, 31.0f, 49.0f, 15.0f}, 
-                {57.0f, 28.0f, 45.0f, 13.0f}, {61.0f, 28.0f, 47.0f, 12.0f}, {64.0f, 29.0f, 43.0f, 13.0f}, {63.0f, 23.0f, 44.0f, 13.0f}, 
-                {60.0f, 22.0f, 40.0f, 10.0f}, {56.0f, 30.0f, 41.0f, 13.0f}, {63.0f, 25.0f, 49.0f, 15.0f}, {50.0f, 20.0f, 35.0f, 10.0f}, 
-                {59.0f, 30.0f, 42.0f, 15.0f}, {55.0f, 25.0f, 40.0f, 13.0f}, {62.0f, 29.0f, 43.0f, 13.0f}, {51.0f, 25.0f, 30.0f, 11.0f}, 
-                {57.0f, 28.0f, 41.0f, 13.0f}, {58.0f, 27.0f, 39.0f, 12.0f}, {56.0f, 29.0f, 36.0f, 13.0f}, {67.0f, 31.0f, 47.0f, 15.0f}, 
-                {67.0f, 31.0f, 44.0f, 14.0f}, {55.0f, 24.0f, 38.0f, 11.0f}, {56.0f, 30.0f, 45.0f, 15.0f}, {61.0f, 28.0f, 40.0f, 13.0f}, 
-                {50.0f, 23.0f, 33.0f, 10.0f}, {55.0f, 26.0f, 44.0f, 12.0f}, {64.0f, 32.0f, 45.0f, 15.0f}, {55.0f, 23.0f, 40.0f, 13.0f}, 
-                {66.0f, 30.0f, 44.0f, 14.0f}, {68.0f, 28.0f, 48.0f, 14.0f}, {58.0f, 27.0f, 41.0f, 10.0f}, {54.0f, 30.0f, 45.0f, 15.0f}, 
-                {56.0f, 25.0f, 39.0f, 11.0f}, {62.0f, 22.0f, 45.0f, 15.0f}, {65.0f, 28.0f, 46.0f, 15.0f}, {58.0f, 26.0f, 40.0f, 12.0f}, 
-                {57.0f, 29.0f, 42.0f, 13.0f}, {59.0f, 32.0f, 48.0f, 18.0f}, {70.0f, 32.0f, 47.0f, 14.0f}, {60.0f, 29.0f, 45.0f, 15.0f}, 
-                {57.0f, 26.0f, 35.0f, 10.0f}, {67.0f, 30.0f, 50.0f, 17.0f}            
+                {66.0f, 29.0f, 46.0f, 13.0f}, {61.0f, 29.0f, 47.0f, 14.0f}, {60.0f, 34.0f, 45.0f, 16.0f}, {52.0f, 27.0f, 39.0f, 14.0f},
+                {49.0f, 24.0f, 33.0f, 10.0f}, {60.0f, 27.0f, 51.0f, 16.0f}, {56.0f, 27.0f, 42.0f, 13.0f}, {61.0f, 30.0f, 46.0f, 14.0f},
+                {55.0f, 24.0f, 37.0f, 10.0f}, {57.0f, 30.0f, 42.0f, 12.0f}, {63.0f, 33.0f, 47.0f, 16.0f}, {69.0f, 31.0f, 49.0f, 15.0f},
+                {57.0f, 28.0f, 45.0f, 13.0f}, {61.0f, 28.0f, 47.0f, 12.0f}, {64.0f, 29.0f, 43.0f, 13.0f}, {63.0f, 23.0f, 44.0f, 13.0f},
+                {60.0f, 22.0f, 40.0f, 10.0f}, {56.0f, 30.0f, 41.0f, 13.0f}, {63.0f, 25.0f, 49.0f, 15.0f}, {50.0f, 20.0f, 35.0f, 10.0f},
+                {59.0f, 30.0f, 42.0f, 15.0f}, {55.0f, 25.0f, 40.0f, 13.0f}, {62.0f, 29.0f, 43.0f, 13.0f}, {51.0f, 25.0f, 30.0f, 11.0f},
+                {57.0f, 28.0f, 41.0f, 13.0f}, {58.0f, 27.0f, 39.0f, 12.0f}, {56.0f, 29.0f, 36.0f, 13.0f}, {67.0f, 31.0f, 47.0f, 15.0f},
+                {67.0f, 31.0f, 44.0f, 14.0f}, {55.0f, 24.0f, 38.0f, 11.0f}, {56.0f, 30.0f, 45.0f, 15.0f}, {61.0f, 28.0f, 40.0f, 13.0f},
+                {50.0f, 23.0f, 33.0f, 10.0f}, {55.0f, 26.0f, 44.0f, 12.0f}, {64.0f, 32.0f, 45.0f, 15.0f}, {55.0f, 23.0f, 40.0f, 13.0f},
+                {66.0f, 30.0f, 44.0f, 14.0f}, {68.0f, 28.0f, 48.0f, 14.0f}, {58.0f, 27.0f, 41.0f, 10.0f}, {54.0f, 30.0f, 45.0f, 15.0f},
+                {56.0f, 25.0f, 39.0f, 11.0f}, {62.0f, 22.0f, 45.0f, 15.0f}, {65.0f, 28.0f, 46.0f, 15.0f}, {58.0f, 26.0f, 40.0f, 12.0f},
+                {57.0f, 29.0f, 42.0f, 13.0f}, {59.0f, 32.0f, 48.0f, 18.0f}, {70.0f, 32.0f, 47.0f, 14.0f}, {60.0f, 29.0f, 45.0f, 15.0f},
+                {57.0f, 26.0f, 35.0f, 10.0f}, {67.0f, 30.0f, 50.0f, 17.0f}
         };
     }
 
     /**
      * Returns Iris virginica data
-     * 
-     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic 
-     * Problems, Annals of Eugenics 7, 179-188, 1936.	
-     * 
+     *
+     * Literature: R. A. Fisher, The Use of Multiple Measurements in Taxonomic
+     * Problems, Annals of Eugenics 7, 179-188, 1936.
+     *
      * @return Iris versicolor data
      */
     private float[][] getIrisVirginicaDataMatrix() {
-        return new 
+        return new
             float[][] {
-                {63.0f, 33.0f, 60.0f, 25.0f}, {65.0f, 30.0f, 52.0f, 20.0f}, {58.0f, 28.0f, 51.0f, 24.0f}, {68.0f, 30.0f, 55.0f, 21.0f}, 
-                {67.0f, 31.0f, 56.0f, 24.0f}, {63.0f, 28.0f, 51.0f, 15.0f}, {69.0f, 31.0f, 51.0f, 23.0f}, {64.0f, 27.0f, 53.0f, 19.0f}, 
-                {69.0f, 31.0f, 54.0f, 21.0f}, {72.0f, 36.0f, 61.0f, 25.0f}, {57.0f, 25.0f, 50.0f, 20.0f}, {65.0f, 32.0f, 51.0f, 20.0f}, 
-                {65.0f, 30.0f, 58.0f, 22.0f}, {62.0f, 34.0f, 54.0f, 23.0f}, {64.0f, 28.0f, 56.0f, 21.0f}, {61.0f, 26.0f, 56.0f, 14.0f}, 
-                {64.0f, 28.0f, 56.0f, 22.0f}, {77.0f, 30.0f, 61.0f, 23.0f}, {67.0f, 30.0f, 52.0f, 23.0f}, {62.0f, 28.0f, 48.0f, 18.0f}, 
-                {59.0f, 30.0f, 51.0f, 18.0f}, {63.0f, 25.0f, 50.0f, 19.0f}, {72.0f, 30.0f, 58.0f, 16.0f}, {76.0f, 30.0f, 66.0f, 21.0f}, 
-                {64.0f, 32.0f, 53.0f, 23.0f}, {61.0f, 30.0f, 49.0f, 18.0f}, {79.0f, 38.0f, 64.0f, 20.0f}, {72.0f, 32.0f, 60.0f, 18.0f}, 
-                {63.0f, 27.0f, 49.0f, 18.0f}, {77.0f, 28.0f, 67.0f, 20.0f}, {58.0f, 27.0f, 51.0f, 19.0f}, {67.0f, 25.0f, 58.0f, 18.0f}, 
-                {49.0f, 25.0f, 45.0f, 17.0f}, {67.0f, 33.0f, 57.0f, 21.0f}, {77.0f, 38.0f, 67.0f, 22.0f}, {56.0f, 28.0f, 49.0f, 20.0f}, 
-                {65.0f, 30.0f, 55.0f, 18.0f}, {58.0f, 27.0f, 51.0f, 19.0f}, {74.0f, 28.0f, 61.0f, 19.0f}, {69.0f, 32.0f, 57.0f, 23.0f}, 
-                {68.0f, 32.0f, 59.0f, 23.0f}, {73.0f, 29.0f, 63.0f, 18.0f}, {71.0f, 30.0f, 59.0f, 21.0f}, {60.0f, 22.0f, 50.0f, 15.0f}, 
-                {77.0f, 26.0f, 69.0f, 23.0f}, {67.0f, 33.0f, 57.0f, 25.0f}, {63.0f, 29.0f, 56.0f, 18.0f}, {60.0f, 30.0f, 48.0f, 18.0f}, 
+                {63.0f, 33.0f, 60.0f, 25.0f}, {65.0f, 30.0f, 52.0f, 20.0f}, {58.0f, 28.0f, 51.0f, 24.0f}, {68.0f, 30.0f, 55.0f, 21.0f},
+                {67.0f, 31.0f, 56.0f, 24.0f}, {63.0f, 28.0f, 51.0f, 15.0f}, {69.0f, 31.0f, 51.0f, 23.0f}, {64.0f, 27.0f, 53.0f, 19.0f},
+                {69.0f, 31.0f, 54.0f, 21.0f}, {72.0f, 36.0f, 61.0f, 25.0f}, {57.0f, 25.0f, 50.0f, 20.0f}, {65.0f, 32.0f, 51.0f, 20.0f},
+                {65.0f, 30.0f, 58.0f, 22.0f}, {62.0f, 34.0f, 54.0f, 23.0f}, {64.0f, 28.0f, 56.0f, 21.0f}, {61.0f, 26.0f, 56.0f, 14.0f},
+                {64.0f, 28.0f, 56.0f, 22.0f}, {77.0f, 30.0f, 61.0f, 23.0f}, {67.0f, 30.0f, 52.0f, 23.0f}, {62.0f, 28.0f, 48.0f, 18.0f},
+                {59.0f, 30.0f, 51.0f, 18.0f}, {63.0f, 25.0f, 50.0f, 19.0f}, {72.0f, 30.0f, 58.0f, 16.0f}, {76.0f, 30.0f, 66.0f, 21.0f},
+                {64.0f, 32.0f, 53.0f, 23.0f}, {61.0f, 30.0f, 49.0f, 18.0f}, {79.0f, 38.0f, 64.0f, 20.0f}, {72.0f, 32.0f, 60.0f, 18.0f},
+                {63.0f, 27.0f, 49.0f, 18.0f}, {77.0f, 28.0f, 67.0f, 20.0f}, {58.0f, 27.0f, 51.0f, 19.0f}, {67.0f, 25.0f, 58.0f, 18.0f},
+                {49.0f, 25.0f, 45.0f, 17.0f}, {67.0f, 33.0f, 57.0f, 21.0f}, {77.0f, 38.0f, 67.0f, 22.0f}, {56.0f, 28.0f, 49.0f, 20.0f},
+                {65.0f, 30.0f, 55.0f, 18.0f}, {58.0f, 27.0f, 51.0f, 19.0f}, {74.0f, 28.0f, 61.0f, 19.0f}, {69.0f, 32.0f, 57.0f, 23.0f},
+                {68.0f, 32.0f, 59.0f, 23.0f}, {73.0f, 29.0f, 63.0f, 18.0f}, {71.0f, 30.0f, 59.0f, 21.0f}, {60.0f, 22.0f, 50.0f, 15.0f},
+                {77.0f, 26.0f, 69.0f, 23.0f}, {67.0f, 33.0f, 57.0f, 25.0f}, {63.0f, 29.0f, 56.0f, 18.0f}, {60.0f, 30.0f, 48.0f, 18.0f},
                 {64.0f, 31.0f, 55.0f, 18.0f}, {63.0f, 34.0f, 56.0f, 24.0f}
         };
     }
     //</editor-fold>
-    
+
 }

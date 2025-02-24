@@ -2,7 +2,7 @@
  * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Callable that wraps an Art2aKernel instance where the call() method returns 
+ * Callable that wraps an Art2aKernel instance where the call() method returns
  * an Art2aResult object. See Art2aKernel for further details.
  *
  * @author Betuel Sevindik, Achim Zielesny
@@ -61,27 +61,27 @@ public class Art2aTask implements Callable<Art2aResult> {
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * similarity (must be in interval (0,1))
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aTask(
-        float[][] aDataMatrix, 
+        float[][] aDataMatrix,
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
-        float aConvergenceThreshold, 
+        float aConvergenceThreshold,
         float aLearningParameter,
         float anOffsetForContrastEnhancement,
         long aRandomSeed,
@@ -90,7 +90,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aTask.Constructor: aVigilance must be in interval (0,1).");
@@ -99,12 +99,12 @@ public class Art2aTask implements Callable<Art2aResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aKernel(
-                    aDataMatrix, 
+                    aDataMatrix,
                     aMaximumNumberOfClusters,
-                    aMaximumNumberOfEpochs, 
-                    aConvergenceThreshold, 
+                    aMaximumNumberOfEpochs,
+                    aConvergenceThreshold,
                     aLearningParameter,
                     anOffsetForContrastEnhancement,
                     aRandomSeed,
@@ -112,12 +112,12 @@ public class Art2aTask implements Callable<Art2aResult> {
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: Can not instantiate Art2aKernel object."
             );
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -126,8 +126,8 @@ public class Art2aTask implements Callable<Art2aResult> {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99), 
-     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99),
+     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT
      * (= 1.0) and RANDOM_SEED (= 1).
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
@@ -147,7 +147,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aTask.Constructor: aVigilance must be in interval (0,1).");
@@ -156,7 +156,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aKernel(
                     aDataMatrix,
                     aMaximumNumberOfClusters,
@@ -164,32 +164,32 @@ public class Art2aTask implements Callable<Art2aResult> {
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: Can not instantiate Art2aKernel object."
             );
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
         }
     }
-    
+
     /**
      * Constructor.
      *
      * @param aPreprocessedArt2aData PreprocessedData object created by method
      * Art2aKernel.getPreprocessedData()
      * @param aVigilance Vigilance parameter (must be in interval (0,1))
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * similarity (must be in interval (0,1))
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
@@ -198,14 +198,14 @@ public class Art2aTask implements Callable<Art2aResult> {
         float aVigilance,
         int aMaximumNumberOfClusters,
         int aMaximumNumberOfEpochs,
-        float aConvergenceThreshold, 
+        float aConvergenceThreshold,
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aTask.Constructor: aVigilance must be in interval (0,1).");
@@ -214,23 +214,23 @@ public class Art2aTask implements Callable<Art2aResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aKernel(
                     aPreprocessedArt2aData,
                     aMaximumNumberOfClusters,
-                    aMaximumNumberOfEpochs, 
-                    aConvergenceThreshold, 
+                    aMaximumNumberOfEpochs,
+                    aConvergenceThreshold,
                     aLearningParameter,
                     aRandomSeed
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: Can not instantiate Art2aKernel object."
             );
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -239,7 +239,7 @@ public class Art2aTask implements Callable<Art2aResult> {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99), 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 100), CONVERGENCE_THRESHOLD (= 0.99),
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aData PreprocessedData object created by method
@@ -257,7 +257,7 @@ public class Art2aTask implements Callable<Art2aResult> {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aTask.Constructor: aVigilance must be in interval (0,1).");
@@ -266,19 +266,19 @@ public class Art2aTask implements Callable<Art2aResult> {
         this.vigilance = aVigilance;
 
         try {
-            this.art2aClusteringKernel = 
+            this.art2aClusteringKernel =
                 new Art2aKernel(
                     aPreprocessedArt2aData,
                     aMaximumNumberOfClusters
                 );
         } catch (IllegalArgumentException anIllegalArgumentException) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.Constructor: Can not instantiate Art2aKernel object."
             );
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
-                anIllegalArgumentException.toString(), 
+                Level.SEVERE,
+                anIllegalArgumentException.toString(),
                 anIllegalArgumentException
             );
             throw anIllegalArgumentException;
@@ -291,7 +291,7 @@ public class Art2aTask implements Callable<Art2aResult> {
      * Performs the clustering process.
      * Note: Parallel Rho winner evaluation is disabled.
      *
-     * @return Clustering result or null if clustering process could not be 
+     * @return Clustering result or null if clustering process could not be
      * performed.
      */
     @Override
@@ -301,12 +301,12 @@ public class Art2aTask implements Callable<Art2aResult> {
             return this.art2aClusteringKernel.getClusterResult(this.vigilance, false);
         } catch (Exception anException) {
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aTask.call: Can not calculate a cluster result."
             );
             Art2aTask.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
+                Level.SEVERE,
+                anException.toString(),
                 anException
             );
             return null;

@@ -2,7 +2,7 @@
  * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@ package de.unijena.cheminf.clustering.art2a;
  * Library of static, thread-safe (stateless) utility methods for ART-2a clustering.
  * <br><br>
  * Note: No checks are performed.
- * 
+ *
  * @author Achim Zielesny
  */
 public class Art2aUtils {

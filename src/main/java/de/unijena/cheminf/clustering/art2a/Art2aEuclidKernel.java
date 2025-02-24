@@ -1,8 +1,8 @@
 /*
- * ART-2a-Euclid Clustering for Java
+ * ART-2a Clustering for Java
  * Copyright (C) 2025 Jonas Schaub, Betuel Sevindik, Achim Zielesny
  *
- * Source code is available at 
+ * Source code is available at
  * <https://github.com/JonasSchaub/ART2a-Clustering-for-Java>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,89 +33,89 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
- * ART-2a-Euclid algorithm implementation for unsupervised, open categorical 
+ * ART-2a-Euclid algorithm implementation for unsupervised, open categorical
  * clustering.
  * <br><br>
- * Literature: G.A. Carpenter, S. Grossberg and D.B. Rosen, Neural Networks 4 
- * (1991) 493-504; D. Wienke, Neural Resonance and Adaptation - Towards 
- * Nature’s Principles in Artificial Pattern Recognition, in L. Buydens and 
- * W. Melssen (Eds.), Chemometrics: Exploring and Exploiting Chemical 
+ * Literature: G.A. Carpenter, S. Grossberg and D.B. Rosen, Neural Networks 4
+ * (1991) 493-504; D. Wienke, Neural Resonance and Adaptation - Towards
+ * Nature’s Principles in Artificial Pattern Recognition, in L. Buydens and
+ * W. Melssen (Eds.), Chemometrics: Exploring and Exploiting Chemical
  * Information, Catholic University Nijmegen, 1994.
  * <br><br>
- * Use Art2aEuclidKernel for sequential clustering instances and Art2aEuclidTask 
- * for clustering instances to be executed concurrently (parallelized). See 
- * hints for ART-2a-Euclid clustering with minimal additional memory allocation 
- * or maximum speed below. 
+ * Use Art2aEuclidKernel for sequential clustering instances and Art2aEuclidTask
+ * for clustering instances to be executed concurrently (parallelized). See
+ * hints for ART-2a-Euclid clustering with minimal additional memory allocation
+ * or maximum speed below.
  * <br><br>
  * Note: For clustering of the SAME data with DIFFERENT vigilance parameters use
- * method getClusterResults() where the mode of calculation may be specified to 
+ * method getClusterResults() where the mode of calculation may be specified to
  * be sequential or concurrent (parallelized).
  * <br><br>
  * All numerical calculations are performed in single (float) precision.
  * <br><br>
- * Note, that aDataMatrix may contain data vectors with all components being 
- * equal to zero (or some constant minimal value). These data vectors are 
- * removed from the clustering process and their indices are returned by method 
+ * Note, that aDataMatrix may contain data vectors with all components being
+ * equal to zero (or some constant minimal value). These data vectors are
+ * removed from the clustering process and their indices are returned by method
  * getZeroLengthDataVectorIndices() of an Art2aEuclidResult object.
  * <br><br>
  * ART-2a-Euclid clustering with minimal memory allocation:
- * If a data matrix with N data row vectors is used to construct a clustering 
- * instance without preprocessing (parameter isDataPreprocessing is set to 
- * false), minimal additional memory is allocated. The data matrix itself is not 
- * changed. The additional allocated memory can be controlled by the 
+ * If a data matrix with N data row vectors is used to construct a clustering
+ * instance without preprocessing (parameter isDataPreprocessing is set to
+ * false), minimal additional memory is allocated. The data matrix itself is not
+ * changed. The additional allocated memory can be controlled by the
  * maximumNumberOfClusters parameter and estimated to be about
- * (additional memory of ART-2a-Euclid instance) = 
- * (2 x maximumNumberOfClusters / N) x (memory of data matrix), 
- * e.g., a 10 MByte data matrix with a maximum number of clusters of 10% of the 
- * number of data row vectors will lead to roughly 2 MByte of additionally 
- * allocated memory. Note, that memory for cluster vectors is only allocated if 
- * needed, e.g. if specified parameter maximumNumberOfClusters allows 150 
- * clusters but only 27 are needed, then only memory for these 27 cluster 
- * vectors is allocated. The minimal memory allocation comes at the expense of 
- * clustering speed since preprocessing steps have to be executed repeatedly. 
- * This also decreases the performance of some methods of the Art2aEuclidResult 
+ * (additional memory of ART-2a-Euclid instance) =
+ * (2 x maximumNumberOfClusters / N) x (memory of data matrix),
+ * e.g., a 10 MByte data matrix with a maximum number of clusters of 10% of the
+ * number of data row vectors will lead to roughly 2 MByte of additionally
+ * allocated memory. Note, that memory for cluster vectors is only allocated if
+ * needed, e.g. if specified parameter maximumNumberOfClusters allows 150
+ * clusters but only 27 are needed, then only memory for these 27 cluster
+ * vectors is allocated. The minimal memory allocation comes at the expense of
+ * clustering speed since preprocessing steps have to be executed repeatedly.
+ * This also decreases the performance of some methods of the Art2aEuclidResult
  * object generated by the clustering process, e.g. getClusterRepresentatives().
  * <br><br>
  * ART-2a-Euclid clustering with maximum speed:
- * If parameter isDataPreprocessing is set to true, preprocessing steps are 
- * calculated in advance for maximum clustering speed (as well as maximum speed 
- * of the Art2aResult methods). This requires an additional memory allocation 
+ * If parameter isDataPreprocessing is set to true, preprocessing steps are
+ * calculated in advance for maximum clustering speed (as well as maximum speed
+ * of the Art2aResult methods). This requires an additional memory allocation
  * for the preprocessed data for an ART-2a-Euclid clustering instance:
- * (additional memory of ART-2a instance) = 
- * (1 + 2 x maximumNumberOfClusters / N) x (memory of data matrix), 
- * e.g., a 10 MByte data matrix with a maximum number of clusters of 10% of the 
- * number of data row vectors will lead to roughly 12 MByte of additionally 
+ * (additional memory of ART-2a instance) =
+ * (1 + 2 x maximumNumberOfClusters / N) x (memory of data matrix),
+ * e.g., a 10 MByte data matrix with a maximum number of clusters of 10% of the
+ * number of data row vectors will lead to roughly 12 MByte of additionally
  * allocated memory.
  * <br><br>
- * CAUTION: Construction of several ART-2a-Euclid clustering instances with the 
- * SAME data matrix PLUS preprocessing is NOT advised due to the significant 
- * memory consumption of each instance. In this case, the data matrix should be 
+ * CAUTION: Construction of several ART-2a-Euclid clustering instances with the
+ * SAME data matrix PLUS preprocessing is NOT advised due to the significant
+ * memory consumption of each instance. In this case, the data matrix should be
  * checked with static method Art2aKernel.isDataMatrixValid() (where possible NaN
  * values can be removed with Utils.isNonFiniteComponentRemoval()) and then a priori
- * converted into a preprocessed Art2aEuclidData object with static method 
- * Art2aEuclidKernel.getArt2aEuclidData(). The generated Art2aData object does 
- * NOT change or refer to the data matrix so that the data matrix memory could 
- * be released after conversion (by setting the data matrix object to null). 
- * The generated Art2aEuclidData object has additionally allocated about the 
- * same memory as the original data matrix, e.g., a 10 MByte data matrix is 
- * converted into a roughly 10 MByte Art2aData object. But this single 
- * Art2aEuclidData object can now be used to construct several ART-2a-Euclid 
- * clustering instances (Art2aEuclidKernel instances or Art2aEuclidTask 
- * instances for concurrent (parallelized) execution) where each of these 
- * ART-2a-Euclid clustering instances (and their generated Art2aEuclidResult 
- * object methods) performs with maximum speed and allocates only the minimal 
- * additional memory of 
- * (additional memory of ART-2a instance) = 
- * (2 x maximumNumberOfClusters / N) x (memory of data matrix), 
- * e.g., for 9 constructed ART-2a-Euclid clustering instances for concurrent 
- * execution only 18 MBytes of additional memory are allocated in total. 
- * Compare this total additional allocated memory of only 10 + 18 = 28 MByte 
- * for an Art2aEuclidData object plus 9 ART-2a-Euclid clustering instances with 
- * the alternative 9 x 12 = 108 MByte of memory for 9 ART-2a-Euclid clustering 
- * instances constructed with the same data matrix plus independent 
- * preprocessing in each instance! (Just for completeness: For a minimal memory 
- * realization of these 9 ART-2a-Euclid clustering instances, each instance can 
- * be constructed with the same data matrix WITHOUT preprocessing, which would 
+ * converted into a preprocessed Art2aEuclidData object with static method
+ * Art2aEuclidKernel.getArt2aEuclidData(). The generated Art2aData object does
+ * NOT change or refer to the data matrix so that the data matrix memory could
+ * be released after conversion (by setting the data matrix object to null).
+ * The generated Art2aEuclidData object has additionally allocated about the
+ * same memory as the original data matrix, e.g., a 10 MByte data matrix is
+ * converted into a roughly 10 MByte Art2aData object. But this single
+ * Art2aEuclidData object can now be used to construct several ART-2a-Euclid
+ * clustering instances (Art2aEuclidKernel instances or Art2aEuclidTask
+ * instances for concurrent (parallelized) execution) where each of these
+ * ART-2a-Euclid clustering instances (and their generated Art2aEuclidResult
+ * object methods) performs with maximum speed and allocates only the minimal
+ * additional memory of
+ * (additional memory of ART-2a instance) =
+ * (2 x maximumNumberOfClusters / N) x (memory of data matrix),
+ * e.g., for 9 constructed ART-2a-Euclid clustering instances for concurrent
+ * execution only 18 MBytes of additional memory are allocated in total.
+ * Compare this total additional allocated memory of only 10 + 18 = 28 MByte
+ * for an Art2aEuclidData object plus 9 ART-2a-Euclid clustering instances with
+ * the alternative 9 x 12 = 108 MByte of memory for 9 ART-2a-Euclid clustering
+ * instances constructed with the same data matrix plus independent
+ * preprocessing in each instance! (Just for completeness: For a minimal memory
+ * realization of these 9 ART-2a-Euclid clustering instances, each instance can
+ * be constructed with the same data matrix WITHOUT preprocessing, which would
  * require only 18 MBytes of additional allocated memory in total.)
  *
  * @author Achim Zielesny
@@ -152,7 +152,7 @@ public class Art2aEuclidKernel {
      */
     private static final float DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT = 1.0f;
     /**
-     * Default value of the convergence threshold for cluster centroid 
+     * Default value of the convergence threshold for cluster centroid
      * distance
      */
     private static final float DEFAULT_CONVERGENCE_THRESHOLD = 0.1f;
@@ -189,16 +189,16 @@ public class Art2aEuclidKernel {
      * Constructor.
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * distance (must be greater zero)
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @param anIsDataPreprocessing True: Data preprocessing is performed, false:
      * Otherwise.
@@ -206,10 +206,10 @@ public class Art2aEuclidKernel {
      *
      */
     public Art2aEuclidKernel(
-        float[][] aDataMatrix, 
+        float[][] aDataMatrix,
         int aMaximumNumberOfClusters,
-        int aMaximumNumberOfEpochs, 
-        float aConvergenceThreshold, 
+        int aMaximumNumberOfEpochs,
+        float aConvergenceThreshold,
         float aLearningParameter,
         float anOffsetForContrastEnhancement,
         long aRandomSeed,
@@ -218,7 +218,7 @@ public class Art2aEuclidKernel {
         // <editor-fold desc="Checks">
         if(!Utils.isDataMatrixValid(aDataMatrix)) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aDataMatrix is not valid."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aDataMatrix is not valid.");
@@ -235,35 +235,35 @@ public class Art2aEuclidKernel {
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aMaximumNumberOfEpochs must be greater zero."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aMaximumNumberOfEpochs must be greater zero.");
         }
         if(aConvergenceThreshold <= 0.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aConvergenceThreshold must be greater zero."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aConvergenceThreshold must be greater zero.");
         }
         if(aLearningParameter <= 0.0f || aLearningParameter >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aLearningParameter must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aLearningParameter must be in interval (0,1).");
         }
         if(anOffsetForContrastEnhancement <= 0.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: anOffsetForContrastEnhancement must be greater zero."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: anOffsetForContrastEnhancement must be greater zero.");
         }
         if(aRandomSeed <= 0L) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aRandomSeed must be greater 0."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aRandomSeed must be greater/equal 0.");
@@ -279,7 +279,7 @@ public class Art2aEuclidKernel {
         } else {
             this.preprocessedData =
                 new PreprocessedData(
-                    aDataMatrix, 
+                    aDataMatrix,
                     Utils.getMinMaxComponents(aDataMatrix),
                     anOffsetForContrastEnhancement
                 );
@@ -294,8 +294,8 @@ public class Art2aEuclidKernel {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
-     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1),
+     * LEARNING_PARAMETER (= 0.01), DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT
      * (= 0.5) and RANDOM_SEED (= 1).
      *
      * @param aDataMatrix Data matrix with data row vectors (IS NOT CHANGED)
@@ -313,43 +313,43 @@ public class Art2aEuclidKernel {
         this(
             aDataMatrix,
             aMaximumNumberOfClusters,
-            DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
-            DEFAULT_CONVERGENCE_THRESHOLD, 
+            DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS,
+            DEFAULT_CONVERGENCE_THRESHOLD,
             DEFAULT_LEARNING_PARAMETER,
             DEFAULT_OFFSET_FOR_CONTRAST_ENHANCEMENT,
             DEFAULT_RANDOM_SEED,
             anIsDataPreprocessing
         );
     }
-    
+
     /**
      * Constructor.
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData object
      * created by method Art2aEuclidKernel.getPreprocessedArt2aEuclidData()
-     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in 
+     * @param aMaximumNumberOfClusters Maximum number of clusters (must be in
      * interval [2, number of data row vectors of aDataMatrix])
-     * @param aMaximumNumberOfEpochs Maximum number of epochs for training 
+     * @param aMaximumNumberOfEpochs Maximum number of epochs for training
      * (must be greater zero)
-     * @param aConvergenceThreshold Convergence threshold for cluster centroid 
+     * @param aConvergenceThreshold Convergence threshold for cluster centroid
      * distance (must be greater zero)
      * @param aLearningParameter Learning parameter (must be in interval (0,1))
-     * @param aRandomSeed Random seed value for random number generator 
+     * @param aRandomSeed Random seed value for random number generator
      * (must be greater zero)
      * @throws IllegalArgumentException Thrown if an argument is illegal
      */
     public Art2aEuclidKernel(
         PreprocessedArt2aEuclidData aPreprocessedArt2aEuclidData,
         int aMaximumNumberOfClusters,
-        int aMaximumNumberOfEpochs, 
-        float aConvergenceThreshold, 
+        int aMaximumNumberOfEpochs,
+        float aConvergenceThreshold,
         float aLearningParameter,
         long aRandomSeed
     ) throws IllegalArgumentException {
         // <editor-fold desc="Checks">
         if(aPreprocessedArt2aEuclidData == null) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aPreprocessedArt2aEuclidData is null.");
@@ -366,28 +366,28 @@ public class Art2aEuclidKernel {
         }
         if(aMaximumNumberOfEpochs <= 0) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aMaximumNumberOfEpochs must be greater zero."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aMaximumNumberOfEpochs must be greater zero.");
         }
         if(aConvergenceThreshold <= 0.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aConvergenceThreshold must be greater zero."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aConvergenceThreshold must be greater zero.");
         }
         if(aLearningParameter <= 0.0f || aLearningParameter >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aLearningParameter must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aLearningParameter must be in interval (0,1).");
         }
         if(aRandomSeed <= 0L) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.Constructor: aRandomSeed must be greater 0."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.Constructor: aRandomSeed must be greater/equal 0.");
@@ -404,7 +404,7 @@ public class Art2aEuclidKernel {
 
     /**
      * Constructor with default values for
-     * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1), 
+     * MAXIMUM_NUMBER_OF_EPOCHS (= 10), CONVERGENCE_THRESHOLD (= 0.1),
      * LEARNING_PARAMETER (= 0.01) and RANDOM_SEED (= 1).
      *
      * @param aPreprocessedArt2aEuclidData PreprocessedData object created by method
@@ -420,8 +420,8 @@ public class Art2aEuclidKernel {
         this(
             aPreprocessedArt2aEuclidData,
             aMaximumNumberOfClusters,
-            DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS, 
-            DEFAULT_CONVERGENCE_THRESHOLD, 
+            DEFAULT_MAXIMUM_NUMBER_OF_EPOCHS,
+            DEFAULT_CONVERGENCE_THRESHOLD,
             DEFAULT_LEARNING_PARAMETER,
             DEFAULT_RANDOM_SEED
         );
@@ -449,21 +449,21 @@ public class Art2aEuclidKernel {
         // <editor-fold desc="Checks">
         if(aVigilance <= 0.0f || aVigilance >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getClusterResult: aVigilance must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getClusterResult: aVigilance must be in interval (0,1).");
         }
         //</editor-fold>
-        
+
         try {
             Random tmpRandomNumberGenerator = new Random(this.randomSeed);
             boolean tmpIsClusterOverflow = false;
-            
+
             float[][] tmpDataMatrix = null;
             float[][] tmpContrastEnhancedMatrix = null;
-            // Flags array that indicates if data row vectors have a length 
-            // of zero (i.e. where all components are equal to zero). True: 
+            // Flags array that indicates if data row vectors have a length
+            // of zero (i.e. where all components are equal to zero). True:
             // Data row vector has a length of zero, false: Otherwise.
             boolean[] tmpDataVectorZeroLengthFlags = null;
             int tmpNumberOfComponents = -1;
@@ -481,24 +481,24 @@ public class Art2aEuclidKernel {
                 tmpNumberOfComponents = tmpDataMatrix[0].length;
             }
             Utils.MinMaxValue[] tmpMinMaxComponents = this.preprocessedData.getMinMaxComponentsOfDataMatrix();
-            
+
             // Set tmpRhoStar
             float tmpRhoStar = tmpNumberOfComponents * (ONE - aVigilance);
 
             // Definitions
-            float tmpThresholdForContrastEnhancement = 
+            float tmpThresholdForContrastEnhancement =
                 Utils.getThresholdForContrastEnhancement(
                     tmpNumberOfComponents,
                     this.preprocessedData.getOffsetForContrastEnhancement()
                 );
             // Scaling factor alpha
             float tmpScalingFactor = tmpThresholdForContrastEnhancement;
-            
-            // Initialize cluster matrix and that for previous epoch (old) with 
+
+            // Initialize cluster matrix and that for previous epoch (old) with
             // all row vectors being null
             float[][] tmpClusterMatrix = new float[this.maximumNumberOfClusters][];
             float[][] tmpClusterMatrixOld = new float[this.maximumNumberOfClusters][];
-            // Cluster usage flags. True: Cluster is used, false: Cluster is 
+            // Cluster usage flags. True: Cluster is used, false: Cluster is
             // empty and can be removed.
             boolean[] tmpClusterUsageFlags = new boolean[this.maximumNumberOfClusters];
             // Buffer for Rho values for parallelized Rho winner evaluation
@@ -507,7 +507,7 @@ public class Art2aEuclidKernel {
                 tmpRhoValueBuffer = new float[this.maximumNumberOfClusters];
             }
 
-            // Initialize cluster indices for data row vectors with -1 to 
+            // Initialize cluster indices for data row vectors with -1 to
             // indicate missing cluster assignment
             int[] tmpClusterIndexOfDataVector = new int[tmpNumberOfDataVectors];
             Utils.fillVector(tmpClusterIndexOfDataVector, -1);
@@ -520,7 +520,7 @@ public class Art2aEuclidKernel {
 
             // Initialize buffer vector for vector operations
             float[] tmpBufferVector = new float[tmpNumberOfComponents];
-            
+
             // Main clustering loop
             int tmpCurrentNumberOfEpochs = 0;
             int tmpNumberOfDetectedClusters = 0;
@@ -529,14 +529,14 @@ public class Art2aEuclidKernel {
             boolean tmpIsConverged = false;
             while(!tmpIsConverged && tmpCurrentNumberOfEpochs < this.maximumNumberOfEpochs) {
                 tmpCurrentNumberOfEpochs++;
-                
+
                 // Get random sequence of indices for data row vectors
                 Utils.shuffleIndices(tmpRandomIndices, tmpRandomNumberGenerator);
 
                 Arrays.fill(tmpClusterUsageFlags, false);
                 for(int i = 0; i < tmpNumberOfDataVectors; i++) {
                     int tmpRandomIndex = tmpRandomIndices[i];
-    
+
                     if (tmpDataVectorZeroLengthFlags[tmpRandomIndex]) {
                         // Shifted data row vector has length of zero: Ignore!
                         continue;
@@ -545,7 +545,7 @@ public class Art2aEuclidKernel {
                     if (this.preprocessedData.hasPreprocessedData()) {
                         Utils.copyVector(tmpContrastEnhancedMatrix[tmpRandomIndex], tmpBufferVector);
                     } else {
-                        tmpDataVectorZeroLengthFlags[tmpRandomIndex] = 
+                        tmpDataVectorZeroLengthFlags[tmpRandomIndex] =
                             Art2aEuclidUtils.setContrastEnhancedVector(
                                 tmpDataMatrix[tmpRandomIndex],
                                 tmpBufferVector,
@@ -610,11 +610,11 @@ public class Art2aEuclidKernel {
                         }
                     }
                 }
-                
+
                 Utils.removeEmptyClusters(
-                    tmpClusterUsageFlags, 
-                    tmpClusterMatrix, 
-                    tmpNumberOfDetectedClusters, 
+                    tmpClusterUsageFlags,
+                    tmpClusterMatrix,
+                    tmpNumberOfDetectedClusters,
                     tmpClusterRemovalInfo
                 );
                 if (tmpClusterRemovalInfo.isClusterRemoved()) {
@@ -623,9 +623,9 @@ public class Art2aEuclidKernel {
                 } else {
                     tmpIsConverged =
                         Art2aEuclidKernel.isConverged(
-                            tmpNumberOfDetectedClusters, 
-                            tmpCurrentNumberOfEpochs, 
-                            tmpClusterMatrix, 
+                            tmpNumberOfDetectedClusters,
+                            tmpCurrentNumberOfEpochs,
+                            tmpClusterMatrix,
                             tmpClusterMatrixOld,
                             this.maximumNumberOfEpochs,
                             this.convergenceThreshold
@@ -647,14 +647,14 @@ public class Art2aEuclidKernel {
                 );
                 // Remove possible empty clusters
                 Utils.removeEmptyClusters(
-                    tmpClusterUsageFlags, 
-                    tmpClusterMatrix, 
-                    tmpNumberOfDetectedClusters, 
+                    tmpClusterUsageFlags,
+                    tmpClusterMatrix,
+                    tmpNumberOfDetectedClusters,
                     tmpClusterRemovalInfo
                 );
                 tmpNumberOfDetectedClusters = tmpClusterRemovalInfo.getNumberOfDetectedClusters();
             }
-            // Check if clusters were removed in last epoch and assure non-empty 
+            // Check if clusters were removed in last epoch and assure non-empty
             // clusters in the cluster matrix
             while (tmpClusterRemovalInfo.isClusterRemoved()) {
                 // Empty clusters are removed: Assign data vectors again
@@ -669,9 +669,9 @@ public class Art2aEuclidKernel {
                     tmpClusterUsageFlags
                 );
                 Utils.removeEmptyClusters(
-                    tmpClusterUsageFlags, 
-                    tmpClusterMatrix, 
-                    tmpNumberOfDetectedClusters, 
+                    tmpClusterUsageFlags,
+                    tmpClusterMatrix,
+                    tmpNumberOfDetectedClusters,
                     tmpClusterRemovalInfo
                 );
                 tmpNumberOfDetectedClusters = tmpClusterRemovalInfo.getNumberOfDetectedClusters();
@@ -680,7 +680,7 @@ public class Art2aEuclidKernel {
                 aVigilance,
                 tmpThresholdForContrastEnhancement,
                 tmpCurrentNumberOfEpochs,
-                tmpNumberOfDetectedClusters, 
+                tmpNumberOfDetectedClusters,
                 tmpClusterIndexOfDataVector,
                 tmpClusterMatrix,
                 tmpDataVectorZeroLengthFlags,
@@ -690,12 +690,12 @@ public class Art2aEuclidKernel {
             );
         } catch (Exception anException) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getClusterResult: An exception occurred: This should never happen!"
             );
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
+                Level.SEVERE,
+                anException.toString(),
                 anException
             );
             throw new Exception("Art2aEuclidKernel.getClusterResult: An exception occurred: This should never happen!");
@@ -721,7 +721,7 @@ public class Art2aEuclidKernel {
         // <editor-fold desc="Checks">
         if (aVigilances == null || aVigilances.length == 0) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getClusterResults: aVigilances is null or has length 0."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getClusterResults: aVigilances is null or has length 0.");
@@ -729,7 +729,7 @@ public class Art2aEuclidKernel {
         for (float tmpVigilance : aVigilances) {
             if(tmpVigilance <= 0.0f || tmpVigilance >= 1.0f) {
                 Art2aEuclidKernel.LOGGER.log(
-                    Level.SEVERE, 
+                    Level.SEVERE,
                     "Art2aEuclidKernel.getClusterResults: Vigilance parameter must be in interval (0,1)."
                 );
                 throw new IllegalArgumentException("Art2aEuclidKernel.getClusterResults: Vigilance parameter must be in interval (0,1).");
@@ -791,14 +791,14 @@ public class Art2aEuclidKernel {
             }
         }
     }
-    
+
     /**
-     * Nearest (smaller) indices of approximants to the desired number of 
+     * Nearest (smaller) indices of approximants to the desired number of
      * representatives.
-     * 
-     * @param aNumberOfRepresentatives Number of representatives (MUST be 
+     *
+     * @param aNumberOfRepresentatives Number of representatives (MUST be
      * greater or equal to 2)
-     * @param aVigilanceMin Minimal vigilance parameter (must be in interval 
+     * @param aVigilanceMin Minimal vigilance parameter (must be in interval
      * (0,1), a good default value is 0.0001f)
      * @param aVigilanceMax Maximal vigilance parameter (must be in interval
      * (0,1), a good default value is 0.9999f)
@@ -821,35 +821,35 @@ public class Art2aEuclidKernel {
         // <editor-fold desc="Checks">
         if(aNumberOfRepresentatives < 2) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: aNumberOfRepresentatives must be greater/equal 2."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getRepresentatives: aNumberOfRepresentatives must be greater/equal 2.");
         }
         if(aVigilanceMin <= 0.0f || aVigilanceMin >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: aVigilanceMin must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getRepresentatives: aVigilanceMin must be in interval (0,1).");
         }
         if(aVigilanceMax <= 0.0f || aVigilanceMax >= 1.0f) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: aVigilanceMax must be in interval (0,1)."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getRepresentatives: aVigilanceMax must be in interval (0,1).");
         }
         if(aVigilanceMin >= aVigilanceMax) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: aVigilanceMin must be smaller than aVigilanceMax."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getRepresentatives: aVigilanceMin must be smaller than aVigilanceMax.");
         }
         if(aNumberOfTrialSteps < 1) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: aNumberOfTrialSteps must be greater/equal 1."
             );
             throw new IllegalArgumentException("Art2aEuclidKernel.getRepresentatives: aNumberOfTrialSteps must be greater/equal 1.");
@@ -884,12 +884,12 @@ public class Art2aEuclidKernel {
             return tmpRepresentativeIndicesOfClusters;
         } catch (Exception anException) {
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
+                Level.SEVERE,
                 "Art2aEuclidKernel.getRepresentatives: An exception occurred: This should never happen!"
             );
             Art2aEuclidKernel.LOGGER.log(
-                Level.SEVERE, 
-                anException.toString(), 
+                Level.SEVERE,
+                anException.toString(),
                 anException
             );
             throw anException;
@@ -905,12 +905,12 @@ public class Art2aEuclidKernel {
      * Note: There a no checks! Check aDataMatrix in advance with method
      * Utils.isDataMatrixValid().
      * <br>
-     * Note: aDataMatrix could be set to null after this operation to release  
+     * Note: aDataMatrix could be set to null after this operation to release
      * its memory.
 
-     * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
+     * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check
      * with Utils.isDataMatrixValid() in advance)
-     * @param anOffsetForContrastEnhancement Offset for contrast enhancement 
+     * @param anOffsetForContrastEnhancement Offset for contrast enhancement
      * (must be greater zero)
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
@@ -920,24 +920,24 @@ public class Art2aEuclidKernel {
         float anOffsetForContrastEnhancement
     ) {
         int tmpNumberOfComponents = aDataMatrix[0].length;
-        float tmpThresholdForContrastEnhancement = 
+        float tmpThresholdForContrastEnhancement =
             Utils.getThresholdForContrastEnhancement(
                 tmpNumberOfComponents,
                 anOffsetForContrastEnhancement
             );
-        
-        // Initialize flags array for scaled data row vectors which have a 
+
+        // Initialize flags array for scaled data row vectors which have a
         // length of zero (i.e. where all components are equal to zero)
         boolean[] tmpDataVectorZeroLengthFlags = new boolean[aDataMatrix.length];
         Utils.fillVector(tmpDataVectorZeroLengthFlags, false);
 
         float[][] tmpContrastEnhancedMatrix = new float[aDataMatrix.length][];
-        
+
         Utils.MinMaxValue[] tmpMinMaxComponents = Utils.getMinMaxComponents(aDataMatrix);
 
         for(int i = 0; i < aDataMatrix.length; i++) {
             float[] tmpContrastEnhancedVector = new float[tmpNumberOfComponents];
-            tmpDataVectorZeroLengthFlags[i] = 
+            tmpDataVectorZeroLengthFlags[i] =
                 Art2aEuclidUtils.setContrastEnhancedVector(
                     aDataMatrix[i],
                     tmpContrastEnhancedVector,
@@ -957,13 +957,13 @@ public class Art2aEuclidKernel {
     /**
      * Creates PreprocessedData object with preprocessed ART-2a-Euclid data for maximum
      * speed of the clustering process. The PreprocessedData object allocates
-     * about twice the memory of aDataMatrix. A default value of 1.0 is used 
+     * about twice the memory of aDataMatrix. A default value of 1.0 is used
      * for the offset for contrast enhancement.
      * <br>
-     * Note: aDataMatrix could be set to null after this operation to release  
+     * Note: aDataMatrix could be set to null after this operation to release
      * its memory.
 
-     * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check 
+     * @param aDataMatrix Data matrix (IS NOT CHANGED and MUST BE VALID: Check
      * with Utils.isDataMatrixValid() in advance)
      * @return PreprocessedData object for maximum clustering speed but with
      * additionally allocated memory (about the same memory as aDataMatrix)
