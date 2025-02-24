@@ -463,6 +463,7 @@ public class Utils {
                 tmpSum += (float) Math.sqrt(Utils.getSquaredDistance(aMatrix[anIndicesOfRowVectors[i]], aMatrix[anIndicesOfRowVectors[j]]));
             }
         }
+        //note: (n*(n-1)) is always even, so integer division can be used and is also preferred because it is correct
         return tmpSum / (float) (anIndicesOfRowVectors.length * (anIndicesOfRowVectors.length - 1) / 2);
     }
 
