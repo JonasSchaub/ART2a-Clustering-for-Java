@@ -35,8 +35,8 @@ import java.util.logging.Logger;
 /**
  * Result of an ART-2a clustering process.
  * <br><br>
- * Note: Art2aResult is a read-only class, i.e. thread-safe. In addition, there
- * are NO internally calculated values cached, i.e. each method call performs
+ * Note: Art2aResult is a read-only class, i.e., thread-safe. In addition, there
+ * are NO internally calculated values cached, i.e., each method call performs
  * a full calculation procedure. An Art2aResult object may be distributed to
  * several concurrent (parallelized) evaluation tasks without any mutual
  * interference problems.
@@ -93,7 +93,7 @@ public class Art2aResult {
      */
     private final boolean isClusterOverflow;
     /**
-     * True: Clustering process converged, false: Otherwise
+     * True: The clustering process converged, false: Otherwise
      */
     private final boolean isConverged;
     /**
@@ -139,13 +139,13 @@ public class Art2aResult {
      * @param aClusterIndexOfDataVector Cluster index of data vector
      * @param aClusterMatrix Cluster matrix
      * @param aDataVectorZeroLengthFlags Flags array that indicates if scaled
-     * data row vectors have a length of zero (i.e. where all components are
+     * data row vectors have a length of zero (i.e., where all components are
      * equal to zero). True: Scaled data row vector has a length of zero
      * (corresponding contrast enhanced unit vector is set to null in this
      * case), false: Otherwise.
      * @param anIsClusterOverflow True: Cluster overflow occurred, false:
      * Otherwise
-     * @param anIsConverged True: Clustering process converged, false: Otherwise
+     * @param anIsConverged True: The clustering process converged, false: Otherwise
      * @param aPreprocessedArt2aData PreprocessedData instance
      */
     public Art2aResult(
@@ -222,12 +222,11 @@ public class Art2aResult {
     }
 
     /**
-     * Returns indices of data vectors in original data matrix that belong to
+     * Returns indices of data vectors in the original data matrix that belong to
      * the specified cluster with index aClusterIndex.
-     * Note: The returned indices are cached for successive fast usage.
      *
      * @param aClusterIndex Index of cluster in cluster matrix
-     * @return Indices of data vectors in original data matrix that belong to
+     * @return Indices of data vectors in the original data matrix that belong to
      * the specified cluster with index aClusterIndex.
      * @throws IllegalArgumentException Thrown if argument is illegal.
      */
@@ -315,15 +314,15 @@ public class Art2aResult {
     }
 
     /**
-     * Returns size of the specified cluster with index aClusterIndex, i.e. the
-     * number of data vectors of original data matrix that belong to the
+     * Returns size of the specified cluster with index aClusterIndex, i.e., the
+     * number of data vectors of the original data matrix that belong to the
      * cluster.
      * Note: The internally evaluated indices of data vectors that belong to the
      * specified cluster are cached for successive fast usage.
      *
      * @param aClusterIndex Index of cluster in cluster matrix
-     * @return Size of the specified cluster with index aClusterIndex, i.e. the
-     * number of data vectors of original data matrix that belong to the
+     * @return Size of the specified cluster with index aClusterIndex, i.e., the
+     * number of data vectors of the original data matrix that belong to the
      * cluster.
      * @throws IllegalArgumentException Thrown if argument is illegal.
      */
@@ -361,7 +360,7 @@ public class Art2aResult {
     /**
      * Returns if clustering process converged.
      *
-     * @return True: Clustering process converged, false: Otherwise
+     * @return True: The clustering process converged, false: Otherwise
      */
     public boolean isConverged() {
         return this.isConverged;
@@ -422,10 +421,10 @@ public class Art2aResult {
     }
 
     /**
-     * Calculates array of indices of sorted representative data vectors of the
+     * Calculates an array of indices of sorted representative data vectors of the
      * specified cluster with index aClusterIndex. The data vector with index 0
      * is closest to the cluster vector, the one with index 1 is the second
-     * closest etc.
+     * closest, etc.
      *
      * @param aClusterIndex Index of cluster vector in cluster matrix
      * @return Array of indices of sorted representative data vectors of the
@@ -489,6 +488,74 @@ public class Art2aResult {
             tmpRepresentativeIndicesOfClusters[i] = this.getClusterRepresentativeIndex(i);
         }
         return tmpRepresentativeIndicesOfClusters;
+    }
+
+    /**
+     * Creates clustering-based training and test data that cover a similar space.
+     * Returns a 2-dimensional jagged integer array where index 0 is the array of data vector
+     * indices of the training data and index 1 is the array of data vector indices of the test
+     * data.
+     * @param aTrainingFraction Fraction of data for training (i.e., a value of 0.7 means that
+     *                          70% of the data are used for training and 30% for test)
+     * @return 2-dimensional jagged integer array where index 0 is the array of data vector
+     * indices of the training data and index 1 is the array of data vector indices of the
+     * test data.
+     * @throws IllegalArgumentException Thrown if argument is illegal
+     */
+    public int[][] getTrainingAndTestIndices(
+        float aTrainingFraction
+    ) throws IllegalArgumentException {
+        //<editor-fold desc="Checks">
+        if(aTrainingFraction <= 0.0f || aTrainingFraction > 1.0f) {
+            Art2aResult.LOGGER.log(
+                Level.SEVERE,
+                "Art2aResult.getTrainingAndTestIndices: aTrainingFraction is illegal."
+            );
+            throw new IllegalArgumentException("Art2aResult.getTrainingAndTestIndices: aTrainingFraction is illegal.");
+        }
+        //</editor-fold>
+        LinkedList<Integer> tmpTrainingIndexList = new LinkedList<>();
+        LinkedList<Integer> tmpTestIndexList = new LinkedList<>();
+        for (int i = 0; i < this.numberOfDetectedClusters; i++) {
+            int[] tmpClusterRepresentativeIndices = this.getClusterRepresentativeIndices(i);
+            if (tmpClusterRepresentativeIndices.length == 1) {
+                // Only 1 data vector index in cluster: Add to training
+                tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[0]);
+            } else if (tmpClusterRepresentativeIndices.length == 2) {
+                // Only 2 data vector indices in cluster: Add equally to training and test
+                tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[0]);
+                tmpTestIndexList.add(tmpClusterRepresentativeIndices[1]);
+            } else {
+                int tmpNumberOfTrainingData = (int) (aTrainingFraction * tmpClusterRepresentativeIndices.length);
+                // Correct possible roundoff error
+                if (tmpNumberOfTrainingData == 0) {
+                    tmpNumberOfTrainingData = 1;
+                }
+                for (int k = 0; k < tmpClusterRepresentativeIndices.length; k++) {
+                    // tmpClusterRepresentativeIndices are sorted according to proximity
+                    // to the cluster center: Add data vector indices which are closer to
+                    // the cluster center to training
+                    if (k < tmpNumberOfTrainingData) {
+                        tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[k]);
+                    } else {
+                        tmpTestIndexList.add(tmpClusterRepresentativeIndices[k]);
+                    }
+                }
+            }
+        }
+        if (tmpTestIndexList.isEmpty()) {
+            return new int[][]
+                {
+                    tmpTrainingIndexList.stream().mapToInt(Integer::intValue).toArray(),
+                    null
+                };
+        } else {
+            return new int[][]
+                {
+                    tmpTrainingIndexList.stream().mapToInt(Integer::intValue).toArray(),
+                    tmpTestIndexList.stream().mapToInt(Integer::intValue).toArray()
+                };
+        }
     }
 
     /**
