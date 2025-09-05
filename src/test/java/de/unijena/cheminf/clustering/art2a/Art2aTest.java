@@ -756,9 +756,6 @@ public class Art2aTest {
         System.out.println("-------------------------------------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
 
-        // float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
-        float[] tmpVigilances = new float[] {0.1f};
-
         int tmpMaximumNumberOfClusters = 150;
         boolean tmpIsDataPreprocessing = false;
         boolean tmpIsParallelRhoWinnerCalculation = false;
@@ -768,45 +765,64 @@ public class Art2aTest {
         float tmpOffsetForContrastEnhancement = 1.0f;
         long tmpRandomSeed = 1L;
 
-        for (float tmpVigilance : tmpVigilances) {
-            System.out.println("  Vigilance parameter = " + String.valueOf(tmpVigilance));
-            Art2aKernel tmpArt2aKernel =
-                new Art2aKernel(
-                    tmpIrisFlowerDataMatrix,
-                    tmpMaximumNumberOfClusters,
-                    tmpMaximumNumberOfEpochs,
-                    tmpConvergenceThreshold,
-                    tmpLearningParameter,
-                    tmpOffsetForContrastEnhancement,
-                    tmpRandomSeed,
-                    tmpIsDataPreprocessing
-                );
-            Assertions.assertNotNull(tmpArt2aKernel);
-            Art2aResult tmpArt2aResult = null;
-            try {
-                tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
-            } catch (Exception anException) {
-                Assertions.fail();
-            }
-            Assertions.assertNotNull(tmpArt2aResult);
-            int tmpNumberOfDetectedClusters = tmpArt2aResult.getNumberOfDetectedClusters();
-            System.out.println("  - Number of detected clusters = " + String.valueOf(tmpArt2aResult.getNumberOfDetectedClusters()));
-            System.out.println("  - Number of epochs            = " + String.valueOf(tmpArt2aResult.getNumberOfEpochs()));
-            for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
-                System.out.println("  - Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aResult.getClusterSize(i)));
-                int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getClusterRepresentativeIndices(i);
-                System.out.println("    " + this.getStringFromIntArray(tmpDataVectorIndicesOfCluster));
-            }
-            System.out.println("");
-            float tmpTrainingFraction = 0.5f;
-            int[][] tmpTrainingAndTestIndices = tmpArt2aResult.getTrainingAndTestIndices(tmpTrainingFraction);
-            System.out.println("Training fraction = " + String.valueOf(tmpTrainingFraction));
-            System.out.println("Training indices");
-            System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[0]));
-            System.out.println("Test indices");
-            System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[1]));
-            System.out.println("");
+        float tmpVigilance = 0.1f;
+        System.out.println("  Vigilance parameter = " + String.valueOf(tmpVigilance));
+        float tmpTrainingFraction = 0.2f;
+        System.out.println("  Training fraction   = " + String.valueOf(tmpTrainingFraction));
+        Art2aKernel tmpArt2aKernel =
+            new Art2aKernel(
+                tmpIrisFlowerDataMatrix,
+                tmpMaximumNumberOfClusters,
+                tmpMaximumNumberOfEpochs,
+                tmpConvergenceThreshold,
+                tmpLearningParameter,
+                tmpOffsetForContrastEnhancement,
+                tmpRandomSeed,
+                tmpIsDataPreprocessing
+            );
+        Assertions.assertNotNull(tmpArt2aKernel);
+        Art2aResult tmpArt2aResult = null;
+        try {
+            tmpArt2aResult = tmpArt2aKernel.getClusterResult(tmpVigilance, tmpIsParallelRhoWinnerCalculation);
+        } catch (Exception anException) {
+            Assertions.fail();
         }
+        Assertions.assertNotNull(tmpArt2aResult);
+        int tmpNumberOfDetectedClusters = tmpArt2aResult.getNumberOfDetectedClusters();
+        System.out.println("  - Number of detected clusters = " + String.valueOf(tmpArt2aResult.getNumberOfDetectedClusters()));
+        System.out.println("  - Number of epochs            = " + String.valueOf(tmpArt2aResult.getNumberOfEpochs()));
+        for (int i = 0; i < tmpNumberOfDetectedClusters; i++) {
+            System.out.println("  - Cluster " + String.valueOf(i) + " of size " + String.valueOf(tmpArt2aResult.getClusterSize(i)));
+            int[] tmpDataVectorIndicesOfCluster = tmpArt2aResult.getClusterRepresentativeIndices(i);
+            System.out.println("    " + this.getStringFromIntArray(tmpDataVectorIndicesOfCluster));
+        }
+        System.out.println("");
+        System.out.println("  Training/test from tmpArt2aResult.getTrainingAndTestIndices()");
+        int[][] tmpTrainingAndTestIndices = tmpArt2aResult.getTrainingAndTestIndices(tmpTrainingFraction);
+        System.out.println("  - Training indices (" + String.valueOf(tmpTrainingAndTestIndices[0].length) + ")");
+        System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[0]));
+        System.out.println("  - Test indices (" + String.valueOf(tmpTrainingAndTestIndices[1].length) + ")");
+        System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[1]));
+        System.out.println("");
+
+        System.out.println("  Training/test from Art2aKernel.getTrainingAndTestIndices()");
+        try {
+            tmpTrainingAndTestIndices =
+                tmpArt2aKernel.getTrainingAndTestIndices(
+                    tmpTrainingFraction,
+                    0.0001f,
+                    0.9999f,
+                    32,
+                    true
+                );
+        } catch (Exception anException) {
+            Assertions.fail();
+        }
+        System.out.println("  - Training indices (" + String.valueOf(tmpTrainingAndTestIndices[0].length) + ")");
+        System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[0]));
+        System.out.println("  - Test indices (" + String.valueOf(tmpTrainingAndTestIndices[1].length) + ")");
+        System.out.println("    " + this.getStringFromIntArray(tmpTrainingAndTestIndices[1]));
+        System.out.println("");
     }
 
     // <editor-fold defaultstate="collapsed" desc="Private methods">

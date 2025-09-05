@@ -871,6 +871,47 @@ public class Utils {
             anIndexArray[j] = tmpIntBuffer;
         }
     }
+
+    /**
+     * Creates clustering-based training and test data vector indices that cover a similar space.
+     * The first data vector index of each cluster (which is most similar to the cluster center)
+     * is assigned for training, all remaining data vector indices for test.
+     * Returns a 2-dimensional jagged integer array where index 0 is the array of
+     * training data vector indices and index 1 is the array of test data vector indices.
+     * Note: No checks are performed.
+     *
+     * @return 2-dimensional jagged integer array where index 0 is the array of training data vector
+     * indices and index 1 is the array of test data vector indices.
+     */
+    protected static int[][] getTrainingAndTestIndices(
+        Art2aResult anArt2aResult
+    ) {
+        LinkedList<Integer> tmpTrainingIndexList = new LinkedList<>();
+        LinkedList<Integer> tmpTestIndexList = new LinkedList<>();
+        for (int i = 0; i < anArt2aResult.getNumberOfDetectedClusters(); i++) {
+            int[] tmpClusterRepresentativeIndices = anArt2aResult.getClusterRepresentativeIndices(i);
+            for (int k = 0; k < tmpClusterRepresentativeIndices.length; k++) {
+                if (k == 0) {
+                    tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[k]);
+                } else {
+                    tmpTestIndexList.add(tmpClusterRepresentativeIndices[k]);
+                }
+            }
+        }
+        if (tmpTestIndexList.isEmpty()) {
+            return new int[][]
+                {
+                    tmpTrainingIndexList.stream().mapToInt(Integer::intValue).toArray(),
+                    null
+                };
+        } else {
+            return new int[][]
+                {
+                    tmpTrainingIndexList.stream().mapToInt(Integer::intValue).toArray(),
+                    tmpTestIndexList.stream().mapToInt(Integer::intValue).toArray()
+                };
+        }
+    }
     //</editor-fold>
 
 }

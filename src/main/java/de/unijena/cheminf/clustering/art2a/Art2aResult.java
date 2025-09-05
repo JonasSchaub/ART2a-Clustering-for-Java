@@ -491,15 +491,13 @@ public class Art2aResult {
     }
 
     /**
-     * Creates clustering-based training and test data that cover a similar space.
-     * Returns a 2-dimensional jagged integer array where index 0 is the array of data vector
-     * indices of the training data and index 1 is the array of data vector indices of the test
-     * data.
-     * @param aTrainingFraction Fraction of data for training (i.e., a value of 0.7 means that
-     *                          70% of the data are used for training and 30% for test)
-     * @return 2-dimensional jagged integer array where index 0 is the array of data vector
-     * indices of the training data and index 1 is the array of data vector indices of the
-     * test data.
+     * Creates clustering-based training and test data vector indices that cover a similar space.
+     * Returns a 2-dimensional jagged integer array where index 0 is the array of
+     * training data vector indices and index 1 is the array of test data vector indices.
+     * @param aTrainingFraction Fraction of data vector indices for training (i.e., a value of 0.7
+     * means that 70% are used for training and 30% for test)
+     * @return 2-dimensional jagged integer array where index 0 is the array of training data vector
+     * indices and index 1 is the array of test data vector indices.
      * @throws IllegalArgumentException Thrown if argument is illegal
      */
     public int[][] getTrainingAndTestIndices(
@@ -526,16 +524,16 @@ public class Art2aResult {
                 tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[0]);
                 tmpTestIndexList.add(tmpClusterRepresentativeIndices[1]);
             } else {
-                int tmpNumberOfTrainingData = (int) (aTrainingFraction * tmpClusterRepresentativeIndices.length);
+                int tmpNumberOfTrainingIndices = (int) (aTrainingFraction * tmpClusterRepresentativeIndices.length);
                 // Correct possible roundoff error
-                if (tmpNumberOfTrainingData == 0) {
-                    tmpNumberOfTrainingData = 1;
+                if (tmpNumberOfTrainingIndices == 0) {
+                    tmpNumberOfTrainingIndices = 1;
                 }
                 for (int k = 0; k < tmpClusterRepresentativeIndices.length; k++) {
                     // tmpClusterRepresentativeIndices are sorted according to proximity
                     // to the cluster center: Add data vector indices which are closer to
                     // the cluster center to training
-                    if (k < tmpNumberOfTrainingData) {
+                    if (k < tmpNumberOfTrainingIndices) {
                         tmpTrainingIndexList.add(tmpClusterRepresentativeIndices[k]);
                     } else {
                         tmpTestIndexList.add(tmpClusterRepresentativeIndices[k]);
