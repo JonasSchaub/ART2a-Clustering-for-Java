@@ -8,8 +8,8 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ "main", "production" ]
+  push: # TODO. remove dev branch from the list again
+    branches: [ "main", "production", "doc-and-deployment" ]
   pull_request:
     branches: [ "main", "production" ]
 
@@ -26,16 +26,19 @@ jobs:
     name: Java ${{ matrix.java }}
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout sources
+      uses: actions/checkout@v4
     - name: Set up Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'
     - name: Change wrapper permissions
       run: chmod +x ./gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v5
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@v2
+      run: ./gradlew build
       with:
         gradle-version: 8.7
         arguments: build
