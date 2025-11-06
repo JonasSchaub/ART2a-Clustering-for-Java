@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/580826376.svg)](https://zenodo.org/badge/latestdoi/580826376) 
+[![DOI](https://zenodo.org/badge/580826376.svg)](https://doi.org/10.5281/zenodo.8075213)
 [![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/latest/index.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/graphs/commit-activity)
