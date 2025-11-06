@@ -9,16 +9,12 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JonasSchaub_ART2a-Clustering-for-Java&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonasSchaub_ART2a-Clustering-for-Java)
 # ART2a-Clustering-for-Java
-Implementation of the ART 2-A fingerprint clustering algorithm in Java.
+Implementation of the ART 2-A clustering algorithm in Java.
 
 ## Description
-Implementation of the ART 2-A count and bit fingerprint clustering algorithm 
-in Java for fast, stable unsupervised clustering for open categorical problems 
-in double or single machine precision. ART stands for "Adaptive Resonance Theory" and 
-represents a family of neural models. ART 2-A is a special form of ART that enables 
-rapid convergence in clustering. ART is able to adapt to changing environments. 
-For clustering, this means that after each assignment of an input to a cluster, 
-the model adapts the cluster to the new input.
+Implementation of the "Adaptive Resonance Theory" ART 2-A clustering algorithm in Java with single machine precision for fast, 
+unsupervised clustering for open categorical problems (see references below). A general description of the algorithm is provided 
+in document <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/ART-2A-Algorithm.pdf">"ART-2A-Algorithm.pdf"</a>.
 
 ## Example initialization and usage of ART2a-Clustering-for-Java
 See the <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">wiki</a> of this repository.
@@ -47,19 +43,8 @@ all source code files including JUnit tests.
 
 ### Tests
 The test class 
-<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aDoubleClusteringTest.java">
-<i>Art2aDoubleClusteringTest</i></a> tests the functionalities of Art-2a in double machine precision
-and the test class 
-<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aFloatClusteringTest.java">
-<i>Art2aFloatClusteringTest</i></a> in single machine precision.
-Methods for the clustering results are also tested.
-
-### Test resources
-The test 
-<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/src/test/resources/de/unijena/cheminf/clustering/art2a">"resources"</a> subfolder
-contains two text files. The text file named "Bit_Fingerprints.txt" contains 10 bit fingerprints, where each line represents 
-one bit fingerprint. And the file named "Count_Fingerprints.txt" contains 6 count fingerprints, where each line represents
-one count fingerprint.
+<a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aTest.java">
+<i>Art2aDoubleClusteringTest</i></a> provides test methods for ART-2A clustering.
 
 ## Dependencies for local installation
 **Needs to be pre-installed:**
@@ -86,6 +71,3 @@ one count fingerprint.
 **An adaptive resonance theory based artificial neural network (ART-2a) for rapid identification of airborne 
 particle shapes from their scanning electron microscopy images**
 * [D. Wienke et al., Chemoinformatics and Intelligent Laboratory Systems (1994) 367-387](https://www.sciencedirect.com/science/article/abs/pii/0169743994850542)
-
-
-
