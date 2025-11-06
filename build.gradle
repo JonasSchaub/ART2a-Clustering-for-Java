@@ -172,23 +172,13 @@ publishing {
                         url = 'https://github.com/B-s123'
                     }
                     developer {
-                        id = 'FelixBaensch'
-                        name = 'Felix Baensch'
-                        email = 'felix.baensch@w-hs.de'
-                        url = 'https://github.com/FelixBaensch'
-                    }
-                    developer {
                         id = 'JonasSchaub'
                         name = 'Jonas Schaub'
                         email = 'jonas.schaub@uni-jena.de'
                         url = 'https://github.com/JonasSchaub'
                     }
                     developer {
-                        name = 'Christoph Steinbeck'
-                        email = 'christoph.steinbeck@uni-jena.de'
-                        url = 'https://cheminf.uni-jena.de/members/steinbeck/'
-                    }
-                    developer {
+                        id = 'zielesny'
                         name = 'Achim Zielesny'
                         email = 'achim.zielesny@w-hs.de'
                         url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'
