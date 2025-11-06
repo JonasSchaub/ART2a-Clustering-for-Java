@@ -39,6 +39,3 @@ jobs:
       uses: gradle/actions/setup-gradle@v5
     - name: Build with Gradle
       run: ./gradlew build
-      with:
-        gradle-version: 8.7
-        arguments: build
