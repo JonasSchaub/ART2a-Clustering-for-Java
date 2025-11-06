@@ -50,14 +50,14 @@ The test class
 **Needs to be pre-installed:**
 * Java Development Kit (JDK) version 17 or higher
     * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
-* Gradle version 8.7
+* Gradle version 9.2.0
     * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**
-* JUnit Jupiter version 5.9.1
+* JUnit Jupiter version 6.0.1
     * [JUnit ](https://junit.org/junit5/)
     * License: Eclipse Public License - v 2.0
-* Spotless version 6.19
+* Spotless version 8.0.0
     * [Spotless GitHub repository](https://github.com/diffplug/spotless)
     * License: Apache-2.0 license
 * Javadoc-publisher version 2.4
