@@ -60,7 +60,7 @@ The test class
 * Spotless version 8.0.0
     * [Spotless GitHub repository](https://github.com/diffplug/spotless)
     * License: Apache-2.0 license
-* Javadoc-publisher version 2.4
+* Javadoc-publisher version 3.0.2
     * [Javadoc-publisher GitHub repository](https://github.com/MathieuSoysal/Javadoc-publisher.yml)
     * License: Apache-2.0 license
 
