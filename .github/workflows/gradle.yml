@@ -8,8 +8,8 @@
 name: Java CI with Gradle
 
 on:
-  push: # TODO. remove dev branch from the list again
-    branches: [ "main", "production", "doc-and-deployment" ]
+  push:
+    branches: [ "main", "production" ]
   pull_request:
     branches: [ "main", "production" ]
 

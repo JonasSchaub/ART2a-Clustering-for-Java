@@ -306,7 +306,6 @@ class WikiExamplesTest {
                 futureList = executorService.invokeAll(art2aTaskList);
             } catch (InterruptedException e) {
                 System.out.println("test_ParallelClustering: InterruptedException occurred.");
-                System.exit(1);
             }
             executorService.shutdown();
             //collect results
@@ -317,7 +316,6 @@ class WikiExamplesTest {
                     parallelResults[index++] = future.get();
                 } catch (Exception e) {
                     System.out.println("test_ParallelClustering: Exception occurred.");
-                    System.exit(1);
                 }
             }
             // Compare results
@@ -465,7 +463,7 @@ class WikiExamplesTest {
     }
 
     /**
-     * Basic example of analysing the angels (distances) between clusters.
+     * Basic example of analysing the angles (distances) between clusters.
      */
     @Test
     void clusterAngelsExample() throws Exception {
