@@ -702,9 +702,9 @@ public class Art2aEuclidTest {
      * results.
      */
     @Test
-    public void test_ParallelClusteringWithGetGlusterResults() {
+    public void test_ParallelClusteringWithGetClusterResults() {
         System.out.println("----------------------------------------------");
-        System.out.println("test_ParallelClusteringWithGetGlusterResults()");
+        System.out.println("test_ParallelClusteringWithGetClusterResults()");
         System.out.println("----------------------------------------------");
         float[][] tmpIrisFlowerDataMatrix = this.getIrisFlowerDataMatrix();
         float[] tmpVigilances = new float[] {0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};

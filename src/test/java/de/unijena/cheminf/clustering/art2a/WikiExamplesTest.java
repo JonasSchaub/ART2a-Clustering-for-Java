@@ -466,7 +466,7 @@ class WikiExamplesTest {
      * Basic example of analysing the angles (distances) between clusters.
      */
     @Test
-    void clusterAngelsExample() throws Exception {
+    void clusterAnglesExample() throws Exception {
         // Prepare your data as a 2D float array
         // Each row represents a data vector
         float[][] dataMatrix = {
