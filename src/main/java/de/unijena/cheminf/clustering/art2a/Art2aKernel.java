@@ -906,6 +906,7 @@ public class Art2aKernel {
      * @return 2-dimensional jagged integer array where index 0 is the array of training data vector
      * indices and index 1 is the array of test data vector indices.
      * @throws IllegalArgumentException Thrown if argument is illegal
+     * @throws Exception if anything unexpected goes wrong
      */
     public int[][] getTrainingAndTestIndices(
         float aTrainingFraction,

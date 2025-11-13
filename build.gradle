@@ -25,20 +25,19 @@
  */
 
 plugins {
-    id 'application'
     id 'org.gradle.java'
     id 'jacoco'
     id 'java-library'
     id 'java'
-    id("com.diffplug.spotless") version "6.19.0"
+    id("com.diffplug.spotless") version "8.0.0"
     id 'org.gradle.maven-publish'
     id 'signing'
-    id("org.sonarqube") version "4.2.1.3168"
+    id "org.sonarqube" version "7.0.1.6134"
 }
 
 group = 'io.github.jonasschaub'
-archivesBaseName = 'ART2a-Clustering-for-Java'
 //see also version for publishing below! And do not forget to update CITATION.cff version as well!!!
+//TODO: increase version for new release!
 version = '1.0.2.1'
 
 //sourceCompatibility = 1.17
@@ -64,8 +63,8 @@ repositories {
 
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-    testImplementation(platform('org.junit:junit-bom:5.9.1'))
-    testImplementation('org.junit.jupiter:junit-jupiter')
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType(Test).configureEach {
@@ -79,6 +78,7 @@ tasks.withType(Test).configureEach {
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
@@ -116,9 +116,8 @@ spotless {
 
 sonar {
     properties {
-        property("sonar.projectKey", "JonasSchaub_ART2a-Clustering-for-Java")
-        property("sonar.organization", "jonasschaub")
-        property("sonar.host.url", "https://sonarcloud.io")
+        property "sonar.projectKey", "JonasSchaub_ART2a-Clustering-for-Java"
+        property "sonar.organization", "jonasschaub"
     }
 }
 
@@ -173,23 +172,13 @@ publishing {
                         url = 'https://github.com/B-s123'
                     }
                     developer {
-                        id = 'FelixBaensch'
-                        name = 'Felix Baensch'
-                        email = 'felix.baensch@w-hs.de'
-                        url = 'https://github.com/FelixBaensch'
-                    }
-                    developer {
                         id = 'JonasSchaub'
                         name = 'Jonas Schaub'
                         email = 'jonas.schaub@uni-jena.de'
                         url = 'https://github.com/JonasSchaub'
                     }
                     developer {
-                        name = 'Christoph Steinbeck'
-                        email = 'christoph.steinbeck@uni-jena.de'
-                        url = 'https://cheminf.uni-jena.de/members/steinbeck/'
-                    }
-                    developer {
+                        id = 'zielesny'
                         name = 'Achim Zielesny'
                         email = 'achim.zielesny@w-hs.de'
                         url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'

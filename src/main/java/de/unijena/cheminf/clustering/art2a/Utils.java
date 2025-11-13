@@ -880,6 +880,7 @@ public class Utils {
      * training data vector indices and index 1 is the array of test data vector indices.
      * Note: No checks are performed.
      *
+     * @param anArt2aResult ART-2a result (IS NOT CHANGED)
      * @return 2-dimensional jagged integer array where index 0 is the array of training data vector
      * indices and index 1 is the array of test data vector indices.
      */

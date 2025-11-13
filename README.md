@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/580826376.svg)](https://zenodo.org/badge/latestdoi/580826376) 
+[![DOI](https://zenodo.org/badge/580826376.svg)](https://doi.org/10.5281/zenodo.8075213)
 [![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/latest/index.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/graphs/commit-activity)
@@ -12,20 +12,20 @@
 Implementation of the ART 2-A clustering algorithm in Java.
 
 ## Description
-Implementation of the "Adaptive Resonance Theory" ART 2-A clustering algorithm in Java with single machine precision for fast, 
+Implementation of the "Adaptive Resonance Theory" ART 2-A clustering algorithm in Java with single machine precision (based on float values) for fast, 
 unsupervised clustering for open categorical problems (see references below). A general description of the algorithm is provided 
 in document <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/tree/main/ART-2A-Algorithm.pdf">"ART-2A-Algorithm.pdf"</a>.
 
-## Example initialization and usage of ART2a-Clustering-for-Java
+## Example usage
 See the <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/wiki">wiki</a> of this repository.
 
 ## JavaDoc
 The JavaDoc of this library can be found <a href="https://jonasschaub.github.io/ART2a-Clustering-for-Java/javadoc/">here</a>.
 
 ## Installation
-ART2a-Clustering-for-Java is hosted as a package/artifact on the sonatype maven central repository. See the 
+ART2a-Clustering-for-Java is hosted as a package/artifact on the Maven central repository. See the 
 <a href="https://central.sonatype.com/artifact/io.github.jonasschaub/ART2a-Clustering-for-Java/">artifact page</a> for installation
-guidelines using build tools like maven or gradle.
+guidelines using build tools like Maven or Gradle.
 <br>
 To install ART2a-Clustering-for-Java via its JAR archive, you can get it from the 
 <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/releases">releases</a>. Note that other dependencies 
@@ -44,29 +44,29 @@ all source code files including JUnit tests.
 ### Tests
 The test class 
 <a href="https://github.com/JonasSchaub/ART2a-Clustering-for-Java/blob/main/src/test/java/de/unijena/cheminf/clustering/art2a/Art2aTest.java">
-<i>Art2aDoubleClusteringTest</i></a> provides test methods for ART-2A clustering.
+<i>Art2aTest</i></a> provides test methods for ART-2A clustering.
 
 ## Dependencies for local installation
 **Needs to be pre-installed:**
-* Java Development Kit (JDK) version 17
+* Java Development Kit (JDK) version 17 or higher
     * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
-* Gradle version 8.7
+* Gradle version 9.2.0
     * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**
-* JUnit Jupiter version 5.9.1
+* JUnit Jupiter version 6.0.1
     * [JUnit ](https://junit.org/junit5/)
     * License: Eclipse Public License - v 2.0
-* Spotless version 6.19
+* Spotless version 8.0.0
     * [Spotless GitHub repository](https://github.com/diffplug/spotless)
     * License: Apache-2.0 license
-* Javadoc-publisher version 2.4
+* Javadoc-publisher version 3.0.2
     * [Javadoc-publisher GitHub repository](https://github.com/MathieuSoysal/Javadoc-publisher.yml)
     * License: Apache-2.0 license
 
 ## References and useful links
 **ART 2-A: An adaptive resonance algorithm for rapid category learning and recognition**
-* [ G.A. Carpenter,S. Grossberg and D.B. Rosen, Neural Networks 4 (1991) 493-504](https://www.sciencedirect.com/science/article/abs/pii/0893608091900457)
+* [G.A. Carpenter,S. Grossberg and D.B. Rosen, Neural Networks 4 (1991) 493-504](https://www.sciencedirect.com/science/article/abs/pii/0893608091900457)
 
 **An adaptive resonance theory based artificial neural network (ART-2a) for rapid identification of airborne 
 particle shapes from their scanning electron microscopy images**
