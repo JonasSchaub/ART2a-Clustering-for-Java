@@ -594,6 +594,15 @@ class WikiExamplesTest {
                 System.out.println("\tMembers: " + Arrays.toString(result.getDataVectorIndicesOfCluster(i)));
                 System.out.println("\tRepresentative Index: " + result.getClusterRepresentativeIndex(i));
             }
+
+            // Calculate distances between all cluster pairs
+            for (int i = 0; i < numberOfClusters; i++) {
+                for (int j = i + 1; j < numberOfClusters; j++) {
+                    double distance = result.getDistanceBetweenClusters(i, j);
+                    System.out.println("Distance between cluster " + i +
+                            " and " + j + ": " + distance);
+                }
+            }
         }
     }
 }
