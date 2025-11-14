@@ -6,7 +6,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/issues/)
 [![GitHub contributors](https://img.shields.io/github/contributors/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://GitHub.com/JonasSchaub/ART2a-Clustering-for-Java/graphs/contributors/)
 [![GitHub release](https://img.shields.io/github/release/JonasSchaub/ART2a-Clustering-for-Java.svg)](https://github.com/JonasSchaub/ART2a-Clustering-for-Java/releases/)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/ART2a-Clustering-for-Java)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.jonasschaub/ART2a-Clustering-for-Java)](https://central.sonatype.com/artifact/io.github.jonasschaub/ART2a-Clustering-for-Java)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JonasSchaub_ART2a-Clustering-for-Java&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonasSchaub_ART2a-Clustering-for-Java)
 # ART2a-Clustering-for-Java
 Implementation of the ART 2-A clustering algorithm in Java.
