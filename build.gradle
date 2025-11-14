@@ -119,9 +119,9 @@ sonar {
     }
 }
 
-artifacts {
+/*artifacts {
     archives javadocJar, sourcesJar
-}
+}*/
 
 mavenPublishing {
     publishToMavenCentral(true, false) // automaticRelease = true, validateDeployment = false
