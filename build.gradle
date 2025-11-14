@@ -171,6 +171,7 @@ mavenPublishing {
         }
     }
 }
-tasks.named('mavenPublishing') {
+
+tasks.named('publishToMavenCentral') {
     dependsOn tasks.plainJavadocJar
 }
