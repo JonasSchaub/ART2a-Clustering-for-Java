@@ -170,8 +170,7 @@ mavenPublishing {
             url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java/'
         }
     }
-
-    tasks.named('generateMetadataFileForMavenPublication') {
-        dependsOn tasks.plainJavadocJar
-    }
+}
+tasks.named('mavenPublishing') {
+    dependsOn tasks.plainJavadocJar
 }
