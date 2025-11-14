@@ -45,15 +45,15 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
-    //withJavadocJar()
+    withJavadocJar()
     withSourcesJar()
 }
 
-/*javadoc {
+javadoc {
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
-}*/
+}
 
 repositories {
     mavenCentral()
