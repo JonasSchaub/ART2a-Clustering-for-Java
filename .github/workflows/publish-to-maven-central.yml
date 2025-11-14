@@ -7,12 +7,10 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-#taken from: https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-gradle
-# and extended using https://selectfrom.dev/using-github-actions-to-automatically-publish-gradle-build-artifacts-d71c915cfa4
 name: Publish package to the Maven Central Repository
 on:
-  push:
-    branches: [ "main" ]
+  #push:
+    #branches: [ "main" ]
   release:
     types: [published]
 jobs:

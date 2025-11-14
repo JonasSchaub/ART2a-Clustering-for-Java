@@ -124,7 +124,7 @@ sonar {
 }*/
 
 mavenPublishing {
-    publishToMavenCentral(true, false) // automaticRelease = true, validateDeployment = false
+    publishToMavenCentral(false, false) // automaticRelease = false, validateDeployment = false
 
     signAllPublications()
 
