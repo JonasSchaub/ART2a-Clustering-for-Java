@@ -123,6 +123,10 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
+tasks.generateMetadataFileForMavenPublication {
+    dependsOn tasks.plainJavadocJar
+}
+
 mavenPublishing {
     publishToMavenCentral(true, false) // automaticRelease = true, validateDeployment = false
 
