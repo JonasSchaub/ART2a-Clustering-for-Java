@@ -30,8 +30,7 @@ plugins {
     id 'java-library'
     id 'java'
     id("com.diffplug.spotless") version "8.0.0"
-    id 'org.gradle.maven-publish'
-    id 'signing'
+    id "com.vanniktech.maven.publish" version "0.35.0"
     id "org.sonarqube" version "7.0.1.6134"
 }
 
@@ -124,106 +123,51 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
+mavenPublishing {
+    publishToMavenCentral(true, false) // automaticRelease = true, validateDeployment = false
 
-            groupId = 'io.github.jonasschaub'
-            artifactId = 'ART2a-Clustering-for-Java'
-            //note: this version has been published, do not try to publish it again! versions 1.0.1.0, 1.0.1.1, and 1.0.2.0 were also already used for publishing!
-            version = '2.0.0'
+    signAllPublications()
 
-            from components.java
+    coordinates("io.github.jonasschaub", "ART2a-Clustering-for-Java", "2.0.0")
 
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
+    pom {
+        name = "ART2a-Clustering-for-Java"
+        description = "Implementation of the ART 2-A clustering algorithm in Java."
+        url = "https://github.com/JonasSchaub/ART2a-Clustering-for-Java"
+        inceptionYear = "2023"
+        licenses {
+            license {
+                name = "MIT"
+                url = "https://opensource.org/license/mit/"
+                distribution = "https://opensource.org/license/mit/"
             }
-
-            pom {
-
-                name = 'ART2a-Clustering-for-Java'
-                description = 'Implementation of the ART 2-A fingerprint clustering algorithm in Java.'
-                url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java'
-
-                //this way, properties can be added:
-                //properties = [
-                        //myProp: "value",
-                        //"prop.with.dots": "anotherValue"
-                //]
-
-                licenses {
-                    license {
-                        name = 'MIT'
-                        url = 'https://opensource.org/license/mit/'
-                    }
+        }
+        developers {
+            developers {
+                developer {
+                    id = "B-s123"
+                    name = "Betuel Sevindik"
+                    email = "betuel.sevindik@studmail.w-hs.de"
+                    url = "https://github.com/B-s123"
                 }
-
-                developers {
-                    developer {
-                        id = 'B-s123'
-                        name = 'Betuel Sevindik'
-                        email = 'betuel.sevindik@studmail.w-hs.de'
-                        url = 'https://github.com/B-s123'
-                    }
-                    developer {
-                        id = 'JonasSchaub'
-                        name = 'Jonas Schaub'
-                        email = 'jonas.schaub@uni-jena.de'
-                        url = 'https://github.com/JonasSchaub'
-                    }
-                    developer {
-                        id = 'zielesny'
-                        name = 'Achim Zielesny'
-                        email = 'achim.zielesny@w-hs.de'
-                        url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'
-                    }
+                developer {
+                    id = "JonasSchaub"
+                    name = "Jonas Schaub"
+                    email = "jonas.schaub@uni-jena.de"
+                    url = "https://github.com/JonasSchaub"
                 }
-
-                scm {
-                    connection = 'scm:git:git://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
-                    developerConnection = 'scm:git:ssh://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
-                    url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java/'
+                developer {
+                    id = "zielesny"
+                    name = "Achim Zielesny"
+                    email = "achim.zielesny@w-hs.de"
+                    url = "https://www.w-hs.de/service/informationen-zur-person/person/zielesny/"
                 }
             }
         }
-    }
-    repositories {
-        maven {
-            //these two lines did not work because dir() apparently asks for a local path
-            //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
-            //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-
-            //TODO: is this actually the way to fully automatically do it?
-            //def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
-            //def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            //url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-            //after publishing, go to https://s01.oss.sonatype.org, log in, close the staged repo, and release it if everything worked out
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                //uses keys and passwords declared in userhome/.gradle/gradle.properties
-                //username = property("ossrhUsername") as String
-                //password = property("ossrhPassword") as String
-                //uses environment variables declared in yml file which passes GitHub secrets to it
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
-            }
+        scm {
+            connection = 'scm:git:git://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
+            developerConnection = 'scm:git:ssh://github.com/JonasSchaub/ART2a-Clustering-for-Java.git'
+            url = 'https://github.com/JonasSchaub/ART2a-Clustering-for-Java/'
         }
     }
-}
-
-signing {
-    //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
-    //sign publishing.publications.mavenJava
-
-    //uses environment variables declared in yml file which passes GitHub secrets to it
-    def signingKey = System.getenv("signingKey")
-    def signingPassword = System.getenv("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
 }
