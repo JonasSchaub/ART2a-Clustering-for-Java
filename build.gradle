@@ -172,6 +172,8 @@ mavenPublishing {
     }
 }
 
-tasks.named('publishToMavenCentral') {
-    dependsOn tasks.plainJavadocJar
+tasks.configureEach { task ->
+    if (task.name == 'generateMetadataFileForMavenPublication') {
+        task.dependsOn tasks.named('javadocJar')
+    }
 }
